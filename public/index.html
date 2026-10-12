@@ -158,8 +158,6 @@ footer{padding:36px 24px;text-align:center;color:var(--muted)}.footer-brand{colo
         <label class="choice"><input type="checkbox" name="lifeStage" value="Solo parent"> Solo parent</label>
         <label class="choice"><input type="checkbox" name="lifeStage" value="Parent in a partnered household"> Parent in a partnered household</label>
         <label class="choice"><input type="checkbox" name="lifeStage" value="Empty nester"> Empty nester</label>
-        <label class="choice"><input type="checkbox" name="lifeStage" value="New in town"> New in town</label>
-        <label class="choice"><input type="checkbox" name="lifeStage" value="None of these / prefer not to say"> None of these / prefer not to say</label>
       </div>
 
       <label style="margin-top:20px">If you have children, what ages are they? Choose all that apply.</label>
@@ -170,7 +168,6 @@ footer{padding:36px 24px;text-align:center;color:var(--muted)}.footer-brand{colo
         <label class="choice"><input type="checkbox" name="childrenAges" value="9–12"> 9–12</label>
         <label class="choice"><input type="checkbox" name="childrenAges" value="13–17"> 13–17</label>
         <label class="choice"><input type="checkbox" name="childrenAges" value="Adult children"> Adult children</label>
-        <label class="choice"><input type="checkbox" name="childrenAges" value="Prefer not to say"> Prefer not to say</label>
       </div>
       <p class="field-hint">This helps with family-friendly plans and playdates. You can skip this question if it doesn’t apply.</p>
 
@@ -198,7 +195,6 @@ footer{padding:36px 24px;text-align:center;color:var(--muted)}.footer-brand{colo
         <option value="I don’t drink">I don’t drink</option>
         <option value="Occasional or social drinker">I drink occasionally or socially</option>
         <option value="Regular drinker">I’m a regular drinker</option>
-        <option value="Prefer not to say">Prefer not to say</option>
       </select>
 
       <label for="cannabisStyle" style="margin-top:20px">Are you comfortable around cannabis (herb)?</label>
@@ -208,7 +204,6 @@ footer{padding:36px 24px;text-align:center;color:var(--muted)}.footer-brand{colo
         <option value="I don’t use cannabis but don’t mind others using it">I don’t use it, but don’t mind others using it</option>
         <option value="I use cannabis occasionally">I use it occasionally</option>
         <option value="I use cannabis regularly">I use it regularly</option>
-        <option value="Prefer not to say">Prefer not to say</option>
       </select>
       <p class="field-hint">These answers help us find people whose lifestyle preferences are compatible with yours.</p>
     </div>
@@ -262,8 +257,8 @@ function validateStep(){
   if(currentStep===3&&!active.querySelector('input[name="availability"]:checked')){
     alert('Please choose at least one time when you are usually available.');return false;
   }
-  if(currentStep===4&&!active.querySelector('input[name="goals"]:checked')){
-    alert('Please choose at least one friendship goal.');return false;
+  if(currentStep===4&&!active.querySelector('input[name="lifeStage"]:checked')){
+    alert('Please select at least one life stage that describes you.');return false;
   }
   return true;
 }
