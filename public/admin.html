@@ -1,0 +1,83 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Neighbours and Friends | Admin</title>
+  <style>
+    :root {
+      --cream: #f8f4ec;
+      --paper: #fffdf8;
+      --green: #354f40;
+      --terracotta: #bb7055;
+      --ink: #2e332d;
+      --muted: #6e746b;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 30px 18px;
+      background: var(--cream);
+      color: var(--ink);
+      font-family: Arial, Helvetica, sans-serif;
+      line-height: 1.6;
+    }
+    main { max-width: 850px; margin: auto; }
+    h1, h2 { font-family: Georgia, "Times New Roman", serif; }
+    h1 { font-size: clamp(30px, 5vw, 44px); margin-bottom: 5px; }
+    .muted { color: var(--muted); }
+    .panel {
+      background: var(--paper);
+      border: 1px solid #e7e1d7;
+      border-radius: 10px;
+      padding: 24px;
+      margin: 22px 0;
+    }
+    label { display: block; font-weight: bold; margin: 14px 0 6px; }
+    input {
+      width: 100%; padding: 12px; border: 1px solid #d6d7ce;
+      border-radius: 6px; font: inherit;
+    }
+    button {
+      background: var(--green); color: white; border: 0;
+      border-radius: 6px; padding: 12px 17px; margin-top: 16px;
+      cursor: pointer; font-weight: bold;
+    }
+    .notice {
+      padding: 14px; background: #f3e8dd;
+      border-left: 4px solid var(--terracotta); border-radius: 4px;
+    }
+    a { color: var(--green); }
+  </style>
+</head>
+<body>
+<main>
+  <p><a href="/">← Back to Neighbours and Friends</a></p>
+  <h1>Neighbours and Friends</h1>
+  <p class="muted">Administration area</p>
+
+  <section class="panel">
+    <h2>Registration management</h2>
+    <p>This page is a starting point for managing registrations, reviewing M-PESA transaction codes and organising members into compatible groups of up to 15 people.</p>
+    <div class="notice">
+      <strong>Not connected yet.</strong>
+      <p>Registration storage, payment verification and automatic matching have not been connected. No member records will appear here yet.</p>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>Planned management tools</h2>
+    <ul>
+      <li>Review registrations and payment status.</li>
+      <li>Confirm M-PESA payments.</li>
+      <li>Match members by neighbourhood and compatible answers.</li>
+      <li>Keep every group at a maximum of 15 members.</li>
+      <li>Prepare group rosters for WhatsApp invitations.</li>
+    </ul>
+  </section>
+
+  <p class="muted">Keep this page private until server-side authentication is configured. Do not use it to collect or display real member information yet.</p>
+</main>
+</body>
+</html>
