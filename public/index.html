@@ -276,11 +276,72 @@ document.querySelectorAll('input[name="goals"]').forEach(box=>box.addEventListen
   if(checked.length>2){box.checked=false;document.getElementById('goalHint').textContent='You can select a maximum of two goals.'}
   else document.getElementById('goalHint').textContent=`${checked.length} of 2 selected.`;
 }));
-form.addEventListener('submit',event=>{
+
+form.addEventListener('submit', async event => {
   event.preventDefault();
-  if(!validateStep())return;
-  document.getElementById('formMessage').textContent='The design and questionnaire are updated, but secure online registration is not connected yet. Please do not submit real personal or payment details until the database connection is completed.';
+  if (!validateStep()) return;
+
+  const formMessage = document.getElementById('formMessage');
+  const submitButton = form.querySelector('button[type="submit"]');
+
+  const selected = name => [
+    ...form.querySelectorAll(`input[name="${name}"]:checked`)
+  ].map(input => input.value);
+
+  const payload = {
+    firstName: document.getElementById('firstName').value.trim(),
+    age: Number(document.getElementById('age').value),
+    phone: document.getElementById('phone').value.trim(),
+    email: document.getElementById('email').value.trim(),
+    county: document.getElementById('county').value,
+    area: document.getElementById('area').value.trim(),
+    neighbourhood: document.getElementById('neighbourhood').value.trim(),
+    primaryActivity: form.querySelector('input[name="primaryActivity"]:checked')?.value,
+    budget: document.getElementById('budget').value,
+    availability: selected('availability'),
+    lifeStage: selected('lifeStage'),
+    childrenAges: selected('childrenAges'),
+    hangoutStyle: document.getElementById('hangoutStyle').value,
+    conversationStyle: document.getElementById('conversationStyle').value,
+    alcoholStyle: document.getElementById('alcoholStyle').value,
+    cannabisStyle: document.getElementById('cannabisStyle').value,
+    mpesaCode: document.getElementById('mpesaCode').value.trim(),
+    paymentDate: document.getElementById('paymentDate').value,
+    paymentTime: document.getElementById('paymentTime').value,
+    consent: document.getElementById('consent').checked
+  };
+
+  try {
+    submitButton.disabled = true;
+    formMessage.textContent = 'Submitting your registration...';
+
+    const response = await fetch('https://peulzmhgqfdcyckzwnnx.supabase.co/functions/v1/register-member', {
+      method: 'POST',
+      headers: {
+  'Content-Type': 'application/json',
+  'Authorization': 'Bearer sb_publishable_PlZa40tC5GeJVo_mhCpOzQ_B6X8yH0e ',
+  'apikey': 'sb_publishable_PlZa40tC5GeJVo_mhCpOzQ_B6X8yH0e '
+},
+      body: JSON.stringify(payload)
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.error || 'Registration could not be submitted.');
+    }
+
+    formMessage.textContent =
+      'Thank you! Your answers have been received. Your payment is awaiting confirmation. Your group invitation will be sent after payment is confirmed.';
+  } catch (error) {
+    formMessage.textContent =
+      'We could not submit your registration. Please try again.';
+    console.error(error);
+  } finally {
+    submitButton.disabled = false;
+  }
 });
+
 </script>
 </body>
 </html>
