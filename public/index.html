@@ -110,6 +110,7 @@ footer{padding:36px 24px;text-align:center;color:var(--muted)}.footer-brand{colo
 <section id="join" class="form-section"><div class="form-wrap">
   <div class="eyebrow">Your next chapter starts here</div><h2>Find your neighbourhood friends.</h2><p class="muted form-intro">Answer the questions below. Your answers help us find people whose lives and interests fit yours.</p>
   <div class="progress-label"><span id="stepLabel">Step 1 of 6</span><span id="progressPercent">17%</span></div><div class="progress" aria-hidden="true"><div class="progress-bar" id="progressBar"></div></div>
+  <div class="group-note"><strong>Small groups, thoughtfully matched.</strong><br>Each group has a maximum of 15 people. Some groups may be smaller when that allows us to make a closer match for everyone.</div>
   <form id="joinForm">
     <div class="step active"><h3>First, a little about you</h3>
       <label for="firstName">First name</label><input id="firstName" name="firstName" required autocomplete="given-name">
@@ -134,34 +135,87 @@ footer{padding:36px 24px;text-align:center;color:var(--muted)}.footer-brand{colo
       <label class="choice"><input type="radio" name="primaryActivity" value="Video games"> Video games</label>
       <label class="choice"><input type="radio" name="primaryActivity" value="Kids' playdates"> Kids' playdates</label>
       <label class="choice"><input type="radio" name="primaryActivity" value="Night out"> Night out</label>
-      <label class="choice"><input type="radio" name="primaryActivity" value="Breakfast with friends"> Breakfast with friends</label>
-      <label class="choice"><input type="radio" name="primaryActivity" value="Dinner with friends"> Dinner with friends</label>
+      <label class="choice"><input type="radio" name="primaryActivity" value="Breakfast"> Breakfast</label>
+      <label class="choice"><input type="radio" name="primaryActivity" value="Dinner"> Dinner</label>
+      <label class="choice"><input type="radio" name="primaryActivity" value="Go to the gym"> Go to the gym</label>
       <label class="choice"><input type="radio" name="primaryActivity" value="Movie or series hangout"> Movie / series hangout</label>
     </div></div>
     <div class="step"><h3>What works for your budget and schedule?</h3>
       <label for="budget">Other than casual neighbourhood meetups, what is your budget for paid activities you might plan together?</label>
       <p class="field-hint">Choose what you are comfortable spending per person on a single outing. We match people within the same budget category.</p>
-      <select id="budget" name="budget" required><option value="">Choose a budget category</option><option value="Free or low-cost activities only">Free or low-cost activities only</option><option value="Under KES 1,000">Under KES 1,000</option><option value="KES 1,000–2,500">KES 1,000–2,500</option><option value="KES 2,500–5,000">KES 2,500–5,000</option><option value="KES 5,000+">KES 5,000+</option></select>
+      <select id="budget" name="budget" required><option value="">Choose a budget category</option><option value="Free or low-cost activities only">Free or low-cost activities only</option><option value="Under KES 1,000">Under KES 1,000</option><option value="KES 1,000–2,500">KES 1,000–2,500</option><option value="KES 2,500–5,000">KES 2,500–5,000</option><option value="KES 5,000–10,000">KES 5,000–10,000</option><option value="KES 10,000+">KES 10,000+</option></select>
       <label>When are you usually available?</label><div class="choices">
         <label class="choice"><input type="checkbox" name="availability" value="Weekday mornings"> Weekday mornings</label><label class="choice"><input type="checkbox" name="availability" value="Weekday evenings"> Weekday evenings</label><label class="choice"><input type="checkbox" name="availability" value="Weekends"> Weekends</label><label class="choice"><input type="checkbox" name="availability" value="Flexible"> Flexible</label>
       </div><p class="field-hint">Choose all that apply.</p>
     </div>
-    <div class="step"><h3>What kind of friendships would you like to build?</h3><p class="muted">Choose up to two. This helps us match people with similar intentions.</p><div class="choices" id="goalChoices">
-      <label class="choice"><input type="checkbox" name="goals" value="Regular everyday companionship"> Regular everyday companionship</label>
-      <label class="choice"><input type="checkbox" name="goals" value="Spontaneous plans and quick visits"> Spontaneous plans and quick visits</label>
-      <label class="choice"><input type="checkbox" name="goals" value="Fitness and outdoor activities"> Fitness and outdoor activities</label>
-      <label class="choice"><input type="checkbox" name="goals" value="Food, drinks and nights out"> Food, drinks and nights out</label>
-      <label class="choice"><input type="checkbox" name="goals" value="Games, movies and relaxing at home"> Games, movies and relaxing at home</label>
-      <label class="choice"><input type="checkbox" name="goals" value="Children's playdates and family activities"> Children's playdates and family activities</label>
-      <label class="choice"><input type="checkbox" name="goals" value="Travel and weekend trips"> Travel and weekend trips</label>
-      <label class="choice"><input type="checkbox" name="goals" value="Meaningful conversations and emotional support"> Meaningful conversations and emotional support</label>
-      <label class="choice"><input type="checkbox" name="goals" value="Faith-based activities and spiritual growth"> Faith-based activities and spiritual growth</label>
-      <label class="choice"><input type="checkbox" name="goals" value="Business, networking and sharing opportunities"> Business, networking and sharing opportunities</label>
-    </div><p id="goalHint" class="field-hint" aria-live="polite">Choose one or two options.</p></div>
+    <div class="step"><h3>Who are you most likely to click with?</h3>
+      <p class="muted">A few details help us match everyday lifestyles and social energy, not just interests. Share only what you’re comfortable sharing.</p>
+
+      <label>Which life stages describe you? Choose all that apply.</label>
+      <div class="choices">
+        <label class="choice"><input type="checkbox" name="lifeStage" value="Single"> Single</label>
+        <label class="choice"><input type="checkbox" name="lifeStage" value="Partnered or married"> Partnered or married</label>
+        <label class="choice"><input type="checkbox" name="lifeStage" value="Solo parent"> Solo parent</label>
+        <label class="choice"><input type="checkbox" name="lifeStage" value="Parent in a partnered household"> Parent in a partnered household</label>
+        <label class="choice"><input type="checkbox" name="lifeStage" value="Empty nester"> Empty nester</label>
+        <label class="choice"><input type="checkbox" name="lifeStage" value="New in town"> New in town</label>
+        <label class="choice"><input type="checkbox" name="lifeStage" value="None of these / prefer not to say"> None of these / prefer not to say</label>
+      </div>
+
+      <label style="margin-top:20px">If you have children, what ages are they? Choose all that apply.</label>
+      <div class="choices">
+        <label class="choice"><input type="checkbox" name="childrenAges" value="No children"> I don’t have children</label>
+        <label class="choice"><input type="checkbox" name="childrenAges" value="Under 5"> Under 5</label>
+        <label class="choice"><input type="checkbox" name="childrenAges" value="5–8"> 5–8</label>
+        <label class="choice"><input type="checkbox" name="childrenAges" value="9–12"> 9–12</label>
+        <label class="choice"><input type="checkbox" name="childrenAges" value="13–17"> 13–17</label>
+        <label class="choice"><input type="checkbox" name="childrenAges" value="Adult children"> Adult children</label>
+        <label class="choice"><input type="checkbox" name="childrenAges" value="Prefer not to say"> Prefer not to say</label>
+      </div>
+      <p class="field-hint">This helps with family-friendly plans and playdates. You can skip this question if it doesn’t apply.</p>
+
+      <label for="hangoutStyle" style="margin-top:20px">What sounds most like your ideal hangout?</label>
+      <select id="hangoutStyle" name="hangoutStyle" required>
+        <option value="">Choose what feels most like you</option>
+        <option value="One-on-one or a coffee for two">A coffee for two or one-on-one time</option>
+        <option value="Small group">A small group where everyone gets to talk</option>
+        <option value="The more the merrier">The more the merrier</option>
+        <option value="Depends on the day">It depends on the day</option>
+      </select>
+
+      <label for="conversationStyle" style="margin-top:20px">What kind of connection do you enjoy most?</label>
+      <select id="conversationStyle" name="conversationStyle" required>
+        <option value="">Choose your style</option>
+        <option value="Deep talks">Deep talks and meaningful conversations</option>
+        <option value="Light banter">Light banter, jokes and playful conversation</option>
+        <option value="Doing things with little talking">Doing something together without needing to talk much</option>
+        <option value="A mix of all three">A mix of all three</option>
+      </select>
+
+      <label for="alcoholStyle" style="margin-top:20px">Which best describes your relationship with alcohol?</label>
+      <select id="alcoholStyle" name="alcoholStyle" required>
+        <option value="">Choose an option</option>
+        <option value="I don’t drink">I don’t drink</option>
+        <option value="Occasional or social drinker">I drink occasionally or socially</option>
+        <option value="Regular drinker">I’m a regular drinker</option>
+        <option value="Prefer not to say">Prefer not to say</option>
+      </select>
+
+      <label for="cannabisStyle" style="margin-top:20px">Are you comfortable around cannabis (herb)?</label>
+      <select id="cannabisStyle" name="cannabisStyle" required>
+        <option value="">Choose an option</option>
+        <option value="I don’t use cannabis and prefer not to be around it">I don’t use it and prefer not to be around it</option>
+        <option value="I don’t use cannabis but don’t mind others using it">I don’t use it, but don’t mind others using it</option>
+        <option value="I use cannabis occasionally">I use it occasionally</option>
+        <option value="I use cannabis regularly">I use it regularly</option>
+        <option value="Prefer not to say">Prefer not to say</option>
+      </select>
+      <p class="field-hint">These answers help us find people whose lifestyle preferences are compatible with yours.</p>
+    </div>
     <div class="step"><h3>Complete your joining request</h3>
-      <div class="fee-panel"><div class="eyebrow">One-time joining fee</div><div class="fee-amount">KSh 2,800</div><div class="fee-label">Join a WhatsApp group of up to 15 members in your neighbourhood with similar interests.</div><p class="muted">Your answers help us bring together people nearby who most closely match what you’re looking for in a friendship. We make the introduction, then leave the rest to fate.</p><p class="muted">The one-time fee helps cover advertising that brings members together and the costs of running the website. There is no recurring membership fee.</p></div>
+      <div class="fee-panel"><div class="eyebrow">One-time joining fee</div><div class="fee-amount">KSh 2,800</div><div class="fee-label">Your payment adds you to one WhatsApp group of no more than 15 people. Some groups may be smaller when we can make a closer match.</div><p class="muted">Your answers help us bring together people nearby who most closely match what you’re looking for in a friendship. We make the introduction, then leave the rest to fate.</p><p class="muted">This one-time fee helps us cover the cost of running this project. There is no recurring membership fee.</p><div class="group-note" style="margin-top:16px"><strong>Need a different group?</strong><br>If, after one month, you’re unhappy with your group, we’ll add you to one more group at no extra cost. This is one additional group only, covered by your original KSh 2,800 payment.</div></div>
       <div class="payment-detail"><strong>M-PESA Till number:</strong> 1305656</div><div class="payment-detail"><strong>Till name:</strong> Family Forever</div>
-      <div class="payment-detail"><strong>Need a different group?</strong><p style="margin:8px 0 0">If, after one month, you’re unhappy with your group, we’ll add you to one more group at no extra cost. This is one additional group only, covered by your original KSh 2,800 payment.</p></div><p>After paying, enter your M-PESA transaction code below. Your payment must be confirmed before you are added to a WhatsApp group.</p>
+      <p>After paying, enter your M-PESA transaction code below. Your payment must be confirmed before you are added to a WhatsApp group.</p>
       <label for="mpesaCode">M-PESA transaction code</label><input id="mpesaCode" name="mpesaCode" required placeholder="Enter your transaction code" autocomplete="off">
       <label class="choice" style="margin-top:20px"><input type="checkbox" id="consent" name="consent" required> I agree that my answers and contact details may be used to match me with compatible members and contact me about my group.</label>
       <p class="small muted" style="margin-top:14px">Your group invitation will be sent after your payment is confirmed. We will prioritise your neighbourhood, primary activity and budget category when matching.</p>
