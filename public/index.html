@@ -1,313 +1,237 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Neighbours and Friends helps you meet compatible people nearby. Where neighbours become friends and friends become family.">
-  <title>Neighbours and Friends | Friendship, close to home</title>
-  <style>
-    :root {
-      --cream: #f8f4ec;
-      --paper: #fffdf8;
-      --green: #354f40;
-      --green-light: #e5e9df;
-      --terracotta: #bb7055;
-      --ink: #2e332d;
-      --muted: #6e746b;
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      background: var(--cream);
-      color: var(--ink);
-      font-family: Arial, Helvetica, sans-serif;
-      line-height: 1.6;
-    }
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 22px max(6%, calc((100% - 1120px)/2));
-      gap: 20px;
-    }
-    .brand { font-family: Georgia, serif; font-size: 23px; font-weight: bold; }
-    .nav-link { color: var(--green); text-decoration: none; font-weight: bold; }
-    .hero {
-      max-width: 1120px;
-      margin: auto;
-      padding: 70px 24px 82px;
-      display: grid;
-      grid-template-columns: 1.1fr .9fr;
-      align-items: center;
-      gap: 45px;
-    }
-    .eyebrow {
-      color: var(--terracotta);
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      font-size: 12px;
-      font-weight: bold;
-    }
-    h1, h2, h3 { font-family: Georgia, "Times New Roman", serif; line-height: 1.15; }
-    h1 { font-size: clamp(42px, 6vw, 68px); margin: 18px 0; letter-spacing: -1.8px; }
-    h2 { font-size: clamp(30px, 4vw, 43px); }
-    .hero p { font-size: 18px; color: var(--muted); max-width: 520px; }
-    .button {
-      border: 0; border-radius: 6px; padding: 15px 22px;
-      background: var(--green); color: white; cursor: pointer;
-      font-weight: bold; font-size: 15px; display: inline-block;
-      text-decoration: none;
-    }
-    .button.secondary { background: var(--paper); color: var(--green); border: 1px solid #d9ddd2; }
-    .art {
-      min-height: 360px; border-radius: 48% 48% 8px 8px;
-      background: #e6e8dc; display: flex; align-items: center;
-      justify-content: center; padding: 30px; position: relative; overflow: hidden;
-    }
-    .art-card {
-      background: var(--paper); padding: 28px; border-radius: 12px;
-      max-width: 290px; box-shadow: 0 16px 50px #354f4018;
-      transform: rotate(-3deg);
-    }
-    .art-card strong { font-family: Georgia, serif; font-size: 27px; color: var(--green); }
-    .art-card p { font-size: 15px; }
-    section { padding: 70px 24px; }
-    .inner { max-width: 1050px; margin: auto; }
-    .center { text-align: center; }
-    .muted { color: var(--muted); }
-    .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 32px; }
-    .card { background: var(--paper); border-radius: 10px; padding: 25px; border: 1px solid #ece6dc; }
-    .card .number { color: var(--terracotta); font-family: Georgia, serif; font-size: 28px; }
-    .green-section { background: var(--green); color: white; }
-    .green-section .muted { color: #e0e7df; }
-    .group-note { background: var(--green-light); padding: 30px; border-radius: 10px; margin-top: 30px; }
-    .form-wrap { max-width: 720px; margin: auto; background: var(--paper); padding: clamp(22px, 5vw, 45px); border-radius: 12px; border: 1px solid #ece6dc; }
-    label { display: block; font-weight: bold; margin: 17px 0 7px; }
-    input, select, textarea {
-      width: 100%; padding: 13px; border: 1px solid #d6d7ce;
-      border-radius: 6px; background: white; color: var(--ink); font: inherit;
-    }
-    .choices { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 10px; }
-    .choice {
-      display: flex; gap: 9px; align-items: start; border: 1px solid #dedfd6;
-      padding: 12px; border-radius: 6px; font-weight: normal; margin: 0;
-    }
-    .choice input { width: auto; margin-top: 6px; }
-    .step { display: none; }
-    .step.active { display: block; }
-    .progress { height: 5px; background: #e8e6de; border-radius: 9px; margin: 20px 0 28px; overflow: hidden; }
-    .progress-bar { height: 100%; width: 16.66%; background: var(--terracotta); transition: width .2s; }
-    .form-actions { display: flex; justify-content: space-between; gap: 10px; margin-top: 25px; }
-    .small { font-size: 13px; }
-    footer { padding: 35px 24px; text-align: center; color: var(--muted); }
-    @media(max-width: 720px) {
-      .hero { grid-template-columns: 1fr; padding-top: 38px; }
-      .art { min-height: 250px; }
-      .cards { grid-template-columns: 1fr; }
-      .choices { grid-template-columns: 1fr; }
-      header { padding: 18px 20px; }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Neighbours and Friends helps you meet compatible people nearby. Where neighbours become friends and friends become family.">
+<meta name="theme-color" content="#f8f4ec">
+<title>Neighbours and Friends | Friendship, close to home</title>
+<style>
+:root{--cream:#f8f4ec;--paper:#fffdf8;--green:#354f40;--green-light:#e5e9df;--terracotta:#bb7055;--ink:#2e332d;--muted:#6e746b;--line:#e5dfd4}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--cream);color:var(--ink);font-family:Arial,Helvetica,sans-serif;line-height:1.65}a{color:inherit}
+header{display:flex;justify-content:space-between;align-items:center;max-width:1200px;margin:auto;padding:24px 5%;gap:20px}.brand{font-family:Georgia,serif;font-size:clamp(22px,2.5vw,30px);font-weight:bold;line-height:1.1;letter-spacing:-.6px;max-width:270px}.nav-link{color:var(--green);text-decoration:none;font-weight:bold;white-space:nowrap}
+.hero{max-width:1200px;margin:auto;padding:58px 5% 76px;display:grid;grid-template-columns:1.05fr .95fr;align-items:start;gap:clamp(28px,5vw,70px)}.story-copy{max-width:640px}.story-copy h1{font-size:clamp(40px,4.5vw,58px);letter-spacing:-1.6px;margin:18px 0 26px}.story-line{font-family:Georgia,"Times New Roman",serif;font-size:clamp(21px,2.2vw,27px);line-height:1.35;margin:0 0 12px;color:var(--ink)}.story-paragraph{font-size:17px;line-height:1.8;color:var(--muted);margin:22px 0}.memory-lines{border-left:2px solid #d9b7a6;padding:4px 0 4px 20px;margin:25px 0 30px}.memory-lines p{font-family:Georgia,"Times New Roman",serif;font-size:clamp(19px,2vw,23px);line-height:1.45;margin:0 0 15px;color:var(--ink)}.memory-lines p:last-child{margin-bottom:0}.story-emphasis{font-family:Georgia,"Times New Roman",serif;font-size:clamp(26px,3vw,34px);line-height:1.25;color:var(--green);margin:32px 0 24px}.someone-lines{margin:30px 0;padding:4px 0 4px 20px;border-left:2px solid #d9ddd2}.someone-lines p{font-size:17px;line-height:1.75;margin:0 0 17px}.someone-lines p:last-child{margin-bottom:0}.story-ending{font-family:Georgia,"Times New Roman",serif;font-size:clamp(23px,2.5vw,30px);line-height:1.35;color:var(--green);margin:32px 0 24px}.eyebrow{color:var(--terracotta);text-transform:uppercase;letter-spacing:2.3px;font-size:12px;font-weight:800}
+h1,h2,h3{font-family:Georgia,"Times New Roman",serif;line-height:1.14}h1{font-size:clamp(43px,5.4vw,70px);margin:18px 0 22px;letter-spacing:-2px;max-width:700px}h2{font-size:clamp(31px,4vw,45px);margin:14px 0;letter-spacing:-.8px}h3{font-size:23px;margin:10px 0}p{margin-top:0}.hero-copy{font-size:clamp(17px,1.7vw,20px);color:var(--muted);max-width:570px}.tagline{font-weight:700;color:var(--ink);margin:20px 0 26px}
+.button{border:0;border-radius:7px;padding:15px 23px;background:var(--green);color:white;cursor:pointer;font-weight:bold;font-size:16px;display:inline-flex;align-items:center;justify-content:center;gap:10px;text-decoration:none;transition:transform .18s ease,background .18s ease}.button:hover{background:#294133;transform:translateY(-1px)}.button.secondary{background:var(--paper);color:var(--green);border:1px solid #d9ddd2}
+.hero-art{position:relative;min-height:390px;display:flex;align-items:center;justify-content:center;padding:20px}.art-halo{position:absolute;inset:5% 3% 0;background:var(--green-light);border-radius:48% 48% 8px 8px}.illustration{position:relative;z-index:1;width:100%;max-width:470px;height:auto;display:block}.art-caption{position:absolute;z-index:2;left:0;bottom:7%;max-width:240px;background:var(--paper);border:1px solid #ece6dc;box-shadow:0 12px 28px #354f4010;padding:18px 20px;transform:rotate(-2deg)}.art-caption strong{display:block;color:var(--green);font-family:Georgia,serif;font-size:23px;line-height:1.25}.art-caption span{color:var(--muted);font-size:13px;display:block;margin-top:7px}
+section{padding:72px 5%}.inner{max-width:1080px;margin:auto}.center{text-align:center}.muted{color:var(--muted)}.intro{max-width:700px;margin:0 auto 30px}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:34px}.card{background:var(--paper);border-radius:10px;padding:24px;border:1px solid var(--line);text-align:left}.card-top{display:flex;align-items:center;justify-content:space-between;gap:10px}.number{color:var(--terracotta);font-family:Georgia,serif;font-size:29px}.mini-mark{width:42px;height:42px;display:grid;place-items:center;border-radius:50%;background:var(--green-light);color:var(--green);font-size:20px;flex:0 0 auto}.card p{margin-bottom:0}
+.soft-section{background:#eeeee5}.friendship-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:32px}.friendship-card{background:var(--paper);padding:23px;border-radius:10px;border:1px solid #e8e2d8;min-height:180px}.friendship-card .mini-mark{margin-bottom:16px;background:#f2e2d7;color:var(--terracotta)}.group-note{background:var(--green-light);padding:25px 28px;border-radius:10px;margin-top:28px}
+.form-section{background:#f3efe7}.form-wrap{max-width:760px;margin:auto;background:var(--paper);padding:clamp(22px,5vw,46px);border-radius:12px;border:1px solid var(--line);box-shadow:0 14px 44px #354f4008}.form-intro{max-width:580px}label{display:block;font-weight:700;margin:17px 0 7px}input,select,textarea{width:100%;padding:13px;border:1px solid #d6d7ce;border-radius:6px;background:white;color:var(--ink);font:inherit}input:focus,select:focus,textarea:focus{outline:2px solid #9eaf9f;outline-offset:1px}.field-hint{font-size:13px;color:var(--muted);margin:6px 0 0}
+.choices{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:10px}.choice{display:flex;gap:10px;align-items:flex-start;border:1px solid #dedfd6;padding:12px;border-radius:7px;font-weight:normal;margin:0;background:#fffefa;cursor:pointer;transition:border .15s ease,background .15s ease}.choice:has(input:checked){border-color:var(--green);background:#f0f3ed}.choice input{width:auto;margin-top:6px;accent-color:var(--green);flex:0 0 auto}
+.step{display:none}.step.active{display:block;animation:arrive .22s ease}@keyframes arrive{from{opacity:.45;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}.progress-label{display:flex;justify-content:space-between;color:var(--muted);font-size:13px;margin-top:22px}.progress{height:5px;background:#e8e6de;border-radius:9px;margin:8px 0 28px;overflow:hidden}.progress-bar{height:100%;width:16.66%;background:var(--terracotta);transition:width .2s}.form-actions{display:flex;justify-content:space-between;gap:10px;margin-top:27px}.form-actions .button{min-width:120px}.small{font-size:13px}.fee-panel{background:var(--green-light);border-radius:10px;padding:22px;margin:20px 0}.fee-amount{font-family:Georgia,serif;color:var(--green);font-size:clamp(34px,6vw,46px);font-weight:bold;line-height:1.2;margin:5px 0}.fee-label{font-weight:bold;margin-bottom:10px}.payment-detail{padding:13px 0;border-bottom:1px solid #d1d8cd}.payment-detail:last-child{border-bottom:0}
+footer{padding:36px 24px;text-align:center;color:var(--muted)}.footer-brand{color:var(--ink);font-family:Georgia,serif;font-weight:bold;font-size:20px}.form-message{margin-top:15px}
+@media(max-width:760px){header{padding:20px 22px;align-items:flex-start}.brand{max-width:220px;font-size:25px}.nav-link{padding-top:3px}.hero{grid-template-columns:1fr;padding:35px 22px 50px;gap:12px}.story-copy h1{font-size:clamp(39px,10vw,52px);letter-spacing:-1.2px;margin:16px 0 24px}.story-line{font-size:23px}.story-paragraph{font-size:16px;line-height:1.8;margin:19px 0}.memory-lines{padding-left:16px;margin:24px 0}.memory-lines p{font-size:20px;margin-bottom:13px}.story-emphasis{font-size:29px;margin:28px 0 20px}.someone-lines{padding-left:16px;margin:26px 0}.someone-lines p{font-size:16px;margin-bottom:15px}.story-ending{font-size:25px;margin:28px 0 22px}.hero-art{min-height:300px;margin:0 -6px;padding:10px 12px 24px}.art-halo{inset:5% 5% 0}.illustration{max-width:390px}.art-caption{left:2%;bottom:2%;max-width:205px;padding:14px 16px}.art-caption strong{font-size:21px}section{padding:54px 22px}.cards,.friendship-grid{grid-template-columns:1fr;gap:12px;margin-top:25px}.card,.friendship-card{padding:20px}.friendship-card{min-height:0}.choices{grid-template-columns:1fr}.form-wrap{padding:23px 19px}.group-note{padding:21px}.form-actions .button{min-width:0;flex:1;padding:13px 15px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+</style>
 </head>
 <body>
-<header>
-  <div class="brand">Neighbours and Friends</div>
-  <a class="nav-link" href="#how">How it works</a>
-</header>
-
+<header><div class="brand">Neighbours and Friends</div><a class="nav-link" href="#how">How it works ↓</a></header>
 <main>
-  <div class="hero">
-    <div>
-      <div class="eyebrow">Friendship, close to home</div>
-      <h1>Your people might be closer than you think.</h1>
-      <p>Meet people in your neighbourhood who share your interests. See each other regularly. Let friendship happen naturally.</p>
-      <p><strong>Where neighbours become friends and friends become family.</strong></p>
-      <a class="button" href="#join">Find my people</a>
+<div class="hero story-hero">
+  <div class="story-copy">
+    <div class="eyebrow">Friendship, close to home</div>
+    <h1>Making friends as an adult is hard. And that’s not your fault.</h1>
+    <p class="story-line">Nothing is wrong with you.</p>
+    <p class="story-line">It’s just the way life works.</p>
+    <p class="story-paragraph">After school ends, the built-in, everyday relationships end too.</p>
+    <div class="memory-lines" aria-label="The everyday moments we miss">
+      <p>There is no more “see you tomorrow.”</p>
+      <p>No more sharing lunch.</p>
+      <p>No more walking together at the end of the day.</p>
+      <p>No more seeing the same people so often that friendship happens without either of you having to plan it.</p>
     </div>
-    <div class="art">
-      <div class="art-card">
-        <div class="eyebrow">A little closer to home</div>
-        <strong>Same streets.<br>New friendships.</strong>
-        <p>For the walks, the quick visits, the ordinary days and the memories you make together.</p>
-      </div>
+    <p class="story-emphasis">We’re here to make that possible again.</p>
+    <p class="story-paragraph">Our matching system connects you with people close to you who are looking for the same kind of friendship you are.</p>
+    <p class="story-paragraph">Because sometimes, the human connection we need is as simple as sharing a meal together.</p>
+    <p class="story-paragraph">Or taking a 10-minute walk while talking about anything and nothing in particular.</p>
+    <p class="story-paragraph">Sometimes, a face-to-face chat with just one person, once a week, is all we need.</p>
+    <div class="someone-lines">
+      <p>Someone who remembers what you told them last week and asks, “How is that thing you were telling me about going?”</p>
+      <p>Someone who notices when you haven’t been around.</p>
+      <p>Someone you can call when you feel like getting out of the house.</p>
+      <p>Someone you can meet in five minutes without needing to be dressed up.</p>
+      <p>Someone who can pop by and share a cup of tea.</p>
     </div>
+    <p class="story-ending">No big production. Just a person connecting with another.</p>
+    <p class="tagline">Where neighbours become friends and friends become family.</p>
+    <a class="button" href="#join">Find my people <span aria-hidden="true">↗</span></a>
   </div>
-
-  <section id="how">
-    <div class="inner center">
-      <div class="eyebrow">A different way to make friends</div>
-      <h2>Friendship grows when life overlaps.</h2>
-      <p class="muted">Not another app to endlessly browse. We bring together people nearby who want the kind of friendship that fits into everyday life.</p>
-      <div class="cards">
-        <div class="card"><div class="number">01</div><h3>Tell us about yourself</h3><p class="muted">Share your neighbourhood, interests, budget and availability.</p></div>
-        <div class="card"><div class="number">02</div><h3>We find your people</h3><p class="muted">We match members using location and compatible answers.</p></div>
-        <div class="card"><div class="number">03</div><h3>Let fate do the rest</h3><p class="muted">Meet through your WhatsApp group and let friendship unfold naturally.</p></div>
-      </div>
-      <div class="group-note">
-        <h3>Small groups. Room for real connection.</h3>
-        <p>Each group has a maximum of <strong>15 members</strong>. Once a group is full, we start a new one and let fate do the rest.</p>
-      </div>
+  <div class="hero-art" aria-label="Illustration of two neighbours sharing tea">
+    <div class="art-halo"></div>
+    <svg class="illustration" viewBox="0 0 440 390" role="img" aria-labelledby="teaTitle">
+      <title id="teaTitle">Two Black women enjoying tea and conversation</title>
+      <ellipse cx="218" cy="343" rx="174" ry="18" fill="#d8ddcf"/>
+      <path d="M54 97 C22 63 35 35 64 29 M67 81 C92 53 93 35 82 19 M75 94 C111 85 125 63 121 45" fill="none" stroke="#8b987e" stroke-width="3" stroke-linecap="round"/>
+      <path d="M55 75 C40 60 35 48 37 37 M69 58 C53 47 50 34 53 22 M89 73 C108 63 114 50 112 40" fill="none" stroke="#8b987e" stroke-width="3" stroke-linecap="round"/>
+      <path d="M343 66 C367 44 388 44 408 54 M351 83 C378 74 399 81 414 95 M338 48 C350 27 371 20 389 25" fill="none" stroke="#bb7055" stroke-width="3" stroke-linecap="round"/>
+      <path d="M42 207 Q48 177 76 180 L121 193 L129 291 L72 310 Q48 307 42 281Z" fill="#bb7055"/>
+      <path d="M314 194 Q337 176 365 189 L402 217 L388 300 L329 300Z" fill="#d9b6a2"/>
+      <path d="M89 197 Q87 162 120 155 Q151 151 172 178 L190 246 L156 286 L92 270Z" fill="#354f40"/>
+      <path d="M104 171 Q92 147 108 125 Q126 104 148 122 Q163 137 151 160 L143 174Z" fill="#3b241d"/>
+      <ellipse cx="130" cy="137" rx="24" ry="29" fill="#75442f"/>
+      <path d="M106 136 Q101 109 125 103 Q150 102 156 127 L150 117 Q128 125 109 119Z" fill="#241b18"/>
+      <path d="M113 141 Q124 146 136 140" fill="none" stroke="#3b241d" stroke-width="2" stroke-linecap="round"/><circle cx="122" cy="133" r="2" fill="#241b18"/>
+      <path d="M104 159 Q125 177 150 158 L167 187 L145 216 L96 206Z" fill="#bb7055"/>
+      <path d="M148 179 Q183 171 199 188 L215 202" fill="none" stroke="#75442f" stroke-width="15" stroke-linecap="round"/><path d="M209 197 L231 185" fill="none" stroke="#75442f" stroke-width="13" stroke-linecap="round"/>
+      <path d="M260 191 Q281 155 311 165 Q340 175 350 213 L334 282 L272 282 L248 235Z" fill="#e3c6a7"/>
+      <path d="M284 132 Q283 102 311 98 Q342 102 343 133 L333 163 L292 161Z" fill="#211b19"/><ellipse cx="315" cy="137" rx="23" ry="29" fill="#5b3426"/>
+      <path d="M291 136 Q289 105 316 104 Q339 106 341 131 L333 119 Q313 127 293 120Z" fill="#211b19"/>
+      <path d="M301 141 Q312 145 324 140" fill="none" stroke="#301e18" stroke-width="2" stroke-linecap="round"/><circle cx="308" cy="133" r="2" fill="#211b19"/>
+      <path d="M283 164 Q315 183 340 160 L355 199 L326 220 L275 202Z" fill="#354f40"/>
+      <path d="M282 181 Q257 191 247 208 L232 218" fill="none" stroke="#5b3426" stroke-width="14" stroke-linecap="round"/><path d="M231 216 L214 210" fill="none" stroke="#5b3426" stroke-width="12" stroke-linecap="round"/>
+      <ellipse cx="220" cy="238" rx="93" ry="25" fill="#e9d6c2"/><path d="M142 238 L155 324 M298 238 L284 324" stroke="#bb7055" stroke-width="5" stroke-linecap="round"/>
+      <path d="M174 207 L203 207 L200 224 Q188 232 177 224Z" fill="#fffdf8" stroke="#bb7055" stroke-width="2"/><path d="M203 211 Q218 209 213 221 Q210 225 201 223" fill="none" stroke="#bb7055" stroke-width="2"/>
+      <path d="M236 210 L263 210 L260 226 Q249 233 239 226Z" fill="#d7b69c" stroke="#354f40" stroke-width="2"/><path d="M263 214 Q277 213 272 224 Q268 228 261 225" fill="none" stroke="#354f40" stroke-width="2"/>
+      <path d="M189 190 C184 181 195 177 190 168 M249 192 C244 183 255 179 250 170" fill="none" stroke="#bb7055" stroke-width="2" stroke-linecap="round"/>
+      <path d="M375 136 l5 -9 l5 9 l9 4 l-9 4 l-5 9 l-5 -9 l-9 -4Z" fill="#bb7055" opacity=".8"/>
+      <path d="M55 326 q10 -13 20 0 q-10 12 -20 0Z" fill="#8b987e"/><path d="M67 330 q8 -16 19 -13 q-3 13 -19 13Z" fill="#8b987e"/>
+    </svg>
+    <div class="art-caption"><div class="eyebrow">A little closer to home</div><strong>Same streets.<br>New friendships.</strong><span>For the walks, quick visits and ordinary days that become memories.</span></div>
+  </div>
+</div>
+<section id="how"><div class="inner center">
+  <div class="eyebrow">A different way to make friends</div><h2>Friendship grows when life overlaps.</h2>
+  <p class="muted intro">Not another app to endlessly browse. We bring together people nearby who want the kind of friendship that fits into everyday life.</p>
+  <div class="cards">
+    <div class="card"><div class="card-top"><span class="number">01</span><span class="mini-mark" aria-hidden="true">♡</span></div><h3>Tell us about yourself</h3><p class="muted">Share your neighbourhood, favourite activity, budget and availability.</p></div>
+    <div class="card"><div class="card-top"><span class="number">02</span><span class="mini-mark" aria-hidden="true">⌂</span></div><h3>We find your people</h3><p class="muted">We match members by neighbourhood, activity and compatible preferences.</p></div>
+    <div class="card"><div class="card-top"><span class="number">03</span><span class="mini-mark" aria-hidden="true">♡</span></div><h3>Let fate do the rest</h3><p class="muted">Meet through your WhatsApp group and let friendship unfold naturally.</p></div>
+  </div>
+  <div class="group-note"><h3>Small groups. Room for real connection.</h3><p>Each group has a maximum of <strong>15 members</strong>. Once a group is full, a new group can begin. We prioritise your neighbourhood and matching preferences.</p></div>
+</div></section>
+<section class="soft-section"><div class="inner">
+  <div class="center"><div class="eyebrow">The little things matter</div><h2>Your usual walk. A quick visit. A familiar face.</h2><p class="muted intro">Friends you can see without planning weeks ahead. People who know your area, share your interests and become part of your everyday life.</p></div>
+  <div class="friendship-grid">
+    <div class="friendship-card"><div class="mini-mark" aria-hidden="true">☕</div><h3>Everyday companionship</h3><p class="muted">A cup of tea, a quick visit or an ordinary afternoon together.</p></div>
+    <div class="friendship-card"><div class="mini-mark" aria-hidden="true">↗</div><h3>Friends close to home</h3><p class="muted">People nearby who can become part of your everyday life.</p></div>
+    <div class="friendship-card"><div class="mini-mark" aria-hidden="true">✳</div><h3>Shared interests</h3><p class="muted">Find people who enjoy the same things you do.</p></div>
+  </div>
+</div></section>
+<section id="join" class="form-section"><div class="form-wrap">
+  <div class="eyebrow">Your next chapter starts here</div><h2>Find your neighbourhood friends.</h2><p class="muted form-intro">Answer the questions below. Your answers help us find people whose lives and interests fit yours.</p>
+  <div class="progress-label"><span id="stepLabel">Step 1 of 6</span><span id="progressPercent">17%</span></div><div class="progress" aria-hidden="true"><div class="progress-bar" id="progressBar"></div></div>
+  <form id="joinForm">
+    <div class="step active"><h3>First, a little about you</h3>
+      <label for="firstName">First name</label><input id="firstName" name="firstName" required autocomplete="given-name">
+      <label for="age">Age</label><input id="age" name="age" type="number" min="18" max="100" required>
+      <label for="phone">WhatsApp phone number</label><input id="phone" name="phone" type="tel" placeholder="+254 7XX XXX XXX" required autocomplete="tel">
+      <label for="email">Email (optional)</label><input id="email" name="email" type="email" autocomplete="email">
     </div>
-  </section>
-
-  <section class="green-section">
-    <div class="inner center">
-      <div class="eyebrow" style="color:#edc4ad">The little things matter</div>
-      <h2>Your usual walk. A quick visit. A familiar face.</h2>
-      <p class="muted">Friends you can see without planning weeks ahead. People who know your area, share your interests and become part of your everyday life.</p>
+    <div class="step"><h3>Where are you based?</h3>
+      <label for="county">County</label><select id="county" name="county" required><option value="">Choose your county</option>
+      <option>Baringo</option><option>Bomet</option><option>Bungoma</option><option>Busia</option><option>Elgeyo-Marakwet</option><option>Embu</option><option>Garissa</option><option>Homa Bay</option><option>Isiolo</option><option>Kajiado</option><option>Kakamega</option><option>Kericho</option><option>Kiambu</option><option>Kilifi</option><option>Kirinyaga</option><option>Kisii</option><option>Kisumu</option><option>Kitui</option><option>Kwale</option><option>Laikipia</option><option>Lamu</option><option>Machakos</option><option>Makueni</option><option>Mandera</option><option>Marsabit</option><option>Meru</option><option>Migori</option><option>Mombasa</option><option>Murang'a</option><option>Nairobi</option><option>Nakuru</option><option>Nandi</option><option>Narok</option><option>Nyamira</option><option>Nyandarua</option><option>Nyeri</option><option>Samburu</option><option>Siaya</option><option>Taita-Taveta</option><option>Tana River</option><option>Tharaka-Nithi</option><option>Trans Nzoia</option><option>Turkana</option><option>Uasin Gishu</option><option>Vihiga</option><option>Wajir</option><option>West Pokot</option><option>Other</option></select>
+      <label for="area">Area or sub-county</label><input id="area" name="area" required placeholder="e.g. Westlands, Kajiado North">
+      <label for="neighbourhood">Specific neighbourhood, estate or town</label><input id="neighbourhood" name="neighbourhood" required placeholder="e.g. Kilimani, Ongata Rongai, Nyali">
+      <p class="field-hint">We prioritise people in the same neighbourhood before considering nearby areas.</p>
     </div>
-  </section>
-
-  <section id="join">
-    <div class="form-wrap">
-      <div class="eyebrow">Your next chapter starts here</div>
-      <h2>Find your neighbourhood friends.</h2>
-      <p class="muted">Answer the questions below. Your answers help us find people whose lives and interests fit yours.</p>
-      <div class="progress"><div class="progress-bar" id="progressBar"></div></div>
-
-      <form id="joinForm">
-        <div class="step active">
-          <h3>First, a little about you</h3>
-          <label for="firstName">First name</label><input id="firstName" name="firstName" required autocomplete="given-name">
-          <label for="age">Age</label><input id="age" name="age" type="number" min="18" max="100" required>
-          <label for="phone">WhatsApp phone number</label><input id="phone" name="phone" type="tel" placeholder="+254 7XX XXX XXX" required>
-          <label for="email">Email (optional)</label><input id="email" name="email" type="email">
-        </div>
-
-        <div class="step">
-          <h3>Where are you based?</h3>
-          <label for="county">County</label>
-          <select id="county" name="county" required>
-            <option value="">Choose your county</option>
-            <option>Baringo</option><option>Bomet</option><option>Bungoma</option><option>Busia</option><option>Elgeyo-Marakwet</option><option>Embu</option><option>Garissa</option><option>Homa Bay</option><option>Isiolo</option><option>Kajiado</option><option>Kakamega</option><option>Kericho</option><option>Kiambu</option><option>Kilifi</option><option>Kirinyaga</option><option>Kisii</option><option>Kisumu</option><option>Kitui</option><option>Kwale</option><option>Laikipia</option><option>Lamu</option><option>Machakos</option><option>Makueni</option><option>Mandera</option><option>Marsabit</option><option>Meru</option><option Migori> </option><option>Migori</option><option>Mombasa</option><option>Murang'a</option><option>Nairobi</option><option>Nakuru</option><option>Nandi</option><option>Narok</option><option>Nyamira</option><option>Nyandarua</option><option>Nyeri</option><option>Samburu</option><option>Siaya</option><option>Taita-Taveta</option><option>Tana River</option><option>Tharaka-Nithi</option><option>Trans Nzoia</option><option>Turkana</option><option>Uasin Gishu</option><option>Vihiga</option><option>Wajir</option><option>West Pokot</option>
-          </select>
-          <label for="neighbourhood">Neighbourhood, estate or town</label>
-          <input id="neighbourhood" name="neighbourhood" placeholder="e.g. Kilimani, Rongai, Nyali" required>
-          <p class="small muted">Choose the area where you would realistically meet friends. We will expand the neighbourhood list as the community grows.</p>
-        </div>
-
-        <div class="step">
-          <h3>What do you enjoy?</h3>
-          <p class="muted">Choose all that sound like you.</p>
-          <div class="choices">
-            <label class="choice"><input type="checkbox" name="interests" value="Walking and fitness"> Walking and fitness</label>
-            <label class="choice"><input type="checkbox" name="interests" value="Food and coffee"> Food and coffee</label>
-            <label class="choice"><input type="checkbox" name="interests" value="Travel and exploring"> Travel and exploring</label>
-            <label class="choice"><input type="checkbox" name="interests" value="Games and activities"> Games and activities</label>
-            <label class="choice"><input type="checkbox" name="interests" value="Home hangouts"> Home hangouts</label>
-            <label class="choice"><input type="checkbox" name="interests" value="Business and networking"> Business and networking</label>
-            <label class="choice"><input type="checkbox" name="interests" value="Arts and creativity"> Arts and creativity</label>
-            <label class="choice"><input type="checkbox" name="interests" value="Nature and outdoors"> Nature and outdoors</label>
-            <label class="choice"><input type="checkbox" name="interests" value="Parenting and family"> Parenting and family</label>
-            <label class="choice"><input type="checkbox" name="interests" value="Quiet conversations"> Quiet conversations</label>
-          </div>
-        </div>
-
-        <div class="step">
-          <h3>What works for your budget and schedule?</h3>
-          <label for="budget">Comfortable budget per meetup</label>
-          <select id="budget" name="budget" required>
-            <option value="">Choose a budget</option><option>Free activities</option><option>Under KES 1,000</option><option>KES 1,000 to 2,500</option><option>KES 2,500 to 5,000</option><option>KES 5,000 or more</option>
-          </select>
-          <label>When are you usually available?</label>
-          <div class="choices">
-            <label class="choice"><input type="checkbox" name="availability" value="Weekday mornings"> Weekday mornings</label>
-            <label class="choice"><input type="checkbox" name="availability" value="Weekday evenings"> Weekday evenings</label>
-            <label class="choice"><input type="checkbox" name="availability" value="Weekends"> Weekends</label>
-            <label class="choice"><input type="checkbox" name="availability" value="Flexible"> Flexible</label>
-          </div>
-        </div>
-
-        <div class="step">
-          <h3>What kind of friendship are you hoping for?</h3>
-          <div class="choices">
-            <label class="choice"><input type="checkbox" name="goals" value="Regular local friends"> Regular local friends</label>
-            <label class="choice"><input type="checkbox" name="goals" value="Friends for activities"> Friends for activities</label>
-            <label class="choice"><input type="checkbox" name="goals" value="Deep meaningful friendships"> Deep, meaningful friendships</label>
-            <label class="choice"><input type="checkbox" name="goals" value="A wider social circle"> A wider social circle</label>
-            <label class="choice"><input type="checkbox" name="goals" value="People with similar life stage"> People in a similar life stage</label>
-            <label class="choice"><input type="checkbox" name="goals" value="Open to seeing what happens"> Open to seeing what happens</label>
-          </div>
-          <label for="about">Anything else you'd like your group to know? (optional)</label>
-          <textarea id="about" name="about" rows="3" placeholder="A little about your personality or the friendships you enjoy..."></textarea>
-        </div>
-
-        <div class="step">
-          <h3>Payment and confirmation</h3>
-          <p>To help cover advertising that brings members into groups and the costs of running this website, the registration fee is payable via M-PESA.</p>
-          <div class="group-note">
-            <p><strong>Pay to M-PESA Till: 1305656</strong></p>
-            <p><strong>Till name: Family Forever</strong></p>
-            <p>After paying, enter the M-PESA transaction code below.</p>
-          </div>
-          <label for="mpesaCode">M-PESA transaction code</label>
-          <input id="mpesaCode" name="mpesaCode" required placeholder="e.g. QAB12CD34EF">
-          <label class="choice"><input type="checkbox" id="consent" required> I agree that my answers and contact details may be used to match me with compatible members and contact me about my group.</label>
-          <p class="small muted">Your submission is not complete until you send your answers. Payment confirmation is checked separately.</p>
-        </div>
-
-        <div class="form-actions">
-          <button type="button" class="button secondary" id="backBtn" style="display:none">Back</button>
-          <button type="button" class="button" id="nextBtn">Continue</button>
-          <button type="submit" class="button" id="submitBtn" style="display:none">Send my answers</button>
-        </div>
-        <p id="formMessage" class="small muted" aria-live="polite"></p>
-      </form>
+    <div class="step"><h3>What would you most like to do with friends?</h3><p class="muted">Choose one activity that matters most to you.</p><div class="choices">
+      <label class="choice"><input type="radio" name="primaryActivity" value="Morning walk or jog" required> Morning walk or jog</label>
+      <label class="choice"><input type="radio" name="primaryActivity" value="Evening walk or jog"> Evening walk or jog</label>
+      <label class="choice"><input type="radio" name="primaryActivity" value="Grab a drink"> Grab a drink</label>
+      <label class="choice"><input type="radio" name="primaryActivity" value="Supermarket run"> Supermarket run</label>
+      <label class="choice"><input type="radio" name="primaryActivity" value="Cup of tea or coffee"> Cup of tea or coffee</label>
+      <label class="choice"><input type="radio" name="primaryActivity" value="Board games"> Board games</label>
+      <label class="choice"><input type="radio" name="primaryActivity" value="Video games"> Video games</label>
+      <label class="choice"><input type="radio" name="primaryActivity" value="Kids' playdates"> Kids' playdates</label>
+      <label class="choice"><input type="radio" name="primaryActivity" value="Night out"> Night out</label>
+      <label class="choice"><input type="radio" name="primaryActivity" value="Breakfast with friends"> Breakfast with friends</label>
+      <label class="choice"><input type="radio" name="primaryActivity" value="Dinner with friends"> Dinner with friends</label>
+      <label class="choice"><input type="radio" name="primaryActivity" value="Movie or series hangout"> Movie / series hangout</label>
+    </div></div>
+    <div class="step"><h3>What works for your budget and schedule?</h3>
+      <label for="budget">Other than casual neighbourhood meetups, what is your budget for paid activities you might plan together?</label>
+      <p class="field-hint">Choose what you are comfortable spending per person on a single outing. We match people within the same budget category.</p>
+      <select id="budget" name="budget" required><option value="">Choose a budget category</option><option value="Free or low-cost activities only">Free or low-cost activities only</option><option value="Under KES 1,000">Under KES 1,000</option><option value="KES 1,000–2,500">KES 1,000–2,500</option><option value="KES 2,500–5,000">KES 2,500–5,000</option><option value="KES 5,000+">KES 5,000+</option></select>
+      <label>When are you usually available?</label><div class="choices">
+        <label class="choice"><input type="checkbox" name="availability" value="Weekday mornings"> Weekday mornings</label><label class="choice"><input type="checkbox" name="availability" value="Weekday evenings"> Weekday evenings</label><label class="choice"><input type="checkbox" name="availability" value="Weekends"> Weekends</label><label class="choice"><input type="checkbox" name="availability" value="Flexible"> Flexible</label>
+      </div><p class="field-hint">Choose all that apply.</p>
     </div>
-  </section>
+    <div class="step"><h3>What kind of friendships would you like to build?</h3><p class="muted">Choose up to two. This helps us match people with similar intentions.</p><div class="choices" id="goalChoices">
+      <label class="choice"><input type="checkbox" name="goals" value="Regular everyday companionship"> Regular everyday companionship</label>
+      <label class="choice"><input type="checkbox" name="goals" value="Spontaneous plans and quick visits"> Spontaneous plans and quick visits</label>
+      <label class="choice"><input type="checkbox" name="goals" value="Fitness and outdoor activities"> Fitness and outdoor activities</label>
+      <label class="choice"><input type="checkbox" name="goals" value="Food, drinks and nights out"> Food, drinks and nights out</label>
+      <label class="choice"><input type="checkbox" name="goals" value="Games, movies and relaxing at home"> Games, movies and relaxing at home</label>
+      <label class="choice"><input type="checkbox" name="goals" value="Children's playdates and family activities"> Children's playdates and family activities</label>
+      <label class="choice"><input type="checkbox" name="goals" value="Travel and weekend trips"> Travel and weekend trips</label>
+      <label class="choice"><input type="checkbox" name="goals" value="Meaningful conversations and emotional support"> Meaningful conversations and emotional support</label>
+      <label class="choice"><input type="checkbox" name="goals" value="Faith-based activities and spiritual growth"> Faith-based activities and spiritual growth</label>
+      <label class="choice"><input type="checkbox" name="goals" value="Business, networking and sharing opportunities"> Business, networking and sharing opportunities</label>
+    </div><p id="goalHint" class="field-hint" aria-live="polite">Choose one or two options.</p></div>
+    <div class="step"><h3>Complete your joining request</h3>
+      <div class="fee-panel"><div class="eyebrow">One-time joining fee</div><div class="fee-amount">KSh 2,800</div><div class="fee-label">Join a WhatsApp group of up to 15 members in your neighbourhood with similar interests.</div><p class="muted">Your answers help us bring together people nearby who most closely match what you’re looking for in a friendship. We make the introduction, then leave the rest to fate.</p><p class="muted">The one-time fee helps cover advertising that brings members together and the costs of running the website. There is no recurring membership fee.</p></div>
+      <div class="payment-detail"><strong>M-PESA Till number:</strong> 1305656</div><div class="payment-detail"><strong>Till name:</strong> Family Forever</div>
+      <div class="payment-detail"><strong>Need a different group?</strong><p style="margin:8px 0 0">If, after one month, you’re unhappy with your group, we’ll add you to one more group at no extra cost. This is one additional group only, covered by your original KSh 2,800 payment.</p></div><p>After paying, enter your M-PESA transaction code below. Your payment must be confirmed before you are added to a WhatsApp group.</p>
+      <label for="mpesaCode">M-PESA transaction code</label><input id="mpesaCode" name="mpesaCode" required placeholder="Enter your transaction code" autocomplete="off">
+      <label class="choice" style="margin-top:20px"><input type="checkbox" id="consent" name="consent" required> I agree that my answers and contact details may be used to match me with compatible members and contact me about my group.</label>
+      <p class="small muted" style="margin-top:14px">Your group invitation will be sent after your payment is confirmed. We will prioritise your neighbourhood, primary activity and budget category when matching.</p>
+    </div>
+    <div class="form-actions"><button type="button" class="button secondary" id="backBtn" style="display:none">Back</button><button type="button" class="button" id="nextBtn">Continue →</button><button type="submit" class="button" id="submitBtn" style="display:none">Send my answers</button></div>
+    <p id="formMessage" class="small muted form-message" aria-live="polite"></p>
+  </form>
+</div></section>
 </main>
-
-<footer>
-  <strong>Neighbours and Friends</strong><br>
-  Where neighbours become friends and friends become family.<br>
-  <span class="small">Friendship, close to home.</span>
-</footer>
-
+<footer><div class="footer-brand">Neighbours and Friends</div>Where neighbours become friends and friends become family.<br><span class="small">Friendship, close to home.</span></footer>
 <script>
-  const form = document.getElementById('joinForm');
-  const steps = Array.from(document.querySelectorAll('.step'));
-  const nextBtn = document.getElementById('nextBtn');
-  const backBtn = document.getElementById('backBtn');
-  const submitBtn = document.getElementById('submitBtn');
-  const progressBar = document.getElementById('progressBar');
-  let currentStep = 0;
-
-  function showStep(index) {
-    steps.forEach((step, i) => step.classList.toggle('active', i === index));
-    currentStep = index;
-    backBtn.style.display = index === 0 ? 'none' : 'inline-block';
-    nextBtn.style.display = index === steps.length - 1 ? 'none' : 'inline-block';
-    submitBtn.style.display = index === steps.length - 1 ? 'inline-block' : 'none';
-    progressBar.style.width = ((index + 1) / steps.length * 100) + '%';
-    document.getElementById('formMessage').textContent = '';
-  }
-
-  function validateStep() {
-    const active = steps[currentStep];
-    const required = Array.from(active.querySelectorAll('[required]'));
-    for (const field of required) {
-      if (field.type === 'checkbox' && field.name && field.name !== 'consent') continue;
-      if (!field.checkValidity()) {
-        field.reportValidity();
-        return false;
-      }
+const form=document.getElementById('joinForm');
+const steps=Array.from(document.querySelectorAll('.step'));
+const nextBtn=document.getElementById('nextBtn');
+const backBtn=document.getElementById('backBtn');
+const submitBtn=document.getElementById('submitBtn');
+const progressBar=document.getElementById('progressBar');
+const stepLabel=document.getElementById('stepLabel');
+const progressPercent=document.getElementById('progressPercent');
+let currentStep=0;
+function showStep(index){
+  steps.forEach((step,i)=>step.classList.toggle('active',i===index));
+  currentStep=index;
+  backBtn.style.display=index===0?'none':'inline-flex';
+  nextBtn.style.display=index===steps.length-1?'none':'inline-flex';
+  submitBtn.style.display=index===steps.length-1?'inline-flex':'none';
+  const percent=Math.round(((index+1)/steps.length)*100);
+  progressBar.style.width=percent+'%';
+  stepLabel.textContent=`Step ${index+1} of ${steps.length}`;
+  progressPercent.textContent=percent+'%';
+  document.getElementById('formMessage').textContent='';
+}
+function validateStep(){
+  const active=steps[currentStep];
+  for(const field of active.querySelectorAll('[required]')){
+    if(field.type==='checkbox'&&field.name&&field.name!=='consent')continue;
+    if(field.type==='radio'&&field.name){
+      const group=active.querySelectorAll(`input[type="radio"][name="${field.name}"]`);
+      if(![...group].some(item=>item.checked)){field.reportValidity();return false}
+      continue;
     }
-    return true;
+    if(!field.checkValidity()){field.reportValidity();return false}
   }
-
-  nextBtn.addEventListener('click', () => {
-    if (!validateStep()) return;
-    showStep(Math.min(currentStep + 1, steps.length - 1));
-  });
-  backBtn.addEventListener('click', () => showStep(Math.max(currentStep - 1, 0)));
-
-  form.addEventListener('submit', async (event) => {
-    event.preventDefault();
-    if (!validateStep()) return;
-    document.getElementById('formMessage').textContent =
-      'Your form is ready, but online submission is not connected yet. Please do not send real personal details until the secure database connection is completed.';
-  });
+  if(currentStep===3&&!active.querySelector('input[name="availability"]:checked')){
+    alert('Please choose at least one time when you are usually available.');return false;
+  }
+  if(currentStep===4&&!active.querySelector('input[name="goals"]:checked')){
+    alert('Please choose at least one friendship goal.');return false;
+  }
+  return true;
+}
+nextBtn.addEventListener('click',()=>{
+  if(!validateStep())return;
+  showStep(Math.min(currentStep+1,steps.length-1));
+  document.getElementById('join').scrollIntoView({behavior:'smooth',block:'start'});
+});
+backBtn.addEventListener('click',()=>{
+  showStep(Math.max(currentStep-1,0));
+  document.getElementById('join').scrollIntoView({behavior:'smooth',block:'start'});
+});
+document.querySelectorAll('input[name="goals"]').forEach(box=>box.addEventListener('change',()=>{
+  const checked=[...document.querySelectorAll('input[name="goals"]:checked')];
+  if(checked.length>2){box.checked=false;document.getElementById('goalHint').textContent='You can select a maximum of two goals.'}
+  else document.getElementById('goalHint').textContent=`${checked.length} of 2 selected.`;
+}));
+form.addEventListener('submit',event=>{
+  event.preventDefault();
+  if(!validateStep())return;
+  document.getElementById('formMessage').textContent='The design and questionnaire are updated, but secure online registration is not connected yet. Please do not submit real personal or payment details until the database connection is completed.';
+});
 </script>
 </body>
 </html>
