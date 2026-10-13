@@ -333,7 +333,14 @@ footer{padding:36px 24px;text-align:center;color:var(--muted)}.footer-brand{colo
       <div class="fee-panel"><div class="eyebrow">One-time joining fee</div><div class="fee-amount">KSh 2,800</div><div class="fee-label">Your payment adds you to one WhatsApp group of up to 15 people.</div><p class="muted">Your answers help us bring together people nearby who most closely match what you’re looking for in a friendship. We make the introduction, then leave the rest to fate.</p><p class="muted">This one-time fee helps us cover the cost of running this project.</p><div class="group-note" style="margin-top:16px"><strong>Need a different group?</strong><br>After one month, you can join one more group in your neighbourhood at no extra cost. Across two months, you could meet up to 30 people nearby who share your interests and lifestyle.<br><br>Is this how you meet your new friend group? Your best friend? Your partner?<br><br><strong>Join the club and let fate do the rest.</strong></div></div>
       <div class="payment-detail"><strong>M-PESA Till number:</strong> 1305656</div><div class="payment-detail"><strong>Till name:</strong> Family Forever</div>
       <p>After paying, enter your M-PESA transaction code below. Your payment must be confirmed before you are added to a WhatsApp group.</p>
-      <label for="mpesaCode">M-PESA transaction code (10 digits)</label><input id="mpesaCode" name="mpesaCode" required placeholder="Enter your 10-digit transaction code" autocomplete="off" inputmode="numeric" pattern="[0-9]{10}" minlength="10" maxlength="10" title="Enter exactly 10 digits, using numbers only">
+      <label for="mpesaCode">M-PESA transaction code</label><<input id="mpesaCode" name="mpesaCode" required
+  placeholder="Enter your M-PESA transaction code"
+  autocomplete="off"
+  inputmode="text"
+  pattern="[A-Za-z0-9]{8,12}"
+minlength="8"
+maxlength="12"
+  title="Enter your M-PESA transaction code using 8 to 12 letters or numbers"
       <label for="paymentDate" style="margin-top:16px">Date of payment</label><input id="paymentDate" name="paymentDate" type="date" required>
       <label for="paymentTime" style="margin-top:16px">Time of payment</label><input id="paymentTime" name="paymentTime" type="time" required>
       <label class="choice" style="margin-top:20px"><input type="checkbox" id="consent" name="consent" required> I agree that my answers and contact details may be used to match me with compatible members and contact me about my group.</label>
@@ -418,10 +425,12 @@ document.querySelectorAll('input[name="goals"]').forEach(box=>box.addEventListen
   else document.getElementById('goalHint').textContent=`${checked.length} of 2 selected.`;
 }));
 showPage(0);
-form.addEventListener('submit',event=>{
+form.addEventListener('submit', async (event) => {
   event.preventDefault();
-  if(!validatePage())return;
-  document.getElementById('formMessage').textContent='The design and questionnaire are updated, but secure online registration is not connected yet. Please do not submit real personal or payment details until the database connection is completed.';
+  if (!validatePage()) return;
+
+  document.getElementById('formMessage').textContent =
+    'Registration is being prepared. Please wait.';
 });
 </script>
 </body>
