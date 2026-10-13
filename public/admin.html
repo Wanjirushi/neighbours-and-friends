@@ -1,83 +1,199 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Neighbours and Friends | Admin</title>
+  <title>Neighbour Friend Finder | Admin</title>
   <style>
-    :root {
-      --cream: #f8f4ec;
-      --paper: #fffdf8;
-      --green: #354f40;
-      --terracotta: #bb7055;
-      --ink: #2e332d;
-      --muted: #6e746b;
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      padding: 30px 18px;
-      background: var(--cream);
-      color: var(--ink);
-      font-family: Arial, Helvetica, sans-serif;
-      line-height: 1.6;
-    }
-    main { max-width: 850px; margin: auto; }
-    h1, h2 { font-family: Georgia, "Times New Roman", serif; }
-    h1 { font-size: clamp(30px, 5vw, 44px); margin-bottom: 5px; }
-    .muted { color: var(--muted); }
-    .panel {
-      background: var(--paper);
-      border: 1px solid #e7e1d7;
-      border-radius: 10px;
-      padding: 24px;
-      margin: 22px 0;
-    }
-    label { display: block; font-weight: bold; margin: 14px 0 6px; }
-    input {
-      width: 100%; padding: 12px; border: 1px solid #d6d7ce;
-      border-radius: 6px; font: inherit;
-    }
-    button {
-      background: var(--green); color: white; border: 0;
-      border-radius: 6px; padding: 12px 17px; margin-top: 16px;
-      cursor: pointer; font-weight: bold;
-    }
-    .notice {
-      padding: 14px; background: #f3e8dd;
-      border-left: 4px solid var(--terracotta); border-radius: 4px;
-    }
-    a { color: var(--green); }
+    :root{--cream:#f8f4ec;--paper:#fffdf8;--green:#354f40;--terracotta:#bb7055;--ink:#2e332d;--muted:#6e746b;--line:#e7e1d7}
+    *{box-sizing:border-box}body{margin:0;padding:24px 16px;background:var(--cream);color:var(--ink);font:15px/1.55 Arial,Helvetica,sans-serif}
+    main{max-width:1180px;margin:auto}h1,h2{font-family:Georgia,"Times New Roman",serif}h1{font-size:clamp(30px,5vw,42px);margin:4px 0}h2{margin-top:0}.muted{color:var(--muted)}a{color:var(--green)}
+    .panel{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:22px;margin:20px 0;box-shadow:0 3px 14px #354f4008}
+    label{display:block;font-weight:bold;margin:12px 0 6px}input,select{width:100%;padding:11px;border:1px solid #cfcfc5;border-radius:6px;font:inherit;background:white}
+    button{background:var(--green);color:white;border:0;border-radius:6px;padding:10px 14px;cursor:pointer;font-weight:bold;font:inherit}button.secondary{background:#e9e4d9;color:var(--ink)}button.danger{background:#9b4438}button:disabled{opacity:.5;cursor:wait}
+    .row{display:flex;gap:12px;align-items:end;flex-wrap:wrap}.row>div{flex:1;min-width:220px}.notice{padding:12px 14px;background:#f3e8dd;border-left:4px solid var(--terracotta);border-radius:4px;margin:14px 0}.success{background:#e7efe8;border-color:var(--green)}
+    .stats{display:grid;grid-template-columns:repeat(4,minmax(120px,1fr));gap:12px}.stat{padding:14px;background:#f5f1e9;border-radius:8px}.stat strong{display:block;font-size:24px;color:var(--green)}
+    .table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:900px}th,td{text-align:left;padding:11px;border-bottom:1px solid var(--line);vertical-align:top}th{background:#f5f1e9;position:sticky;top:0}td small{color:var(--muted)}.actions{display:flex;gap:7px;flex-wrap:wrap}.actions button{padding:7px 9px;font-size:13px}
+    .badge{display:inline-block;padding:3px 8px;border-radius:20px;background:#eee8dc;font-size:12px;font-weight:bold}.badge.confirmed{background:#dcebdd;color:#285237}.badge.rejected{background:#f4dfdc;color:#8d3028}.badge.pending{background:#f5e7d3;color:#80531d}
+    .hidden{display:none!important}.small{font-size:13px}.topline{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+    @media(max-width:640px){.stats{grid-template-columns:repeat(2,minmax(120px,1fr))}.panel{padding:16px}}
   </style>
 </head>
 <body>
 <main>
-  <p><a href="/">← Back to Neighbours and Friends</a></p>
-  <h1>Neighbours and Friends</h1>
-  <p class="muted">Administration area</p>
+  <p><a href="/">← Back to Neighbour Friend Finder</a></p>
+  <div class="topline"><div><h1>Neighbour Friend Finder</h1><p class="muted">Member administration</p></div><span class="badge">Private admin area</span></div>
 
-  <section class="panel">
-    <h2>Registration management</h2>
-    <p>This page is a starting point for managing registrations, reviewing M-PESA transaction codes and organising members into compatible groups of up to 15 people.</p>
-    <div class="notice">
-      <strong>Not connected yet.</strong>
-      <p>Registration storage, payment verification and automatic matching have not been connected. No member records will appear here yet.</p>
+  <section class="panel" id="loginPanel">
+    <h2>Admin sign in</h2>
+    <p class="muted">Enter the admin password configured in your Supabase Edge Function secrets. Do not use your Supabase secret key here.</p>
+    <form id="loginForm">
+      <label for="adminPassword">Admin password</label>
+      <input id="adminPassword" type="password" autocomplete="current-password" required>
+      <button type="submit" id="loginButton">Sign in and load registrations</button>
+    </form>
+    <div id="loginMessage" class="notice hidden" role="status"></div>
+  </section>
+
+  <section id="dashboard" class="hidden">
+    <div class="panel">
+      <div class="topline"><h2>Registration overview</h2><div class="actions"><button class="secondary" id="refreshButton">Refresh</button><button class="secondary" id="logoutButton">Log out</button></div></div>
+      <div class="stats">
+        <div class="stat"><span>Total members</span><strong id="totalCount">0</strong></div>
+        <div class="stat"><span>Pending</span><strong id="pendingCount">0</strong></div>
+        <div class="stat"><span>Confirmed</span><strong id="confirmedCount">0</strong></div>
+        <div class="stat"><span>Rejected</span><strong id="rejectedCount">0</strong></div>
+      </div>
+      <div id="dashboardMessage" class="notice hidden" role="status"></div>
+    </div>
+    <div class="panel">
+      <h2>Members</h2>
+      <div class="row">
+        <div><label for="searchInput">Search</label><input id="searchInput" placeholder="Name, phone, email, area or M-PESA code"></div>
+        <div><label for="statusFilter">Payment status</label><select id="statusFilter"><option value="all">All statuses</option><option value="pending">Pending</option><option value="confirmed">Confirmed</option><option value="rejected">Rejected</option></select></div>
+      </div>
+      <p class="small muted">Check each M-PESA code against your official payment records before confirming a payment. These buttons only update the recorded status; they do not verify payment with Safaricom.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Member</th><th>Contact</th><th>Neighbourhood</th><th>Preferences</th><th>M-PESA</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="membersBody"><tr><td colspan="7">Sign in to load registrations.</td></tr></tbody>
+        </table>
+      </div>
     </div>
   </section>
-
-  <section class="panel">
-    <h2>Planned management tools</h2>
-    <ul>
-      <li>Review registrations and payment status.</li>
-      <li>Confirm M-PESA payments.</li>
-      <li>Match members by neighbourhood and compatible answers.</li>
-      <li>Keep every group at a maximum of 15 members.</li>
-      <li>Prepare group rosters for WhatsApp invitations.</li>
-    </ul>
-  </section>
-
-  <p class="muted">Keep this page private until server-side authentication is configured. Do not use it to collect or display real member information yet.</p>
 </main>
+<script>
+(() => {
+  const API_URL = 'https://peulzmhgqfdycckzwnnx.supabase.co/functions/v1/admin-members';
+  const $ = (id) => document.getElementById(id);
+  let adminPassword = '';
+  let members = [];
+  const showMessage = (element, message, isSuccess=false) => {
+    element.textContent = message;
+    element.classList.remove('hidden', 'success');
+    if (isSuccess) element.classList.add('success');
+  };
+  async function api(method='GET', payload=null) {
+    const response = await fetch(API_URL, {
+      method,
+      headers: {'Content-Type':'application/json','x-admin-password':adminPassword},
+      body: payload ? JSON.stringify(payload) : undefined
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error || `Request failed (${response.status})`);
+    return data;
+  }
+  function value(obj, key) {
+    const v = obj?.[key];
+    if (Array.isArray(v)) return v.join(', ');
+    return v == null || v === '' ? 'Not provided' : String(v);
+  }
+  function safe(text) {
+    return String(text ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+  }
+  function render() {
+    const q = $('searchInput').value.trim().toLowerCase();
+    const status = $('statusFilter').value;
+    const filtered = members.filter(m => {
+      const haystack = [m.first_name,m.phone,m.email,m.area,m.neighbourhood,m.mpesa_code,m.county].map(x=>String(x??'')).join(' ').toLowerCase();
+      return (!q || haystack.includes(q)) && (status==='all' || String(m.payment_status||'pending').toLowerCase()===status);
+    });
+    $('totalCount').textContent = members.length;
+    $('pendingCount').textContent = members.filter(m=>(m.payment_status||'pending')==='pending').length;
+    $('confirmedCount').textContent = members.filter(m=>m.payment_status==='confirmed').length;
+    $('rejectedCount').textContent = members.filter(m=>m.payment_status==='rejected').length;
+    if (!filtered.length) {
+      $('membersBody').innerHTML = '<tr><td colspan="7">No matching registrations.</td></tr>';
+      return;
+    }
+    $('membersBody').innerHTML = filtered.map(m => {
+      const statusValue = String(m.payment_status || 'pending').toLowerCase();
+      const badge = ['pending','confirmed','rejected'].includes(statusValue) ? statusValue : 'pending';
+      const name = value(m,'first_name');
+      const phone = value(m,'phone');
+      const email = value(m,'email');
+      const area = [m.neighbourhood,m.area,m.county].filter(Boolean).join(', ') || 'Not provided';
+      const preferences = [
+        m.primary_activity && `Activity: ${m.primary_activity}`,
+        m.budget && `Budget: ${m.budget}`,
+        m.availability && `Availability: ${Array.isArray(m.availability)?m.availability.join(', '):m.availability}`,
+        m.life_stage && `Life stage: ${Array.isArray(m.life_stage)?m.life_stage.join(', '):m.life_stage}`
+      ].filter(Boolean).join(' · ') || 'Not provided';
+      return `<tr>
+        <td><strong>${safe(name)}</strong><br><small>Age: ${safe(value(m,'age'))}</small><br><small>ID: ${safe(m.id||'')}</small></td>
+        <td>${safe(phone)}<br><small>${safe(email)}</small></td>
+        <td>${safe(area)}</td>
+        <td>${safe(preferences)}</td>
+        <td><strong>${safe(value(m,'mpesa_code'))}</strong><br><small>${safe(value(m,'payment_date'))} ${safe(value(m,'payment_time'))}</small></td>
+        <td><span class="badge ${badge}">${safe(badge)}</span></td>
+        <td><div class="actions">
+          <button data-action="confirmed" data-id="${safe(m.id)}" ${badge==='confirmed'?'disabled':''}>Confirm payment</button>
+          <button class="danger" data-action="rejected" data-id="${safe(m.id)}" ${badge==='rejected'?'disabled':''}>Reject</button>
+        </div></td>
+      </tr>`;
+    }).join('');
+  }
+  async function loadMembers() {
+    $('refreshButton').disabled = true;
+    showMessage($('dashboardMessage'),'Loading registrations…');
+    try {
+      const data = await api('GET');
+      members = Array.isArray(data.members) ? data.members : [];
+      $('dashboardMessage').classList.add('hidden');
+      render();
+    } catch (err) {
+      showMessage($('dashboardMessage'),err.message);
+      if (/unauthori[sz]ed|password/i.test(err.message)) logout();
+    } finally { $('refreshButton').disabled = false; }
+  }
+  function logout() {
+    adminPassword = '';
+    members = [];
+    $('dashboard').classList.add('hidden');
+    $('loginPanel').classList.remove('hidden');
+    $('adminPassword').value = '';
+    $('membersBody').innerHTML = '<tr><td colspan="7">Sign in to load registrations.</td></tr>';
+  }
+  $('loginForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    adminPassword = $('adminPassword').value;
+    $('loginButton').disabled = true;
+    showMessage($('loginMessage'),'Checking password…');
+    try {
+      const data = await api('GET');
+      members = Array.isArray(data.members) ? data.members : [];
+      $('loginPanel').classList.add('hidden');
+      $('dashboard').classList.remove('hidden');
+      $('loginMessage').classList.add('hidden');
+      render();
+    } catch (err) {
+      showMessage($('loginMessage'),err.message || 'Could not connect to the admin service.');
+      adminPassword = '';
+    } finally { $('loginButton').disabled = false; }
+  });
+  $('refreshButton').addEventListener('click',loadMembers);
+  $('logoutButton').addEventListener('click',logout);
+  $('searchInput').addEventListener('input',render);
+  $('statusFilter').addEventListener('change',render);
+  $('membersBody').addEventListener('click',async e=>{
+    const button=e.target.closest('button[data-action]');
+    if(!button || button.disabled) return;
+    const action=button.dataset.action;
+    const member=members.find(m=>String(m.id)===button.dataset.id);
+    if(!member) return;
+    const label=action==='confirmed'?'confirm this payment as received':'mark this payment as rejected';
+    if(!confirm(`Are you sure you want to ${label} for ${member.first_name||'this member'}? Verify the M-PESA record first.`)) return;
+    button.disabled=true;
+    try {
+      await api('PATCH',{id:member.id,payment_status:action});
+      await loadMembers();
+      showMessage($('dashboardMessage'),`Payment status updated to ${action}.`,true);
+    } catch(err) {
+      showMessage($('dashboardMessage'),err.message);
+      button.disabled=false;
+    }
+  });
+})();
+</script>
 </body>
 </html>
