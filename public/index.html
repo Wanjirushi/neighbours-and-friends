@@ -9,7 +9,7 @@
 <style>
 :root{--cream:#f8f4ec;--paper:#fffdf8;--green:#354f40;--green-light:#e5e9df;--terracotta:#bb7055;--ink:#2e332d;--muted:#6e746b;--line:#e5dfd4}
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--cream);color:var(--ink);font-family:Arial,Helvetica,sans-serif;line-height:1.65}a{color:inherit}
-header{display:flex;justify-content:space-between;align-items:center;max-width:1200px;margin:auto;padding:18px 5%;gap:20px}.brand-lockup{display:flex;align-items:center;gap:12px;min-width:0}.brand-logo{width:58px;height:58px;object-fit:contain;flex:0 0 auto}.brand{font-family:Georgia,serif;font-size:clamp(21px,2.4vw,29px);font-weight:bold;line-height:1.1;letter-spacing:-.6px;max-width:300px}.brand-domain{display:block;font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2px;color:var(--muted);margin-top:5px;font-weight:700}.nav-link{color:var(--green);text-decoration:none;font-weight:bold;white-space:nowrap}
+header{display:flex;justify-content:space-between;align-items:center;max-width:1200px;margin:auto;padding:18px 5%;gap:20px}.brand-lockup{display:flex;align-items:center;gap:12px;min-width:0}.brand-logo{width:58px;height:58px;object-fit:contain;flex:0 0 auto;background:transparent;border:0;border-radius:0;box-shadow:none}.brand{font-family:Georgia,serif;font-size:clamp(21px,2.4vw,29px);font-weight:bold;line-height:1.1;letter-spacing:-.6px;max-width:300px}.brand-domain{display:block;font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2px;color:var(--muted);margin-top:5px;font-weight:700}.nav-link{color:var(--green);text-decoration:none;font-weight:bold;white-space:nowrap}
 .hero{max-width:1200px;margin:auto;padding:58px 5% 76px;display:grid;grid-template-columns:1.05fr .95fr;align-items:start;gap:clamp(28px,5vw,70px)}.story-copy{max-width:640px}.story-copy h1{font-size:clamp(40px,4.5vw,58px);letter-spacing:-1.6px;margin:18px 0 26px}.story-line{font-family:Georgia,"Times New Roman",serif;font-size:clamp(21px,2.2vw,27px);line-height:1.35;margin:0 0 12px;color:var(--ink)}.story-paragraph{font-size:17px;line-height:1.8;color:var(--muted);margin:22px 0}.memory-lines{border-left:2px solid #d9b7a6;padding:4px 0 4px 20px;margin:25px 0 30px}.memory-lines p{font-family:Georgia,"Times New Roman",serif;font-size:clamp(19px,2vw,23px);line-height:1.45;margin:0 0 15px;color:var(--ink)}.memory-lines p:last-child{margin-bottom:0}.story-emphasis{font-family:Georgia,"Times New Roman",serif;font-size:clamp(26px,3vw,34px);line-height:1.25;color:var(--green);margin:32px 0 24px}.someone-lines{margin:30px 0;padding:4px 0 4px 20px;border-left:2px solid #d9ddd2}.someone-lines p{font-size:17px;line-height:1.75;margin:0 0 17px}.someone-lines p:last-child{margin-bottom:0}.story-ending{font-family:Georgia,"Times New Roman",serif;font-size:clamp(23px,2.5vw,30px);line-height:1.35;color:var(--green);margin:32px 0 24px}.eyebrow{color:var(--terracotta);text-transform:uppercase;letter-spacing:2.3px;font-size:12px;font-weight:800}
 h1,h2,h3{font-family:Georgia,"Times New Roman",serif;line-height:1.14}h1{font-size:clamp(43px,5.4vw,70px);margin:18px 0 22px;letter-spacing:-2px;max-width:700px}h2{font-size:clamp(31px,4vw,45px);margin:14px 0;letter-spacing:-.8px}h3{font-size:23px;margin:10px 0}p{margin-top:0}.hero-copy{font-size:clamp(17px,1.7vw,20px);color:var(--muted);max-width:570px}.tagline{font-weight:700;color:var(--ink);margin:20px 0 26px}
 .button{border:0;border-radius:7px;padding:15px 23px;background:var(--green);color:white;cursor:pointer;font-weight:bold;font-size:16px;display:inline-flex;align-items:center;justify-content:center;gap:10px;text-decoration:none;transition:transform .18s ease,background .18s ease}.button:hover{background:#294133;transform:translateY(-1px)}.button.secondary{background:var(--paper);color:var(--green);border:1px solid #d9ddd2}
@@ -176,7 +176,11 @@ footer{padding:36px 24px;text-align:center;color:var(--muted)}.footer-brand{colo
 @media(max-width:760px){
  #joinForm .step{margin-top:23px;padding-top:21px}
 }
-\n</style>
+\n
+.thank-you-page{max-width:650px;margin:0 auto;padding:8px 0}
+.thank-you-page h2{font-size:clamp(30px,4vw,42px);line-height:1.15;color:var(--green)}
+.thank-you-page .payment-detail{padding:18px 0}
+</style>
 </head>
 <body>
 <header><div class="brand-lockup"><img class="brand-logo" src="/friend-finder-mark.png" alt=""><div class="brand">Neighbour Friend Finder</div></div><a class="nav-link" href="#how">How it works ↓</a></header>
@@ -333,14 +337,12 @@ footer{padding:36px 24px;text-align:center;color:var(--muted)}.footer-brand{colo
       <div class="fee-panel"><div class="eyebrow">One-time joining fee</div><div class="fee-amount">KSh 2,800</div><div class="fee-label">Your payment adds you to one WhatsApp group of up to 15 people.</div><p class="muted">Your answers help us bring together people nearby who most closely match what you’re looking for in a friendship. We make the introduction, then leave the rest to fate.</p><p class="muted">This one-time fee helps us cover the cost of running this project.</p><div class="group-note" style="margin-top:16px"><strong>Need a different group?</strong><br>After one month, you can join one more group in your neighbourhood at no extra cost. Across two months, you could meet up to 30 people nearby who share your interests and lifestyle.<br><br>Is this how you meet your new friend group? Your best friend? Your partner?<br><br><strong>Join the club and let fate do the rest.</strong></div></div>
       <div class="payment-detail"><strong>M-PESA Till number:</strong> 1305656</div><div class="payment-detail"><strong>Till name:</strong> Family Forever</div>
       <p>After paying, enter your M-PESA transaction code below. Your payment must be confirmed before you are added to a WhatsApp group.</p>
-      <label for="mpesaCode">M-PESA transaction code</label><<input id="mpesaCode" name="mpesaCode" required
-  placeholder="Enter your M-PESA transaction code"
-  autocomplete="off"
-  inputmode="text"
-  pattern="[A-Za-z0-9]{8,12}"
-minlength="8"
-maxlength="12"
-  title="Enter your M-PESA transaction code using 8 to 12 letters or numbers"
+      <label for="mpesaCode">M-PESA transaction code</label>
+      <input id="mpesaCode" name="mpesaCode" required
+        placeholder="Enter your M-PESA transaction code"
+        autocomplete="off" inputmode="text"
+        pattern="[A-Za-z0-9]{8,12}" minlength="8" maxlength="12"
+        title="Enter your M-PESA transaction code using 8 to 12 letters or numbers">
       <label for="paymentDate" style="margin-top:16px">Date of payment</label><input id="paymentDate" name="paymentDate" type="date" required>
       <label for="paymentTime" style="margin-top:16px">Time of payment</label><input id="paymentTime" name="paymentTime" type="time" required>
       <label class="choice" style="margin-top:20px"><input type="checkbox" id="consent" name="consent" required> I agree that my answers and contact details may be used to match me with compatible members and contact me about my group.</label>
@@ -361,76 +363,99 @@ maxlength="12"
     <details class="faq-item"><summary>What happens after payment?</summary><p>After your payment is confirmed, you will receive an invitation to the WhatsApp group with people near you who are most likely to be compatible as friends, based on your questionnaire answers.</p></details>
     <details class="faq-item"><summary>What if my neighbourhood is missing?</summary><p>Choose “Other” and type your estate, neighbourhood or town. We will use that information when arranging local matches.</p></details>
     <details class="faq-item"><summary>Is this for only one gender?</summary><p>Everyone is welcome to join. You will be placed in a group based on your location and interests, regardless of gender.</p></details>
+    <details class="faq-item"><summary>Are there any other benefits?</summary><p>Yes! Every two months, we organise affordable or free community activities where members from different neighbourhood groups can meet and connect. Think picnics in beautiful gardens, walks in Karura Forest, movie nights at the cinema, and more. We’ll share activity details in your WhatsApp group in advance, so you can plan ahead and mark your calendar. It’s another chance to make new friends beyond your own group!</p></details>
   </div>
 </div></section>
 </main>
-<footer><img src="/friend-finder-mark.png" alt="" style="width:58px;height:58px;object-fit:contain;display:block;margin:0 auto 8px"><div class="footer-brand">Neighbour Friend Finder</div>Where neighbours become friends and friends become family.<br><a href="https://neighbourfriendfinder.co.ke">neighbourfriendfinder.co.ke</a></footer>
+<footer><img src="/friend-finder-mark.png" alt="" style="width:58px;height:58px;object-fit:contain;display:block;margin:0 auto 8px;background:transparent;border:0;border-radius:0;box-shadow:none"><div class="footer-brand">Neighbour Friend Finder</div>Where neighbours become friends and friends become family.<br><a href="https://neighbourfriendfinder.co.ke">neighbourfriendfinder.co.ke</a></footer>
 <script>
-const form=document.getElementById('joinForm');
-const steps=Array.from(document.querySelectorAll('.step'));
-const nextBtn=document.getElementById('nextBtn');
-const backBtn=document.getElementById('backBtn');
-const submitBtn=document.getElementById('submitBtn');
-const progressBar=document.getElementById('progressBar');
-const stepLabel=document.getElementById('stepLabel');
-const progressPercent=document.getElementById('progressPercent');
-const pageSize=2;
-const totalPages=Math.ceil(steps.length/pageSize);
-let currentPage=0;
-function showPage(page){
-  currentPage=0;
-  steps.forEach(step=>step.classList.add('active'));
-  backBtn.style.display='none';
-  nextBtn.style.display='none';
-  submitBtn.style.display='inline-flex';
-  stepLabel.style.display='none';
-  progressPercent.style.display='none';
-  progressBar.style.width='100%';
-  document.getElementById('formMessage').textContent='';
-}
-function validatePage(){
-  const visibleSteps=steps.filter(step=>step.classList.contains('active'));
-  for(const active of visibleSteps){
-    for(const field of active.querySelectorAll('[required]')){
-      if(field.type==='checkbox'&&field.name&&field.name!=='consent')continue;
-      if(field.type==='radio'&&field.name){
-        const group=active.querySelectorAll(`input[type="radio"][name="${field.name}"]`);
-        if(![...group].some(item=>item.checked)){field.reportValidity();return false}
-        continue;
-      }
-      if(!field.checkValidity()){field.reportValidity();return false}
-    }
-    const index=steps.indexOf(active);
-    if(index===3&&!active.querySelector('input[name="availability"]:checked')){
-      alert('Please choose at least one time when you are usually available.');return false;
-    }
-    if(index===4&&!active.querySelector('input[name="lifeStage"]:checked')){
-      alert('Please select at least one life stage that describes you.');return false;
-    }
-  }
-  return true;
-}
-nextBtn.addEventListener('click',()=>{
-  if(!validatePage())return;
-  showPage(Math.min(currentPage+1,totalPages-1));
-  document.getElementById('join').scrollIntoView({behavior:'smooth',block:'start'});
-});
-backBtn.addEventListener('click',()=>{
-  showPage(Math.max(currentPage-1,0));
-  document.getElementById('join').scrollIntoView({behavior:'smooth',block:'start'});
-});
-document.querySelectorAll('input[name="goals"]').forEach(box=>box.addEventListener('change',()=>{
-  const checked=[...document.querySelectorAll('input[name="goals"]:checked')];
-  if(checked.length>2){box.checked=false;document.getElementById('goalHint').textContent='You can select a maximum of two goals.'}
-  else document.getElementById('goalHint').textContent=`${checked.length} of 2 selected.`;
-}));
-showPage(0);
+const form = document.getElementById('joinForm');
+const submitBtn = document.getElementById('submitBtn');
+const formMessage = document.getElementById('formMessage');
+
 form.addEventListener('submit', async (event) => {
   event.preventDefault();
-  if (!validatePage()) return;
 
-  document.getElementById('formMessage').textContent =
-    'Registration is being prepared. Please wait.';
+  if (!form.reportValidity()) return;
+
+  const values = new FormData(form);
+  const payload = {
+    firstName: String(values.get('firstName') || '').trim(),
+    age: Number(values.get('age')),
+    phone: String(values.get('phone') || '').trim(),
+    email: String(values.get('email') || '').trim(),
+    county: String(values.get('county') || '').trim(),
+    area: String(values.get('area') || '').trim(),
+    neighbourhood: String(values.get('neighbourhood') || '').trim(),
+    primaryActivity: String(values.get('primaryActivity') || ''),
+    budget: String(values.get('budget') || ''),
+    availability: values.getAll('availability'),
+    lifeStage: values.getAll('lifeStage'),
+    childrenAges: values.getAll('childrenAges'),
+    hangoutStyle: String(values.get('hangoutStyle') || ''),
+    conversationStyle: String(values.get('conversationStyle') || ''),
+    alcoholStyle: String(values.get('alcoholStyle') || ''),
+    cannabisStyle: String(values.get('cannabisStyle') || ''),
+    mpesaCode: String(values.get('mpesaCode') || '').trim().toUpperCase(),
+    paymentDate: String(values.get('paymentDate') || ''),
+    paymentTime: String(values.get('paymentTime') || ''),
+    consent: values.get('consent') === 'on'
+  };
+
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Sending...';
+  formMessage.textContent = 'Sending your registration securely. Please wait.';
+  formMessage.style.color = '';
+
+  try {
+    const response = await fetch(
+      'https://peulzmhgqfdycckzwnnx.supabase.co/functions/v1/register-member',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      }
+    );
+
+    const result = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      throw new Error(result.error || 'We could not submit your registration. Please check your answers and try again.');
+    }
+
+    const formWrap = form.closest('.form-wrap');
+    formWrap.innerHTML = `
+      <div class="thank-you-page" role="status" aria-live="polite">
+        <div style="text-align:center;margin-bottom:24px">
+          <div aria-hidden="true" style="font-size:52px;line-height:1.2;color:#354f40">✓</div>
+          <p class="eyebrow">Registration received</p>
+          <h2 style="margin-top:12px">You’re one step closer to finding your people!</h2>
+          <p class="muted" style="font-size:17px">Thank you for joining Neighbour Friend Finder. We’ve received your registration.</p>
+        </div>
+        <div class="payment-detail">
+          <strong>1. We’ll confirm your payment</strong>
+          <p class="muted" style="margin:8px 0 0">Your registration is pending while we verify your M-PESA payment.</p>
+        </div>
+        <div class="payment-detail">
+          <strong>2. We’ll invite you to your WhatsApp group</strong>
+          <p class="muted" style="margin:8px 0 0">Once your payment is confirmed, we’ll send your invitation to your matched neighbourhood group.</p>
+        </div>
+        <div class="payment-detail">
+          <strong>3. Get ready to meet your people</strong>
+          <p class="muted" style="margin:8px 0 0">You’ll have a chance to connect with neighbours and start making plans together.</p>
+        </div>
+        <p class="small muted" style="margin-top:22px;text-align:center">Please don’t submit the form again. Your registration is not marked as paid until we verify your payment.</p>
+      </div>`;
+    formWrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } catch (error) {
+    formMessage.textContent =
+      error instanceof Error
+        ? error.message
+        : 'We could not submit your registration. Please check your internet connection and try again.';
+    formMessage.style.color = '#a13f2b';
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Send my answers';
+  }
 });
 </script>
 </body>
