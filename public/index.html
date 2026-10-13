@@ -180,9 +180,10 @@ footer{padding:36px 24px;text-align:center;color:var(--muted)}.footer-brand{colo
 .thank-you-page{max-width:650px;margin:0 auto;padding:8px 0}
 .thank-you-page h2{font-size:clamp(30px,4vw,42px);line-height:1.15;color:var(--green)}
 .thank-you-page .payment-detail{padding:18px 0}
-/* Kenya-only location suggestions */
-.location-picker{position:relative}.location-suggestions{position:absolute;z-index:30;left:0;right:0;top:100%;background:#fff;border:1px solid #d6d7ce;border-radius:6px;box-shadow:0 12px 24px #0002;max-height:260px;overflow:auto}.location-suggestions[hidden]{display:none}.location-option{display:block;width:100%;padding:12px 14px;text-align:left;border:0;border-bottom:1px solid #eee;background:#fff;color:var(--ink);cursor:pointer;font:inherit}.location-option:hover,.location-option:focus{background:var(--green-light)}.location-status{font-size:13px;color:var(--muted);margin-top:6px}
+/* Location choice and interactive map */
+.location-methods{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}.location-method{font:inherit;text-align:left;background:#fffefa;color:var(--ink);border:1px solid #dedfd6;border-radius:8px;padding:14px;cursor:pointer}.location-method:hover,.location-method:focus{border-color:var(--green);background:var(--green-light)}.location-method strong{display:block;color:var(--green)}.location-method span{display:block;font-size:12px;color:var(--muted);margin-top:3px}.location-map-wrap[hidden]{display:none}#locationMap{height:340px;width:100%;border-radius:8px;border:1px solid var(--line);margin-top:12px}.location-status{font-size:13px;color:var(--muted);margin-top:8px}.location-privacy{font-size:13px;color:var(--muted);margin-top:10px}.location-confirm{margin-top:10px}.location-confirm[hidden]{display:none}@media(max-width:520px){.location-methods{grid-template-columns:1fr}#locationMap{height:300px}}
 </style>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoYkV+G2F7vY0=" crossorigin="">
 </head>
 <body>
 <header><div class="brand-lockup"><img class="brand-logo" src="/friend-finder-mark.png" alt=""><div class="brand">Neighbour Friend Finder</div></div><a class="nav-link" href="#how">How it works ↓</a></header>
@@ -250,34 +251,21 @@ footer{padding:36px 24px;text-align:center;color:var(--muted)}.footer-brand{colo
       <label for="county">County</label><select id="county" name="county" required><option value="">Choose your county</option>
       <option>Baringo</option><option>Bomet</option><option>Bungoma</option><option>Busia</option><option>Elgeyo-Marakwet</option><option>Embu</option><option>Garissa</option><option>Homa Bay</option><option>Isiolo</option><option>Kajiado</option><option>Kakamega</option><option>Kericho</option><option>Kiambu</option><option>Kilifi</option><option>Kirinyaga</option><option>Kisii</option><option>Kisumu</option><option>Kitui</option><option>Kwale</option><option>Laikipia</option><option>Lamu</option><option>Machakos</option><option>Makueni</option><option>Mandera</option><option>Marsabit</option><option>Meru</option><option>Migori</option><option>Mombasa</option><option>Murang'a</option><option>Nairobi</option><option>Nakuru</option><option>Nandi</option><option>Narok</option><option>Nyamira</option><option>Nyandarua</option><option>Nyeri</option><option>Samburu</option><option>Siaya</option><option>Taita-Taveta</option><option>Tana River</option><option>Tharaka-Nithi</option><option>Trans Nzoia</option><option>Turkana</option><option>Uasin Gishu</option><option>Vihiga</option><option>Wajir</option><option>West Pokot</option><option>Other</option></select>
       <label for="area">Area or sub-county</label><input id="area" name="area" required placeholder="e.g. Westlands, Kajiado North">
-      <label for="neighbourhood">Choose the nearest street, estate or landmark to you</label>
-      <div class="location-picker"><input id="neighbourhood" name="neighbourhood" required autocomplete="off" placeholder="e.g. Othaya Road, Green Park Estate, Lavington Mall" aria-autocomplete="list" aria-controls="locationSuggestions" aria-expanded="false"><div id="locationSuggestions" class="location-suggestions" role="listbox" hidden></div></div>
-      <input type="hidden" id="locationLatitude" name="locationLatitude"><input type="hidden" id="locationLongitude" name="locationLongitude">
-      <p id="locationStatus" class="location-status" aria-live="polite"></p>
-      <p class="field-hint">We use your selected location to match you with neighbours within a 5 km radius. Please choose the nearest street, estate or landmark to you to ensure accurate matching.</p>
-    </div>
-    <div class="step"><h3>What would you most like to do with friends?</h3><p class="muted">Choose one activity that matters most to you.</p><div class="choices">
-      <label class="choice"><input type="radio" name="primaryActivity" value="Morning walk or jog" required> Morning walk or jog</label>
-      <label class="choice"><input type="radio" name="primaryActivity" value="Evening walk or jog"> Evening walk or jog</label>
-      <label class="choice"><input type="radio" name="primaryActivity" value="Grab a drink"> Grab a drink</label>
-      <label class="choice"><input type="radio" name="primaryActivity" value="Supermarket run"> Supermarket run</label>
-      <label class="choice"><input type="radio" name="primaryActivity" value="Cup of tea or coffee"> Cup of tea or coffee</label>
-      <label class="choice"><input type="radio" name="primaryActivity" value="Board games"> Board games</label>
-      <label class="choice"><input type="radio" name="primaryActivity" value="Video games"> Video games</label>
-      <label class="choice"><input type="radio" name="primaryActivity" value="Kids' playdates"> Kids' playdates</label>
-      <label class="choice"><input type="radio" name="primaryActivity" value="Night out"> Night out</label>
-      <label class="choice"><input type="radio" name="primaryActivity" value="Breakfast"> Breakfast</label>
-      <label class="choice"><input type="radio" name="primaryActivity" value="Dinner"> Dinner</label>
-      <label class="choice"><input type="radio" name="primaryActivity" value="Go to the gym"> Go to the gym</label>
-      <label class="choice"><input type="radio" name="primaryActivity" value="Movie or series hangout"> Movie / series hangout</label>
-    </div></div>
-    <div class="step"><h3>What works for your budget and schedule?</h3>
-      <label for="budget">Other than casual neighbourhood meetups, what is your budget for paid activities you might plan together?</label>
-      <p class="field-hint">Choose what you are comfortable spending per person on a single outing. We match people within the same budget category.</p>
-      <select id="budget" name="budget" required><option value="">Choose a budget category</option><option value="Free or low-cost activities only">Free or low-cost activities only</option><option value="Under KES 1,000">Under KES 1,000</option><option value="KES 1,000–2,500">KES 1,000–2,500</option><option value="KES 2,500–5,000">KES 2,500–5,000</option><option value="KES 5,000–10,000">KES 5,000–10,000</option><option value="KES 10,000+">KES 10,000+</option></select>
-      <label>When are you usually available?</label><div class="choices">
-        <label class="choice"><input type="checkbox" name="availability" value="Weekday mornings"> Weekday mornings</label><label class="choice"><input type="checkbox" name="availability" value="Weekday evenings"> Weekday evenings</label><label class="choice"><input type="checkbox" name="availability" value="Weekends"> Weekends</label><label class="choice"><input type="checkbox" name="availability" value="Flexible"> Flexible</label>
-      </div><p class="field-hint">Choose all that apply.</p>
+       <p class="field-hint">Select the place you want us to use for nearby friendship matching.</p>
+       <div class="location-methods">
+         <button class="location-method" id="useCurrentLocation" type="button"><strong>◎ Use my current location</strong><span>Allow your browser to detect where you are.</span></button>
+         <button class="location-method" id="chooseMapLocation" type="button"><strong>⌖ Choose on map</strong><span>Zoom in and tap a location yourself.</span></button>
+       </div>
+       <div class="location-map-wrap" id="locationMapWrap" hidden>
+         <div id="locationMap" role="application" aria-label="Map of Kenya; tap to choose your location"></div>
+         <p class="field-hint">Tap the map to place or move your pin, then confirm your selection.</p>
+         <button type="button" class="button secondary location-confirm" id="confirmMapLocation" hidden>Confirm this location</button>
+       </div>
+       <input type="hidden" id="neighbourhood" name="neighbourhood">
+       <input type="hidden" id="locationLatitude" name="locationLatitude"><input type="hidden" id="locationLongitude" name="locationLongitude">
+       <p id="locationStatus" class="location-status" role="status" aria-live="polite">No location selected yet.</p>
+       <p class="location-privacy">🔒 Your exact location is not shared publicly. It is stored privately and used only to match you with people within a 5 km radius. If you prefer, choose a nearby point rather than your home.</p>
+     </div><p class="field-hint">Choose all that apply.</p>
     </div>
     <div class="step"><h3>Who are you most likely to click with?</h3>
       <p class="muted">A few details help us match everyday lifestyles and social energy, not just interests. </p>
@@ -373,71 +361,74 @@ footer{padding:36px 24px;text-align:center;color:var(--muted)}.footer-brand{colo
 </div></section>
 </main>
 <footer><img src="/friend-finder-mark.png" alt="" style="width:58px;height:58px;object-fit:contain;display:block;margin:0 auto 8px;background:transparent;border:0;border-radius:0;box-shadow:none"><div class="footer-brand">Neighbour Friend Finder</div>Where neighbours become friends and friends become family.<br><a href="https://neighbourfriendfinder.co.ke">neighbourfriendfinder.co.ke</a></footer>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script>
-// Replace this placeholder locally before publishing. Never paste your key into a chat.
-const GEOAPIFY_API_KEY = '554dfc3966cb464db1e7d73925b7df26';
 const locationInput = document.getElementById('neighbourhood');
-const locationSuggestions = document.getElementById('locationSuggestions');
 const locationStatus = document.getElementById('locationStatus');
 const latitudeInput = document.getElementById('locationLatitude');
 const longitudeInput = document.getElementById('locationLongitude');
-let locationSearchTimer;
-let locationSearchController;
-let locationSearchSequence = 0;
-let selectedLocationText = '';
-function clearLocationSelection(){latitudeInput.value='';longitudeInput.value='';selectedLocationText='';}
-function showLocationOptions(items){
-  locationSuggestions.replaceChildren();
-  items.forEach(item=>{
-    const button=document.createElement('button');button.type='button';button.className='location-option';button.setAttribute('role','option');
-    button.textContent=item.properties.formatted || item.properties.address_line1 || 'Location in Kenya';
-    button.addEventListener('click',()=>{
-      const p=item.properties;
-      locationInput.value=button.textContent;
-      latitudeInput.value=String(p.lat);longitudeInput.value=String(p.lon);
-      selectedLocationText=locationInput.value;
-      locationSuggestions.hidden=true;locationInput.setAttribute('aria-expanded','false');
-      locationStatus.textContent='Location selected in Kenya.';
-      locationInput.setCustomValidity('');
-    });locationSuggestions.append(button);
-  });
-  locationSuggestions.hidden=items.length===0;
-  locationInput.setAttribute('aria-expanded',String(items.length>0));
+const mapWrap = document.getElementById('locationMapWrap');
+const confirmMapButton = document.getElementById('confirmMapLocation');
+let locationMap = null;
+let locationMarker = null;
+let pendingMapLocation = null;
+function setChosenLocation(lat, lon, method) {
+  if (!Number.isFinite(lat) || !Number.isFinite(lon) || lat < -4.9 || lat > 5.1 || lon < 33.8 || lon > 42.2) {
+    locationStatus.textContent = 'Please choose a location within Kenya.';
+    return false;
+  }
+  latitudeInput.value = String(lat);
+  longitudeInput.value = String(lon);
+  // Preserve the existing backend's neighbourhood text field without exposing coordinates in its label.
+  const area = document.getElementById('area').value.trim();
+  const county = document.getElementById('county').value.trim();
+  locationInput.value = [area, county].filter(Boolean).join(', ') || 'Selected location in Kenya';
+  locationStatus.textContent = method === 'gps' ? '✓ Current location selected.' : '✓ Map location confirmed.';
+  return true;
 }
-async function searchKenyaLocations(query){
-  const seq=++locationSearchSequence;
-  if(locationSearchController)locationSearchController.abort();
-  locationSearchController=new AbortController();
-  if(GEOAPIFY_API_KEY.startsWith('PASTE_')){locationStatus.textContent='Location search is not configured yet. Please contact the site administrator.';return;}
-  const variants=[query];
-  // Try common spacing variation such as Greenpark -> Green Park.
-  if(/greenpark/i.test(query))variants.push(query.replace(/greenpark/ig,'Green Park'));
-  try{
-    let results=[];
-    for(const term of variants){
-      const url=new URL('https://api.geoapify.com/v1/geocode/autocomplete');
-      url.searchParams.set('text',term);url.searchParams.set('filter','countrycode:ke');url.searchParams.set('limit','8');url.searchParams.set('format','geojson');url.searchParams.set('apiKey',GEOAPIFY_API_KEY);
-      const response=await fetch(url,{signal:locationSearchController.signal});
-      if(!response.ok)throw new Error('Search unavailable');
-      const data=await response.json();
-      results=(data.features||[]).filter(x=>x.properties && x.properties.country_code==='ke' && Number.isFinite(Number(x.properties.lat)) && Number.isFinite(Number(x.properties.lon)));
-      if(results.length)break;
-    }
-    if(seq!==locationSearchSequence)return;
-    showLocationOptions(results);
-    locationStatus.textContent=results.length?'Choose the nearest matching location from the suggestions.':'No results found. Try a nearby street or landmark, or check the spelling.';
-  }catch(error){if(error.name!=='AbortError' && seq===locationSearchSequence){showLocationOptions([]);locationStatus.textContent='Location search is temporarily unavailable. Please try again.';}}
+function showMap() {
+  mapWrap.hidden = false;
+  if (!window.L) {locationStatus.textContent='The map could not load. Please check your internet connection and try again.';return;}
+  if (!locationMap) {
+    locationMap = L.map('locationMap').setView([-0.0236,37.9062],6);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom:19, attribution:'&copy; OpenStreetMap contributors'
+    }).addTo(locationMap);
+    locationMap.on('click', e => {
+      pendingMapLocation = e.latlng;
+      if (locationMarker) locationMarker.setLatLng(e.latlng);
+      else locationMarker = L.marker(e.latlng).addTo(locationMap);
+      confirmMapButton.hidden = false;
+      locationStatus.textContent = 'Pin placed. Tap “Confirm this location” to save it.';
+    });
+  }
+  setTimeout(()=>locationMap.invalidateSize(),80);
 }
-locationInput.addEventListener('input',()=>{
-  clearTimeout(locationSearchTimer);++locationSearchSequence;
-  if(locationSearchController)locationSearchController.abort();
-  clearLocationSelection();showLocationOptions([]);locationInput.setCustomValidity('');
-  const query=locationInput.value.trim();
-  if(query.length<3){locationStatus.textContent='Type at least 3 letters to search within Kenya.';return;}
-  locationStatus.textContent='Searching locations in Kenya...';
-  locationSearchTimer=setTimeout(()=>searchKenyaLocations(query),350);
+document.getElementById('chooseMapLocation').addEventListener('click', () => {
+  pendingMapLocation = null;
+  confirmMapButton.hidden = true;
+  showMap();
+  locationStatus.textContent = 'Zoom in and tap the map to choose a location.';
 });
-locationInput.addEventListener('blur',()=>setTimeout(()=>{locationSuggestions.hidden=true;locationInput.setAttribute('aria-expanded','false');},180));
+confirmMapButton.addEventListener('click', () => {
+  if (!pendingMapLocation) return;
+  if (setChosenLocation(pendingMapLocation.lat,pendingMapLocation.lng,'map')) confirmMapButton.hidden = true;
+});
+document.getElementById('useCurrentLocation').addEventListener('click', () => {
+  if (!navigator.geolocation) {locationStatus.textContent='Your browser does not support location detection. Please choose on the map.';return;}
+  locationStatus.textContent = 'Requesting your location permission…';
+  navigator.geolocation.getCurrentPosition(
+    position => {
+      const {latitude,longitude,accuracy}=position.coords;
+      if (setChosenLocation(latitude,longitude,'gps')) {
+        locationStatus.textContent = `✓ Current location selected (estimated accuracy: ${Math.round(accuracy)} metres).`;
+        if (locationMap) locationMap.setView([latitude,longitude],15);
+      }
+    },
+    () => {locationStatus.textContent='Could not detect your location. You can choose it on the map instead.';},
+    {enableHighAccuracy:true,timeout:15000,maximumAge:0}
+  );
+});
 const form = document.getElementById('joinForm');
 const submitBtn = document.getElementById('submitBtn');
 const formMessage = document.getElementById('formMessage');
@@ -446,12 +437,11 @@ form.addEventListener('submit', async (event) => {
   event.preventDefault();
 
   if (!form.reportValidity()) return;
-  if (!latitudeInput.value || !longitudeInput.value || locationInput.value !== selectedLocationText) {
-    locationInput.setCustomValidity('Please select a location from the Kenya suggestions.');
-    locationInput.reportValidity();
+  if (!latitudeInput.value || !longitudeInput.value) {
+    locationStatus.textContent = 'Please use your current location or choose and confirm a point on the map.';
+    document.getElementById('useCurrentLocation').focus();
     return;
   }
-  locationInput.setCustomValidity('');
 
   const values = new FormData(form);
   const payload = {
