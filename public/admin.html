@@ -16,6 +16,7 @@
     .table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:900px}th,td{text-align:left;padding:11px;border-bottom:1px solid var(--line);vertical-align:top}th{background:#f5f1e9;position:sticky;top:0}td small{color:var(--muted)}.actions{display:flex;gap:7px;flex-wrap:wrap}.actions button{padding:7px 9px;font-size:13px}
     .badge{display:inline-block;padding:3px 8px;border-radius:20px;background:#eee8dc;font-size:12px;font-weight:bold}.badge.confirmed{background:#dcebdd;color:#285237}.badge.rejected{background:#f4dfdc;color:#8d3028}.badge.pending{background:#f5e7d3;color:#80531d}
     .hidden{display:none!important}.small{font-size:13px}.topline{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+    .group-card{border:1px solid var(--line);border-radius:10px;padding:16px;margin:12px 0;background:#fff}.group-card h3{margin:0 0 6px;font-family:Georgia,"Times New Roman",serif}.group-card ul{margin:10px 0;padding-left:22px}.group-meta{font-size:13px;color:var(--muted)}
     @media(max-width:640px){.stats{grid-template-columns:repeat(2,minmax(120px,1fr))}.panel{padding:16px}}
   </style>
 </head>
@@ -60,6 +61,26 @@
         </table>
       </div>
     </div>
+    <div class="panel" id="matchingPanel">
+      <div class="topline">
+        <div><h2>Member matching</h2><p class="muted">Generate proposed friendship groups from members with confirmed payments who are not already assigned to a group.</p></div>
+        <div class="actions"><button id="generateMatchesButton">Generate proposed groups</button></div>
+      </div>
+      <div class="notice">Proposals are suggestions for your review. The system prioritises location, activities, budget, availability, friendship goals and shared interests. Groups contain 2 to 15 members. Generating proposals does not assign anyone yet.</div>
+      <div id="matchingMessage" class="notice hidden" role="status"></div>
+      <div id="matchingResults" class="hidden">
+        <div class="stats" style="grid-template-columns:repeat(2,minmax(120px,1fr));margin:14px 0">
+          <div class="stat"><span>Eligible members</span><strong id="eligibleCount">0</strong></div>
+          <div class="stat"><span>Not matched in this preview</span><strong id="unmatchedCount">0</strong></div>
+        </div>
+        <div id="proposedGroups"></div>
+        <div class="actions" style="margin-top:16px">
+          <button id="approveGroupsButton" disabled>Approve and assign these groups</button>
+          <button class="secondary" id="discardGroupsButton">Discard proposals</button>
+        </div>
+        <p class="small muted">Approving saves group assignments. Members already assigned to a group are excluded from future matching rounds.</p>
+      </div>
+    </div>
   </section>
 </main>
 <script>
@@ -68,6 +89,7 @@
   const $ = (id) => document.getElementById(id);
   let adminPassword = '';
   let members = [];
+  let proposedGroups = [];
   const showMessage = (element, message, isSuccess=false) => {
     element.textContent = message;
     element.classList.remove('hidden', 'success');
@@ -146,6 +168,61 @@
       if (/unauthori[sz]ed|password/i.test(err.message)) logout();
     } finally { $('refreshButton').disabled = false; }
   }
+  function renderProposedGroups() {
+    const host = $('proposedGroups');
+    if (!proposedGroups.length) {
+      host.innerHTML = '<p>No groups were proposed. You may need more eligible members in compatible locations.</p>';
+      $('approveGroupsButton').disabled = true;
+      return;
+    }
+    host.innerHTML = proposedGroups.map((group, index) => `
+      <article class="group-card">
+        <h3>Group ${index + 1} · ${group.members.length} members</h3>
+        <div class="group-meta">${safe(group.summary || '')}</div>
+        <ul>${group.members.map(m => `<li><strong>${safe(m.first_name || 'Member')}</strong>${m.age ? `, age ${safe(m.age)}` : ''} - ${safe([m.neighbourhood,m.area,m.county].filter(Boolean).join(', ') || 'Location not provided')}<br><small>${safe(m.primary_activity || 'Activity not specified')} · Budget: ${safe(m.budget || 'Not provided')}</small></li>`).join('')}</ul>
+      </article>`).join('');
+    $('approveGroupsButton').disabled = false;
+  }
+  async function generateMatches() {
+    $('generateMatchesButton').disabled = true;
+    $('approveGroupsButton').disabled = true;
+    showMessage($('matchingMessage'), 'Finding compatible members…');
+    try {
+      const data = await api('POST', { action: 'preview_matches' });
+      proposedGroups = Array.isArray(data.groups) ? data.groups : [];
+      $('eligibleCount').textContent = data.eligible_count ?? 0;
+      $('unmatchedCount').textContent = data.unmatched_count ?? 0;
+      $('matchingResults').classList.remove('hidden');
+      renderProposedGroups();
+      showMessage($('matchingMessage'), `Preview ready: ${proposedGroups.length} proposed group(s). Nothing has been assigned yet.`, true);
+    } catch (err) {
+      showMessage($('matchingMessage'), err.message || 'Could not generate proposed groups.');
+    } finally {
+      $('generateMatchesButton').disabled = false;
+    }
+  }
+  async function approveGroups() {
+    if (!proposedGroups.length) return;
+    const memberCount = proposedGroups.reduce((total, group) => total + group.members.length, 0);
+    if (!confirm(`Approve ${proposedGroups.length} group(s) and assign ${memberCount} members? This will save their group assignments.`)) return;
+    $('approveGroupsButton').disabled = true;
+    try {
+      const groups = proposedGroups.map(group => ({ member_ids: group.members.map(m => m.id) }));
+      const result = await api('POST', { action: 'finalize_matches', groups });
+      proposedGroups = [];
+      $('matchingResults').classList.add('hidden');
+      showMessage($('matchingMessage'), `Success: ${result.groups_saved} group(s) saved and ${result.members_assigned} members assigned.`, true);
+      await loadMembers();
+    } catch (err) {
+      showMessage($('matchingMessage'), err.message || 'Could not save group assignments.');
+      $('approveGroupsButton').disabled = false;
+    }
+  }
+  function discardGroups() {
+    proposedGroups = [];
+    $('matchingResults').classList.add('hidden');
+    $('matchingMessage').classList.add('hidden');
+  }
   function logout() {
     adminPassword = '';
     members = [];
@@ -175,6 +252,9 @@
   $('logoutButton').addEventListener('click',logout);
   $('searchInput').addEventListener('input',render);
   $('statusFilter').addEventListener('change',render);
+  $('generateMatchesButton').addEventListener('click', generateMatches);
+  $('approveGroupsButton').addEventListener('click', approveGroups);
+  $('discardGroupsButton').addEventListener('click', discardGroups);
   $('membersBody').addEventListener('click',async e=>{
     const button=e.target.closest('button[data-action]');
     if(!button || button.disabled) return;
