@@ -281,6 +281,30 @@ footer{padding:36px 24px;text-align:center;color:var(--muted)}.footer-brand{colo
        <p id="locationStatus" class="location-status" role="status" aria-live="polite">No location selected yet.</p>
        <p class="location-privacy">🔒 Your exact location is not shared publicly. It is stored privately and used only to match you with people within a 5 km radius. If you prefer, choose a nearby point rather than your home.</p>
      </div>
+    
+    <div class="step"><h3>What would you most like to do with friends?</h3><p class="muted">Choose one activity that matters most to you.</p><div class="choices">
+<label class="choice"><input name="primaryActivity" required="" type="radio" value="Morning walk or jog"/> Morning walk or jog</label>
+<label class="choice"><input name="primaryActivity" type="radio" value="Evening walk or jog"/> Evening walk or jog</label>
+<label class="choice"><input name="primaryActivity" type="radio" value="Grab a drink"/> Grab a drink</label>
+<label class="choice"><input name="primaryActivity" type="radio" value="Supermarket run"/> Supermarket run</label>
+<label class="choice"><input name="primaryActivity" type="radio" value="Cup of tea or coffee"/> Cup of tea or coffee</label>
+<label class="choice"><input name="primaryActivity" type="radio" value="Board games"/> Board games</label>
+<label class="choice"><input name="primaryActivity" type="radio" value="Video games"/> Video games</label>
+<label class="choice"><input name="primaryActivity" type="radio" value="Kids' playdates"/> Kids' playdates</label>
+<label class="choice"><input name="primaryActivity" type="radio" value="Night out"/> Night out</label>
+<label class="choice"><input name="primaryActivity" type="radio" value="Breakfast"/> Breakfast</label>
+<label class="choice"><input name="primaryActivity" type="radio" value="Dinner"/> Dinner</label>
+<label class="choice"><input name="primaryActivity" type="radio" value="Go to the gym"/> Go to the gym</label>
+<label class="choice"><input name="primaryActivity" type="radio" value="Movie or series hangout"/> Movie / series hangout</label>
+</div></div>
+    <div class="step"><h3>What works for your budget and schedule?</h3>
+<label for="budget">Other than casual neighbourhood meetups, what is your budget for paid activities you might plan together?</label>
+<p class="field-hint">Choose what you are comfortable spending per person on a single outing. We match people within the same budget category.</p>
+<select id="budget" name="budget" required=""><option value="">Choose a budget category</option><option value="Free or low-cost activities only">Free or low-cost activities only</option><option value="Under KES 1,000">Under KES 1,000</option><option value="KES 1,000–2,500">KES 1,000–2,500</option><option value="KES 2,500–5,000">KES 2,500–5,000</option><option value="KES 5,000–10,000">KES 5,000–10,000</option><option value="KES 10,000+">KES 10,000+</option></select>
+<label>When are you usually available?</label><div class="choices">
+<label class="choice"><input name="availability" type="checkbox" value="Weekday mornings"/> Weekday mornings</label><label class="choice"><input name="availability" type="checkbox" value="Weekday evenings"/> Weekday evenings</label><label class="choice"><input name="availability" type="checkbox" value="Weekends"/> Weekends</label><label class="choice"><input name="availability" type="checkbox" value="Flexible"/> Flexible</label>
+</div><p class="field-hint">Choose all that apply.</p>
+</div>
     <div class="step"><h3>Who are you most likely to click with?</h3>
       <p class="muted">A few details help us match everyday lifestyles and social energy, not just interests. </p>
 
@@ -495,7 +519,7 @@ form.addEventListener('submit', async (event) => {
       invalid.scrollIntoView({behavior:'smooth',block:'center'});
       invalid.focus({preventScroll:true});
       invalid.reportValidity();
-      const label = invalid.labels && invalid.labels[0] ? invalid.labels[0].textContent.trim() : (invalid.getAttribute('aria-label') || 'a required field');
+      const label = invalid.labels && invalid.labels[0] ? invalid.labels[0].textContent.trim() : (invalid.getAttribute('aria-label') || invalid.name || 'a required field');
       formMessage.textContent = 'Please complete: ' + label + '. Then click Join the Club again.';
       formMessage.classList.add('is-error');
     }
