@@ -180,6 +180,8 @@ footer{padding:36px 24px;text-align:center;color:var(--muted)}.footer-brand{colo
 .thank-you-page{max-width:650px;margin:0 auto;padding:8px 0}
 .thank-you-page h2{font-size:clamp(30px,4vw,42px);line-height:1.15;color:var(--green)}
 .thank-you-page .payment-detail{padding:18px 0}
+/* Kenya-only location suggestions */
+.location-picker{position:relative}.location-suggestions{position:absolute;z-index:30;left:0;right:0;top:100%;background:#fff;border:1px solid #d6d7ce;border-radius:6px;box-shadow:0 12px 24px #0002;max-height:260px;overflow:auto}.location-suggestions[hidden]{display:none}.location-option{display:block;width:100%;padding:12px 14px;text-align:left;border:0;border-bottom:1px solid #eee;background:#fff;color:var(--ink);cursor:pointer;font:inherit}.location-option:hover,.location-option:focus{background:var(--green-light)}.location-status{font-size:13px;color:var(--muted);margin-top:6px}
 </style>
 </head>
 <body>
@@ -248,8 +250,11 @@ footer{padding:36px 24px;text-align:center;color:var(--muted)}.footer-brand{colo
       <label for="county">County</label><select id="county" name="county" required><option value="">Choose your county</option>
       <option>Baringo</option><option>Bomet</option><option>Bungoma</option><option>Busia</option><option>Elgeyo-Marakwet</option><option>Embu</option><option>Garissa</option><option>Homa Bay</option><option>Isiolo</option><option>Kajiado</option><option>Kakamega</option><option>Kericho</option><option>Kiambu</option><option>Kilifi</option><option>Kirinyaga</option><option>Kisii</option><option>Kisumu</option><option>Kitui</option><option>Kwale</option><option>Laikipia</option><option>Lamu</option><option>Machakos</option><option>Makueni</option><option>Mandera</option><option>Marsabit</option><option>Meru</option><option>Migori</option><option>Mombasa</option><option>Murang'a</option><option>Nairobi</option><option>Nakuru</option><option>Nandi</option><option>Narok</option><option>Nyamira</option><option>Nyandarua</option><option>Nyeri</option><option>Samburu</option><option>Siaya</option><option>Taita-Taveta</option><option>Tana River</option><option>Tharaka-Nithi</option><option>Trans Nzoia</option><option>Turkana</option><option>Uasin Gishu</option><option>Vihiga</option><option>Wajir</option><option>West Pokot</option><option>Other</option></select>
       <label for="area">Area or sub-county</label><input id="area" name="area" required placeholder="e.g. Westlands, Kajiado North">
-      <label for="neighbourhood">Specific neighbourhood, estate or town</label><input id="neighbourhood" name="neighbourhood" required placeholder="e.g. Kilimani, Ongata Rongai, Nyali">
-      <p class="field-hint">We prioritise people in the same neighbourhood before considering nearby areas.</p>
+      <label for="neighbourhood">Choose the nearest street, estate or landmark to you</label>
+      <div class="location-picker"><input id="neighbourhood" name="neighbourhood" required autocomplete="off" placeholder="e.g. Othaya Road, Green Park Estate, Lavington Mall" aria-autocomplete="list" aria-controls="locationSuggestions" aria-expanded="false"><div id="locationSuggestions" class="location-suggestions" role="listbox" hidden></div></div>
+      <input type="hidden" id="locationLatitude" name="locationLatitude"><input type="hidden" id="locationLongitude" name="locationLongitude">
+      <p id="locationStatus" class="location-status" aria-live="polite">Select a suggestion in Kenya. Your exact home address is not required.</p>
+      <p class="field-hint">We use the selected street, estate or landmark as an approximate location for nearby matching.</p>
     </div>
     <div class="step"><h3>What would you most like to do with friends?</h3><p class="muted">Choose one activity that matters most to you.</p><div class="choices">
       <label class="choice"><input type="radio" name="primaryActivity" value="Morning walk or jog" required> Morning walk or jog</label>
@@ -369,6 +374,70 @@ footer{padding:36px 24px;text-align:center;color:var(--muted)}.footer-brand{colo
 </main>
 <footer><img src="/friend-finder-mark.png" alt="" style="width:58px;height:58px;object-fit:contain;display:block;margin:0 auto 8px;background:transparent;border:0;border-radius:0;box-shadow:none"><div class="footer-brand">Neighbour Friend Finder</div>Where neighbours become friends and friends become family.<br><a href="https://neighbourfriendfinder.co.ke">neighbourfriendfinder.co.ke</a></footer>
 <script>
+// Replace this placeholder locally before publishing. Never paste your key into a chat.
+const GEOAPIFY_API_KEY = '554dfc3966cb464db1e7d73925b7df26';
+const locationInput = document.getElementById('neighbourhood');
+const locationSuggestions = document.getElementById('locationSuggestions');
+const locationStatus = document.getElementById('locationStatus');
+const latitudeInput = document.getElementById('locationLatitude');
+const longitudeInput = document.getElementById('locationLongitude');
+let locationSearchTimer;
+let locationSearchController;
+let locationSearchSequence = 0;
+let selectedLocationText = '';
+function clearLocationSelection(){latitudeInput.value='';longitudeInput.value='';selectedLocationText='';}
+function showLocationOptions(items){
+  locationSuggestions.replaceChildren();
+  items.forEach(item=>{
+    const button=document.createElement('button');button.type='button';button.className='location-option';button.setAttribute('role','option');
+    button.textContent=item.properties.formatted || item.properties.address_line1 || 'Location in Kenya';
+    button.addEventListener('click',()=>{
+      const p=item.properties;
+      locationInput.value=button.textContent;
+      latitudeInput.value=String(p.lat);longitudeInput.value=String(p.lon);
+      selectedLocationText=locationInput.value;
+      locationSuggestions.hidden=true;locationInput.setAttribute('aria-expanded','false');
+      locationStatus.textContent='Location selected in Kenya.';
+      locationInput.setCustomValidity('');
+    });locationSuggestions.append(button);
+  });
+  locationSuggestions.hidden=items.length===0;
+  locationInput.setAttribute('aria-expanded',String(items.length>0));
+}
+async function searchKenyaLocations(query){
+  const seq=++locationSearchSequence;
+  if(locationSearchController)locationSearchController.abort();
+  locationSearchController=new AbortController();
+  if(GEOAPIFY_API_KEY.startsWith('PASTE_')){locationStatus.textContent='Location search is not configured yet. Please contact the site administrator.';return;}
+  const variants=[query];
+  // Try common spacing variation such as Greenpark -> Green Park.
+  if(/greenpark/i.test(query))variants.push(query.replace(/greenpark/ig,'Green Park'));
+  try{
+    let results=[];
+    for(const term of variants){
+      const url=new URL('https://api.geoapify.com/v1/geocode/autocomplete');
+      url.searchParams.set('text',term);url.searchParams.set('filter','countrycode:ke');url.searchParams.set('limit','8');url.searchParams.set('format','geojson');url.searchParams.set('apiKey',GEOAPIFY_API_KEY);
+      const response=await fetch(url,{signal:locationSearchController.signal});
+      if(!response.ok)throw new Error('Search unavailable');
+      const data=await response.json();
+      results=(data.features||[]).filter(x=>x.properties && x.properties.country_code==='ke' && Number.isFinite(Number(x.properties.lat)) && Number.isFinite(Number(x.properties.lon)));
+      if(results.length)break;
+    }
+    if(seq!==locationSearchSequence)return;
+    showLocationOptions(results);
+    locationStatus.textContent=results.length?'Choose the nearest matching location from the suggestions.':'No results found. Try a nearby street or landmark, or check the spelling.';
+  }catch(error){if(error.name!=='AbortError' && seq===locationSearchSequence){showLocationOptions([]);locationStatus.textContent='Location search is temporarily unavailable. Please try again.';}}
+}
+locationInput.addEventListener('input',()=>{
+  clearTimeout(locationSearchTimer);++locationSearchSequence;
+  if(locationSearchController)locationSearchController.abort();
+  clearLocationSelection();showLocationOptions([]);locationInput.setCustomValidity('');
+  const query=locationInput.value.trim();
+  if(query.length<3){locationStatus.textContent='Type at least 3 letters to search within Kenya.';return;}
+  locationStatus.textContent='Searching locations in Kenya...';
+  locationSearchTimer=setTimeout(()=>searchKenyaLocations(query),350);
+});
+locationInput.addEventListener('blur',()=>setTimeout(()=>{locationSuggestions.hidden=true;locationInput.setAttribute('aria-expanded','false');},180));
 const form = document.getElementById('joinForm');
 const submitBtn = document.getElementById('submitBtn');
 const formMessage = document.getElementById('formMessage');
@@ -377,6 +446,12 @@ form.addEventListener('submit', async (event) => {
   event.preventDefault();
 
   if (!form.reportValidity()) return;
+  if (!latitudeInput.value || !longitudeInput.value || locationInput.value !== selectedLocationText) {
+    locationInput.setCustomValidity('Please select a location from the Kenya suggestions.');
+    locationInput.reportValidity();
+    return;
+  }
+  locationInput.setCustomValidity('');
 
   const values = new FormData(form);
   const payload = {
@@ -387,6 +462,8 @@ form.addEventListener('submit', async (event) => {
     county: String(values.get('county') || '').trim(),
     area: String(values.get('area') || '').trim(),
     neighbourhood: String(values.get('neighbourhood') || '').trim(),
+    locationLatitude: Number(values.get('locationLatitude')),
+    locationLongitude: Number(values.get('locationLongitude')),
     primaryActivity: String(values.get('primaryActivity') || ''),
     budget: String(values.get('budget') || ''),
     availability: values.getAll('availability'),
