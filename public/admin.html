@@ -17,6 +17,8 @@
     .badge{display:inline-block;padding:3px 8px;border-radius:20px;background:#eee8dc;font-size:12px;font-weight:bold}.badge.confirmed{background:#dcebdd;color:#285237}.badge.rejected{background:#f4dfdc;color:#8d3028}.badge.pending{background:#f5e7d3;color:#80531d}
     .hidden{display:none!important}.small{font-size:13px}.topline{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
     .group-card{border:1px solid var(--line);border-radius:10px;padding:16px;margin:12px 0;background:#fff}.group-card h3{margin:0 0 6px;font-family:Georgia,"Times New Roman",serif}.group-card ul{margin:10px 0;padding-left:22px}.group-meta{font-size:13px;color:var(--muted)}
+
+    .demand-table{min-width:760px}.demand-level{display:inline-block;padding:4px 8px;border-radius:18px;font-size:12px;font-weight:bold;background:#eee8dc}.demand-level.ready{background:#dcebdd;color:#285237}.demand-level.near{background:#f5e7d3;color:#80531d}.demand-level.wait{background:#eee8dc;color:#575c54}
     @media(max-width:640px){.stats{grid-template-columns:repeat(2,minmax(120px,1fr))}.panel{padding:16px}}
   </style>
 </head>
@@ -60,6 +62,17 @@
           <tbody id="membersBody"><tr><td colspan="7">Sign in to load registrations.</td></tr></tbody>
         </table>
       </div>
+    </div>
+    <div class="panel" id="demandPanel">
+      <div class="topline"><div><h2>Neighbourhood demand tracker</h2><p class="muted">See where registrations are coming from and which areas are closest to having enough confirmed, unassigned members for a friendship group.</p></div><button class="secondary" id="refreshDemandButton">Refresh tracker</button></div>
+      <div class="notice">This tracker groups people by their most specific available location: neighbourhood, then area, then county. It counts confirmed, unassigned members separately from pending registrations. It does not automatically promise a group or match people.</div>
+      <div class="stats" style="grid-template-columns:repeat(3,minmax(120px,1fr));margin:14px 0">
+        <div class="stat"><span>Areas represented</span><strong id="demandAreaCount">0</strong></div>
+        <div class="stat"><span>Confirmed and waiting</span><strong id="demandWaitingCount">0</strong></div>
+        <div class="stat"><span>Pending registrations</span><strong id="demandPendingCount">0</strong></div>
+      </div>
+      <div class="table-wrap"><table class="demand-table"><thead><tr><th>Neighbourhood / area</th><th>Total registrations</th><th>Confirmed and waiting</th><th>Pending</th><th>Already grouped</th><th>Demand status</th></tr></thead><tbody id="demandBody"><tr><td colspan="6">Sign in to load demand data.</td></tr></tbody></table></div>
+      <p class="small muted">Planning guide: 3 or more confirmed members waiting is a promising cluster; 2 may be enough to review for a match; 1 means keep collecting interest. Compatibility and practical travel distance still matter.</p>
     </div>
     <div class="panel" id="matchingPanel">
       <div class="topline">
@@ -113,6 +126,42 @@
   function safe(text) {
     return String(text ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
   }
+  function renderDemandTracker() {
+    const buckets = new Map();
+    members.forEach(m => {
+      const neighbourhood = String(m.neighbourhood || '').trim();
+      const area = String(m.area || '').trim();
+      const county = String(m.county || '').trim();
+      const key = neighbourhood || area || county || 'Location not provided';
+      if (!buckets.has(key)) buckets.set(key, { key, total: 0, pending: 0, confirmedWaiting: 0, assigned: 0, confirmed: 0 });
+      const b = buckets.get(key);
+      b.total++;
+      const status = String(m.payment_status || 'pending').toLowerCase();
+      const assigned = m.group_id !== null && m.group_id !== undefined && String(m.group_id).trim() !== '';
+      if (status === 'pending') b.pending++;
+      if (status === 'confirmed') {
+        b.confirmed++;
+        if (assigned) b.assigned++;
+        else b.confirmedWaiting++;
+      }
+    });
+    const rows = [...buckets.values()].sort((a,b) => b.confirmedWaiting-a.confirmedWaiting || b.total-a.total || a.key.localeCompare(b.key));
+    $('demandAreaCount').textContent = rows.length;
+    $('demandWaitingCount').textContent = rows.reduce((n,b)=>n+b.confirmedWaiting,0);
+    $('demandPendingCount').textContent = rows.reduce((n,b)=>n+b.pending,0);
+    const host = $('demandBody');
+    if (!rows.length) {
+      host.innerHTML = '<tr><td colspan="6">No registrations yet.</td></tr>';
+      return;
+    }
+    host.innerHTML = rows.map(b => {
+      let label = 'Awaiting confirmed members', cls = 'wait';
+      if (b.confirmedWaiting >= 3) { label = 'Promising cluster'; cls = 'ready'; }
+      else if (b.confirmedWaiting === 2) { label = 'Review for matching'; cls = 'near'; }
+      else if (b.confirmedWaiting === 1) { label = 'Needs more members'; cls = 'wait'; }
+      return `<tr><td><strong>${safe(b.key)}</strong></td><td>${b.total}</td><td>${b.confirmedWaiting}</td><td>${b.pending}</td><td>${b.assigned}</td><td><span class="demand-level ${cls}">${safe(label)}</span></td></tr>`;
+    }).join('');
+  }
   function render() {
     const q = $('searchInput').value.trim().toLowerCase();
     const status = $('statusFilter').value;
@@ -124,6 +173,7 @@
     $('pendingCount').textContent = members.filter(m=>(m.payment_status||'pending')==='pending').length;
     $('confirmedCount').textContent = members.filter(m=>m.payment_status==='confirmed').length;
     $('rejectedCount').textContent = members.filter(m=>m.payment_status==='rejected').length;
+    renderDemandTracker();
     if (!filtered.length) {
       $('membersBody').innerHTML = '<tr><td colspan="7">No matching registrations.</td></tr>';
       return;
@@ -249,6 +299,7 @@
     } finally { $('loginButton').disabled = false; }
   });
   $('refreshButton').addEventListener('click',loadMembers);
+  $('refreshDemandButton').addEventListener('click',renderDemandTracker);
   $('logoutButton').addEventListener('click',logout);
   $('searchInput').addEventListener('input',render);
   $('statusFilter').addEventListener('change',render);
