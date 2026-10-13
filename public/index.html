@@ -171,8 +171,8 @@ footer{padding:36px 24px;text-align:center;color:var(--muted)}.footer-brand{colo
 #joinForm .step:first-child{border-top:0;margin-top:0;padding-top:0}
 #joinForm .step-kicker{margin-bottom:8px}
 #joinForm h3{margin-top:0;margin-bottom:18px}
-#joinForm .form-nav #backBtn,#joinForm .form-nav #nextBtn{display:none!important}
-#joinForm .form-nav #submitBtn{display:inline-flex!important}
+#joinForm .form-actions #backBtn,#joinForm .form-actions #nextBtn{display:none!important}
+#joinForm .form-actions #submitBtn{display:inline-flex!important}
 @media(max-width:760px){
  #joinForm .step{margin-top:23px;padding-top:21px}
 }
@@ -409,7 +409,7 @@ form.addEventListener('submit', async (event) => {
 
   try {
     const response = await fetch(
-      'https://peulzmhgqfdycckzwnnx.supabase.co/functions/v1/register-member',
+      'https://peulzmhgqfdcyckzwnnx.supabase.co/functions/v1/register-member',
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
