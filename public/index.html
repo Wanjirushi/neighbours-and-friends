@@ -182,8 +182,21 @@ footer{padding:36px 24px;text-align:center;color:var(--muted)}.footer-brand{colo
 .thank-you-page .payment-detail{padding:18px 0}
 /* Location choice and interactive map */
 .location-methods{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}.location-method{font:inherit;text-align:left;background:#fffefa;color:var(--ink);border:1px solid #dedfd6;border-radius:8px;padding:14px;cursor:pointer}.location-method:hover,.location-method:focus{border-color:var(--green);background:var(--green-light)}.location-method strong{display:block;color:var(--green)}.location-method span{display:block;font-size:12px;color:var(--muted);margin-top:3px}.location-map-wrap[hidden]{display:none}#locationMap{height:340px;width:100%;border-radius:8px;border:1px solid var(--line);margin-top:12px}.location-status{font-size:13px;color:var(--muted);margin-top:8px}.location-privacy{font-size:13px;color:var(--muted);margin-top:10px}.location-confirm{margin-top:10px}.location-confirm[hidden]{display:none}@media(max-width:520px){.location-methods{grid-template-columns:1fr}#locationMap{height:300px}}
+/* Visible location selection and robust map layout */
+.location-method.is-selected{border:2px solid var(--green);background:#e5e9df;box-shadow:0 0 0 2px #354f4010}
+.location-status{font-size:15px;line-height:1.5;margin:14px 0;padding:12px 14px;border:1px solid #d6d7ce;border-radius:8px;background:#fffefa}
+.location-status.is-success{background:#e5e9df;border:2px solid var(--green);color:#243e30;font-weight:700}
+.location-status.is-error{background:#fff2ed;border:1px solid #b65d44;color:#8a3723;font-weight:700}
+.location-map-wrap{width:100%;min-width:0;overflow:hidden}
+#locationMap{position:relative;overflow:hidden;isolation:isolate;height:340px;width:100%;max-width:100%;z-index:0}
+#locationMap .leaflet-pane,#locationMap .leaflet-tile,#locationMap .leaflet-marker-icon,#locationMap .leaflet-marker-shadow{position:absolute}
+#locationMap .leaflet-container{overflow:hidden}
+.payment-time-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.payment-time-row select{min-width:0}
+.form-message.is-error{color:#a13f2b;font-weight:700;padding:12px;background:#fff2ed;border-radius:7px}
+@media(max-width:520px){#locationMap{height:300px}}
 </style>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoYkV+G2F7vY0=" crossorigin="">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"">
 </head>
 <body>
 <header><div class="brand-lockup"><img class="brand-logo" src="/friend-finder-mark.png" alt=""><div class="brand">Neighbour Friend Finder</div></div><a class="nav-link" href="#how">How it works ↓</a></header>
@@ -265,8 +278,7 @@ footer{padding:36px 24px;text-align:center;color:var(--muted)}.footer-brand{colo
        <input type="hidden" id="locationLatitude" name="locationLatitude"><input type="hidden" id="locationLongitude" name="locationLongitude">
        <p id="locationStatus" class="location-status" role="status" aria-live="polite">No location selected yet.</p>
        <p class="location-privacy">🔒 Your exact location is not shared publicly. It is stored privately and used only to match you with people within a 5 km radius. If you prefer, choose a nearby point rather than your home.</p>
-     </div><p class="field-hint">Choose all that apply.</p>
-    </div>
+     </div>
     <div class="step"><h3>Who are you most likely to click with?</h3>
       <p class="muted">A few details help us match everyday lifestyles and social energy, not just interests. </p>
 
@@ -337,11 +349,18 @@ footer{padding:36px 24px;text-align:center;color:var(--muted)}.footer-brand{colo
         pattern="[A-Za-z0-9]{8,12}" minlength="8" maxlength="12"
         title="Enter your M-PESA transaction code using 8 to 12 letters or numbers">
       <label for="paymentDate" style="margin-top:16px">Date of payment</label><input id="paymentDate" name="paymentDate" type="date" required>
-      <label for="paymentTime" style="margin-top:16px">Time of payment</label><input id="paymentTime" name="paymentTime" type="time" required>
+      <label for="paymentHour" style="margin-top:16px">Time of payment</label>
+      <div class="payment-time-row">
+        <select id="paymentHour" aria-label="Payment hour" required><option value="">Hour</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option></select>
+        <select id="paymentMinute" aria-label="Payment minutes" required><option value="">Minutes</option><option value="00">00</option><option value="01">01</option><option value="02">02</option><option value="03">03</option><option value="04">04</option><option value="05">05</option><option value="06">06</option><option value="07">07</option><option value="08">08</option><option value="09">09</option><option value="10">10</option><option value="11">11</option><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="17">17</option><option value="18">18</option><option value="19">19</option><option value="20">20</option><option value="21">21</option><option value="22">22</option><option value="23">23</option><option value="24">24</option><option value="25">25</option><option value="26">26</option><option value="27">27</option><option value="28">28</option><option value="29">29</option><option value="30">30</option><option value="31">31</option><option value="32">32</option><option value="33">33</option><option value="34">34</option><option value="35">35</option><option value="36">36</option><option value="37">37</option><option value="38">38</option><option value="39">39</option><option value="40">40</option><option value="41">41</option><option value="42">42</option><option value="43">43</option><option value="44">44</option><option value="45">45</option><option value="46">46</option><option value="47">47</option><option value="48">48</option><option value="49">49</option><option value="50">50</option><option value="51">51</option><option value="52">52</option><option value="53">53</option><option value="54">54</option><option value="55">55</option><option value="56">56</option><option value="57">57</option><option value="58">58</option><option value="59">59</option></select>
+      </div>
+      <label for="paymentPeriod" style="margin-top:8px">AM or PM</label>
+      <select id="paymentPeriod" required><option value="">Choose AM or PM</option><option value="AM">AM</option><option value="PM">PM</option></select>
+      <p class="field-hint">Choose the time shown in your M-PESA confirmation message.</p>
       <label class="choice" style="margin-top:20px"><input type="checkbox" id="consent" name="consent" required> I agree that my answers and contact details may be used to match me with compatible members and contact me about my group.</label>
       <p class="small muted" style="margin-top:14px">Your group invitation will be sent after your payment is confirmed. We will prioritise your neighbourhood and compatibility based on your answers to the questions.</p>
     </div>
-    <div class="form-actions"><button type="button" class="button secondary" id="backBtn" style="display:none">Back</button><button type="button" class="button" id="nextBtn">Continue →</button><button type="submit" class="button" id="submitBtn" style="display:none">Send my answers</button></div>
+    <div class="form-actions"><button type="button" class="button secondary" id="backBtn" style="display:none">Back</button><button type="button" class="button" id="nextBtn">Join the Club</button><button type="submit" class="button" id="submitBtn" style="display:none">Join the Club</button></div>
     <p id="formMessage" class="small muted form-message" aria-live="polite"></p>
   </form>
 </div></section>
@@ -354,14 +373,14 @@ footer{padding:36px 24px;text-align:center;color:var(--muted)}.footer-brand{colo
     <details class="faq-item"><summary>Do I have to meet everyone from my group?</summary><p>You can meet people one by one or plan a big group gathering, get to know each other and take it from there.</p></details>
     <details class="faq-item"><summary>Is this a paid service?</summary><p>Yes. The one-time KSh 2,800 fee helps cover the cost of running Neighbour Friend Finder.</p></details>
     <details class="faq-item"><summary>What happens after payment?</summary><p>After your payment is confirmed, you will receive an invitation to the WhatsApp group with people near you who are most likely to be compatible as friends, based on your questionnaire answers.</p></details>
-    <details class="faq-item"><summary>What if my neighbourhood is missing?</summary><p>Choose “Other” and type your estate, neighbourhood or town. We will use that information when arranging local matches.</p></details>
+    <details class="faq-item"><summary>What if my neighbourhood is missing?</summary><p>You can use your current location or choose a point on the map, even if your estate is not listed anywhere.</p></details>
     <details class="faq-item"><summary>Is this for only one gender?</summary><p>Everyone is welcome to join. You will be placed in a group based on your location and interests, regardless of gender.</p></details>
     <details class="faq-item"><summary>Are there any other benefits?</summary><p>Yes! Every two months, we organise affordable or free community activities where members from different neighbourhood groups can meet and connect. Think picnics in beautiful gardens, walks in Karura Forest, movie nights at the cinema, and more. We’ll share activity details in your WhatsApp group in advance, so you can plan ahead and mark your calendar. It’s another chance to make new friends beyond your own group!</p></details>
   </div>
 </div></section>
 </main>
 <footer><img src="/friend-finder-mark.png" alt="" style="width:58px;height:58px;object-fit:contain;display:block;margin:0 auto 8px;background:transparent;border:0;border-radius:0;box-shadow:none"><div class="footer-brand">Neighbour Friend Finder</div>Where neighbours become friends and friends become family.<br><a href="https://neighbourfriendfinder.co.ke">neighbourfriendfinder.co.ke</a></footer>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js""></script>
 <script>
 const locationInput = document.getElementById('neighbourhood');
 const locationStatus = document.getElementById('locationStatus');
@@ -369,12 +388,25 @@ const latitudeInput = document.getElementById('locationLatitude');
 const longitudeInput = document.getElementById('locationLongitude');
 const mapWrap = document.getElementById('locationMapWrap');
 const confirmMapButton = document.getElementById('confirmMapLocation');
+const gpsButton = document.getElementById('useCurrentLocation');
+const mapButton = document.getElementById('chooseMapLocation');
+function showLocationMessage(message, kind='') {
+  locationStatus.textContent = message;
+  locationStatus.classList.toggle('is-success',kind==='success');
+  locationStatus.classList.toggle('is-error',kind==='error');
+}
+function selectLocationMethod(method) {
+  gpsButton.classList.toggle('is-selected',method==='gps');
+  mapButton.classList.toggle('is-selected',method==='map');
+  gpsButton.setAttribute('aria-pressed',String(method==='gps'));
+  mapButton.setAttribute('aria-pressed',String(method==='map'));
+}
 let locationMap = null;
 let locationMarker = null;
 let pendingMapLocation = null;
 function setChosenLocation(lat, lon, method) {
   if (!Number.isFinite(lat) || !Number.isFinite(lon) || lat < -4.9 || lat > 5.1 || lon < 33.8 || lon > 42.2) {
-    locationStatus.textContent = 'Please choose a location within Kenya.';
+    showLocationMessage('Please choose a location within Kenya.','error');
     return false;
   }
   latitudeInput.value = String(lat);
@@ -383,12 +415,13 @@ function setChosenLocation(lat, lon, method) {
   const area = document.getElementById('area').value.trim();
   const county = document.getElementById('county').value.trim();
   locationInput.value = [area, county].filter(Boolean).join(', ') || 'Selected location in Kenya';
-  locationStatus.textContent = method === 'gps' ? '✓ Current location selected.' : '✓ Map location confirmed.';
+  showLocationMessage(method === 'gps' ? '✓ Location saved! We’ll use this point to find neighbours within 5 km.' : '✓ Map location saved! We’ll use this point to find neighbours within 5 km.','success');
+  selectLocationMethod(method);
   return true;
 }
 function showMap() {
   mapWrap.hidden = false;
-  if (!window.L) {locationStatus.textContent='The map could not load. Please check your internet connection and try again.';return;}
+  if (!window.L) {showLocationMessage('The map could not load. Please check your internet connection and try again.','error');return;}
   if (!locationMap) {
     locationMap = L.map('locationMap').setView([-0.0236,37.9062],6);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -399,33 +432,35 @@ function showMap() {
       if (locationMarker) locationMarker.setLatLng(e.latlng);
       else locationMarker = L.marker(e.latlng).addTo(locationMap);
       confirmMapButton.hidden = false;
-      locationStatus.textContent = 'Pin placed. Tap “Confirm this location” to save it.';
+      showLocationMessage('Pin placed. Tap “Confirm this location” to save it.');
     });
   }
-  setTimeout(()=>locationMap.invalidateSize(),80);
+  setTimeout(()=>locationMap.invalidateSize({pan:false}),150);
+  setTimeout(()=>locationMap.invalidateSize({pan:false}),650);
+  if (latitudeInput.value && longitudeInput.value) locationMap.setView([Number(latitudeInput.value),Number(longitudeInput.value)],15);
 }
 document.getElementById('chooseMapLocation').addEventListener('click', () => {
   pendingMapLocation = null;
   confirmMapButton.hidden = true;
   showMap();
-  locationStatus.textContent = 'Zoom in and tap the map to choose a location.';
+  showLocationMessage('Zoom in and tap the map to choose a location.');
 });
 confirmMapButton.addEventListener('click', () => {
   if (!pendingMapLocation) return;
   if (setChosenLocation(pendingMapLocation.lat,pendingMapLocation.lng,'map')) confirmMapButton.hidden = true;
 });
 document.getElementById('useCurrentLocation').addEventListener('click', () => {
-  if (!navigator.geolocation) {locationStatus.textContent='Your browser does not support location detection. Please choose on the map.';return;}
-  locationStatus.textContent = 'Requesting your location permission…';
+  if (!navigator.geolocation) {showLocationMessage('Your browser does not support location detection. Please choose on the map.','error');return;}
+  showLocationMessage('Finding your location… please allow location access if prompted.');
   navigator.geolocation.getCurrentPosition(
     position => {
       const {latitude,longitude,accuracy}=position.coords;
       if (setChosenLocation(latitude,longitude,'gps')) {
-        locationStatus.textContent = `✓ Current location selected (estimated accuracy: ${Math.round(accuracy)} metres).`;
+        showLocationMessage(`✓ Location saved successfully! Estimated accuracy: ${Math.round(accuracy)} metres. We’ll use this location to find neighbours within 5 km.`, 'success');
         if (locationMap) locationMap.setView([latitude,longitude],15);
       }
     },
-    () => {locationStatus.textContent='Could not detect your location. You can choose it on the map instead.';},
+    () => {showLocationMessage('Could not detect your location. You can choose it on the map instead.','error');},
     {enableHighAccuracy:true,timeout:15000,maximumAge:0}
   );
 });
@@ -436,14 +471,31 @@ const formMessage = document.getElementById('formMessage');
 form.addEventListener('submit', async (event) => {
   event.preventDefault();
 
-  if (!form.reportValidity()) return;
+  formMessage.classList.remove('is-error');
+  if (!form.checkValidity()) {
+    const invalid = form.querySelector(':invalid');
+    if (invalid) {
+      invalid.scrollIntoView({behavior:'smooth',block:'center'});
+      invalid.focus({preventScroll:true});
+      invalid.reportValidity();
+      const label = invalid.labels && invalid.labels[0] ? invalid.labels[0].textContent.trim() : (invalid.getAttribute('aria-label') || 'a required field');
+      formMessage.textContent = 'Please complete: ' + label + '. Then click Join the Club again.';
+      formMessage.classList.add('is-error');
+    }
+    return;
+  }
   if (!latitudeInput.value || !longitudeInput.value) {
-    locationStatus.textContent = 'Please use your current location or choose and confirm a point on the map.';
+    showLocationMessage('Please use your current location or choose and confirm a point on the map.','error');
     document.getElementById('useCurrentLocation').focus();
     return;
   }
 
   const values = new FormData(form);
+  const hour = Number(document.getElementById('paymentHour').value);
+  const minute = document.getElementById('paymentMinute').value;
+  const period = document.getElementById('paymentPeriod').value;
+  const hour24 = (hour % 12) + (period === 'PM' ? 12 : 0);
+  const paymentTime24 = String(hour24).padStart(2,'0') + ':' + minute;
   const payload = {
     firstName: String(values.get('firstName') || '').trim(),
     age: Number(values.get('age')),
@@ -465,7 +517,7 @@ form.addEventListener('submit', async (event) => {
     cannabisStyle: String(values.get('cannabisStyle') || ''),
     mpesaCode: String(values.get('mpesaCode') || '').trim().toUpperCase(),
     paymentDate: String(values.get('paymentDate') || ''),
-    paymentTime: String(values.get('paymentTime') || ''),
+    paymentTime: paymentTime24,
     consent: values.get('consent') === 'on'
   };
 
@@ -520,8 +572,9 @@ form.addEventListener('submit', async (event) => {
         ? error.message
         : 'We could not submit your registration. Please check your internet connection and try again.';
     formMessage.style.color = '#a13f2b';
+    formMessage.classList.add('is-error');
     submitBtn.disabled = false;
-    submitBtn.textContent = 'Send my answers';
+    submitBtn.textContent = 'Join the Club';
   }
 });
 </script>
