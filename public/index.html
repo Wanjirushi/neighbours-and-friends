@@ -195,8 +195,11 @@ footer{padding:36px 24px;text-align:center;color:var(--muted)}.footer-brand{colo
 .payment-time-row select{min-width:0}
 .form-message.is-error{color:#a13f2b;font-weight:700;padding:12px;background:#fff2ed;border-radius:7px}
 @media(max-width:520px){#locationMap{height:300px}}
+ .location-preview{margin-top:14px;border:1px solid var(--line);border-radius:9px;padding:14px;background:#fffefa}
+.location-preview[hidden]{display:none}#locationPreviewMap{height:245px;width:100%;position:relative;overflow:hidden;border-radius:8px;margin:10px 0}
+.location-preview .button{margin:6px 6px 0 0;font-size:14px;padding:11px 13px}
 </style>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
 </head>
 <body>
 <header><div class="brand-lockup"><img class="brand-logo" src="/friend-finder-mark.png" alt=""><div class="brand">Neighbour Friend Finder</div></div><a class="nav-link" href="#how">How it works ↓</a></header>
@@ -273,6 +276,14 @@ footer{padding:36px 24px;text-align:center;color:var(--muted)}.footer-brand{colo
          <div id="locationMap" role="application" aria-label="Map of Kenya; tap to choose your location"></div>
          <p class="field-hint">Tap the map to place or move your pin, then confirm your selection.</p>
          <button type="button" class="button secondary location-confirm" id="confirmMapLocation" hidden>Confirm this location</button>
+       </div>
+       <div id="locationPreview" class="location-preview" hidden>
+         <strong id="locationPreviewHeading">Review your location</strong>
+         <p id="locationPreviewName" class="field-hint">Checking nearby area…</p>
+         <div id="locationPreviewMap" aria-label="Preview of selected location on map"></div>
+         <p id="locationPreviewAccuracy" class="field-hint"></p>
+         <button type="button" id="confirmPreviewLocation" class="button">Confirm this location</button>
+         <button type="button" id="changePreviewLocation" class="button secondary">Choose a different point</button>
        </div>
        <input type="hidden" id="neighbourhood" name="neighbourhood">
        <input type="hidden" id="locationLatitude" name="locationLatitude"><input type="hidden" id="locationLongitude" name="locationLongitude">
@@ -380,7 +391,7 @@ footer{padding:36px 24px;text-align:center;color:var(--muted)}.footer-brand{colo
 </div></section>
 </main>
 <footer><img src="/friend-finder-mark.png" alt="" style="width:58px;height:58px;object-fit:contain;display:block;margin:0 auto 8px;background:transparent;border:0;border-radius:0;box-shadow:none"><div class="footer-brand">Neighbour Friend Finder</div>Where neighbours become friends and friends become family.<br><a href="https://neighbourfriendfinder.co.ke">neighbourfriendfinder.co.ke</a></footer>
-<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js""></script>
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const locationInput = document.getElementById('neighbourhood');
 const locationStatus = document.getElementById('locationStatus');
@@ -404,66 +415,107 @@ function selectLocationMethod(method) {
 let locationMap = null;
 let locationMarker = null;
 let pendingMapLocation = null;
-function setChosenLocation(lat, lon, method) {
-  if (!Number.isFinite(lat) || !Number.isFinite(lon) || lat < -4.9 || lat > 5.1 || lon < 33.8 || lon > 42.2) {
-    showLocationMessage('Please choose a location within Kenya.','error');
-    return false;
-  }
+let previewMap = null;
+let previewMarker = null;
+let proposedLocation = null;
+let previewRequestId = 0;
+function kenyaCoordinates(lat, lon) { return Number.isFinite(lat) && Number.isFinite(lon) && lat >= -4.9 && lat <= 5.1 && lon >= 33.8 && lon <= 42.2; }
+function setChosenLocation(lat, lon, method, areaName) {
+  if (!kenyaCoordinates(lat,lon)) {showLocationMessage('Please choose a location within Kenya.','error');return false;}
   latitudeInput.value = String(lat);
   longitudeInput.value = String(lon);
-  // Preserve the existing backend's neighbourhood text field without exposing coordinates in its label.
   const area = document.getElementById('area').value.trim();
   const county = document.getElementById('county').value.trim();
-  locationInput.value = [area, county].filter(Boolean).join(', ') || 'Selected location in Kenya';
-  showLocationMessage(method === 'gps' ? '✓ Location saved! We’ll use this point to find neighbours within 5 km.' : '✓ Map location saved! We’ll use this point to find neighbours within 5 km.','success');
+  locationInput.value = areaName || [area,county].filter(Boolean).join(', ') || 'Selected location in Kenya';
   selectLocationMethod(method);
+  showLocationMessage('✓ Location confirmed. You can continue with your registration.','success');
+  document.getElementById('locationPreview').hidden = true;
   return true;
 }
 function showMap() {
   mapWrap.hidden = false;
-  if (!window.L) {showLocationMessage('The map could not load. Please check your internet connection and try again.','error');return;}
+  if (!window.L) {showLocationMessage('The map could not load. Please check your connection and try again.','error');return;}
   if (!locationMap) {
     locationMap = L.map('locationMap').setView([-0.0236,37.9062],6);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom:19, attribution:'&copy; OpenStreetMap contributors'
-    }).addTo(locationMap);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap contributors'}).addTo(locationMap);
     locationMap.on('click', e => {
-      pendingMapLocation = e.latlng;
+      pendingMapLocation=e.latlng;
       if (locationMarker) locationMarker.setLatLng(e.latlng);
-      else locationMarker = L.marker(e.latlng).addTo(locationMap);
-      confirmMapButton.hidden = false;
-      showLocationMessage('Pin placed. Tap “Confirm this location” to save it.');
+      else locationMarker=L.marker(e.latlng).addTo(locationMap);
+      confirmMapButton.hidden=false;
+      showLocationMessage('Pin placed. Select “Preview this location” to check it.');
     });
   }
-  setTimeout(()=>locationMap.invalidateSize({pan:false}),150);
-  setTimeout(()=>locationMap.invalidateSize({pan:false}),650);
+  setTimeout(()=>locationMap.invalidateSize(),150);
+  setTimeout(()=>locationMap.invalidateSize(),500);
   if (latitudeInput.value && longitudeInput.value) locationMap.setView([Number(latitudeInput.value),Number(longitudeInput.value)],15);
 }
-document.getElementById('chooseMapLocation').addEventListener('click', () => {
-  pendingMapLocation = null;
-  confirmMapButton.hidden = true;
-  showMap();
+async function previewLocation(lat,lon,method,accuracy) {
+  if (!kenyaCoordinates(lat,lon)) {showLocationMessage('Please choose a location within Kenya.','error');return;}
+  latitudeInput.value=""; longitudeInput.value=""; locationInput.value="";
+  proposedLocation={lat,lon,method,accuracy};
+  const requestId=++previewRequestId;
+  const panel=document.getElementById('locationPreview');
+  panel.hidden=false;
+  document.getElementById('locationPreviewName').textContent='Finding the nearest named area…';
+  document.getElementById('locationPreviewAccuracy').textContent=accuracy!=null ? `GPS estimated accuracy: ${Math.round(accuracy)} metres. Check that the pin is in the right place.` : 'Check that the pin is in the right place.';
+  showLocationMessage('Location found. Review the map below and confirm the pin.');
+  if (window.L) {
+    if (!previewMap) {
+      previewMap=L.map('locationPreviewMap',{scrollWheelZoom:false}).setView([lat,lon],15);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap contributors'}).addTo(previewMap);
+      previewMarker=L.marker([lat,lon]).addTo(previewMap);
+    } else {previewMap.setView([lat,lon],15);previewMarker.setLatLng([lat,lon]);}
+    setTimeout(()=>previewMap.invalidateSize(),120);
+    setTimeout(()=>previewMap.invalidateSize(),450);
+  }
+  // Reverse geocoding is a convenience label; the confirmed coordinates remain authoritative.
+  try {
+    const controller=new AbortController();
+    const timeout=setTimeout(()=>controller.abort(),6500);
+    let response;
+    try {response=await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lon)}&zoom=16&addressdetails=1`,{signal:controller.signal,headers:{'Accept':'application/json'}});}
+    finally {clearTimeout(timeout);}
+    if (!response.ok) throw new Error('Location name unavailable');
+    const result=await response.json();
+    if (requestId!==previewRequestId) return;
+    const a=result.address||{};
+    const label=[a.suburb||a.neighbourhood||a.quarter||a.residential||a.village||a.town||a.city_district||a.city||a.county, a.city||a.town||a.county].filter((x,i,arr)=>x && arr.indexOf(x)===i).join(', ');
+    proposedLocation.areaName=label || '';
+    document.getElementById('locationPreviewName').textContent=label || 'Selected point in Kenya (see map pin)';
+  } catch(e) {
+    if (requestId===previewRequestId) document.getElementById('locationPreviewName').textContent='Selected point in Kenya (see map pin)';
+  }
+}
+document.getElementById('chooseMapLocation').addEventListener('click',()=>{
+  ++previewRequestId;document.getElementById('locationPreview').hidden=true;
+  pendingMapLocation=null;confirmMapButton.hidden=true;showMap();
   showLocationMessage('Zoom in and tap the map to choose a location.');
 });
-confirmMapButton.addEventListener('click', () => {
+confirmMapButton.textContent='Preview this location';
+confirmMapButton.addEventListener('click',()=>{
   if (!pendingMapLocation) return;
-  if (setChosenLocation(pendingMapLocation.lat,pendingMapLocation.lng,'map')) confirmMapButton.hidden = true;
+  previewLocation(pendingMapLocation.lat,pendingMapLocation.lng,'map',null);
 });
-document.getElementById('useCurrentLocation').addEventListener('click', () => {
+document.getElementById('useCurrentLocation').addEventListener('click',()=>{
   if (!navigator.geolocation) {showLocationMessage('Your browser does not support location detection. Please choose on the map.','error');return;}
   showLocationMessage('Finding your location… please allow location access if prompted.');
-  navigator.geolocation.getCurrentPosition(
-    position => {
-      const {latitude,longitude,accuracy}=position.coords;
-      if (setChosenLocation(latitude,longitude,'gps')) {
-        showLocationMessage(`✓ Location saved successfully! Estimated accuracy: ${Math.round(accuracy)} metres. We’ll use this location to find neighbours within 5 km.`, 'success');
-        if (locationMap) locationMap.setView([latitude,longitude],15);
-      }
-    },
-    () => {showLocationMessage('Could not detect your location. You can choose it on the map instead.','error');},
-    {enableHighAccuracy:true,timeout:15000,maximumAge:0}
-  );
+  navigator.geolocation.getCurrentPosition(position=>{
+    const {latitude,longitude,accuracy}=position.coords;
+    mapWrap.hidden=true;
+    previewLocation(latitude,longitude,'gps',accuracy);
+  },()=>showLocationMessage('Could not detect your location. You can choose it on the map instead.','error'),{enableHighAccuracy:true,timeout:15000,maximumAge:0});
 });
+document.getElementById('confirmPreviewLocation').addEventListener('click',()=>{
+  if (!proposedLocation) return;
+  setChosenLocation(proposedLocation.lat,proposedLocation.lon,proposedLocation.method,proposedLocation.areaName);
+});
+document.getElementById('changePreviewLocation').addEventListener('click',()=>{
+  ++previewRequestId;document.getElementById('locationPreview').hidden=true;
+  pendingMapLocation=null;confirmMapButton.hidden=true;showMap();
+  showLocationMessage('Move the map and tap the point you would like to use.');
+});
+
 const form = document.getElementById('joinForm');
 const submitBtn = document.getElementById('submitBtn');
 const formMessage = document.getElementById('formMessage');
