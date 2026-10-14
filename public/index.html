@@ -198,7 +198,14 @@ footer{padding:36px 24px;text-align:center;color:var(--muted)}.footer-brand{colo
 @media(max-width:520px){#locationMap{height:300px}}
 </style>
 <link href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" rel="stylesheet"/>
-</head>
+<style>
+/* Prominent closing invitation and clear payment amount */
+.closing-invitation{background:#354f40;color:#fffdf8;border:2px solid #354f40;border-radius:12px;padding:26px 28px;text-align:center;box-shadow:0 10px 24px #354f4020}
+.closing-invitation strong{display:block;font-family:Georgia,"Times New Roman",serif;font-size:clamp(22px,3vw,30px);line-height:1.4}
+.closing-invitation p{margin:16px 0 0;font-weight:800;font-size:19px;color:#fffdf8}
+.membership-amount strong{display:block;font-size:19px;color:var(--green)}
+.membership-amount p{margin:6px 0 0;font-size:14px;color:var(--muted);line-height:1.6}
+</style></head>
 <body>
 <header><div class="brand-lockup"><img alt="" class="brand-logo" src="/friend-finder-mark.png"/><div class="brand">Neighbour Friend Finder</div></div><a class="nav-link" href="#how">How it works ↓</a></header>
 <main>
@@ -281,14 +288,14 @@ footer{padding:36px 24px;text-align:center;color:var(--muted)}.footer-brand{colo
 <p class="location-privacy">🔒 Your exact location is not shared publicly. It is stored privately and used only to match you with people within a 5 km radius. If you prefer, choose a nearby point rather than your home.</p>
 </div>
 <div class="step"><h3>What would you most like to do with friends?</h3><p class="muted">Choose one activity that matters most to you.</p><div class="choices">
-<label class="choice"><input name="primaryActivity" required="" type="radio" value="Morning walk or jog"> Morning walk or jog</input></label>
-<label class="choice"><input name="primaryActivity" type="radio" value="Evening walk or jog"> Evening walk or jog</input></label>
-<label class="choice"><input name="primaryActivity" type="radio" value="Grab a drink"> Grab a drink</input></label>
-<label class="choice"><input name="primaryActivity" type="radio" value="Supermarket run"> Supermarket run</input></label>
-<label class="choice"><input name="primaryActivity" type="radio" value="Cup of tea or coffee"> Cup of tea or coffee</input></label>
-<label class="choice"><input name="primaryActivity" type="radio" value="Board games"> Board games</input></label>
-<label class="choice"><input name="primaryActivity" type="radio" value="Video games"> Video games</input></label>
-<label class="choice"><input name="primaryActivity" type="radio" value="Kids' playdates"> Kids' playdates</input></label>
+<label class="choice"><input name="primaryActivity" required="" type="radio" value="Morning walk or jog"/> Morning walk or jog</label>
+<label class="choice"><input name="primaryActivity" type="radio" value="Evening walk or jog"/> Evening walk or jog</label>
+<label class="choice"><input name="primaryActivity" type="radio" value="Grab a drink"/> Grab a drink</label>
+<label class="choice"><input name="primaryActivity" type="radio" value="Supermarket run"/> Supermarket run</label>
+<label class="choice"><input name="primaryActivity" type="radio" value="Cup of tea or coffee"/> Cup of tea or coffee</label>
+<label class="choice"><input name="primaryActivity" type="radio" value="Board games"/> Board games</label>
+<label class="choice"><input name="primaryActivity" type="radio" value="Video games"/> Video games</label>
+<label class="choice"><input name="primaryActivity" type="radio" value="Kids' playdates"/> Kids' playdates</label>
 <label class="choice"><input name="primaryActivity" type="radio" value="Night out"/> Night out</label>
 <label class="choice"><input name="primaryActivity" type="radio" value="Breakfast"/> Breakfast</label>
 <label class="choice"><input name="primaryActivity" type="radio" value="Dinner"/> Dinner</label>
@@ -357,9 +364,9 @@ footer{padding:36px 24px;text-align:center;color:var(--muted)}.footer-brand{colo
 <p class="field-hint">These answers help us find people whose lifestyle preferences are compatible with yours.</p>
 </div>
 <div class="step"><h3>Complete your joining request</h3>
-<div class="fee-panel"><div class="eyebrow">Membership valid for 1 year</div><div class="fee-amount">KSh 2,800</div><div class="fee-label">Individual introductions to up to 15 highly compatible members near you during your membership year.</div><p class="muted">We match you individually with compatible neighbours within a 5 km radius. Where applicable, we also form WhatsApp friendship groups of highly compatible people in the same area.</p><p class="muted">As a member, you will receive monthly invitations to hangouts open to everyone in the greater area. This helps you meet people who could be compatible but were slightly outside your individual matching radius, for example. Hangouts include free or inexpensive activities like picnics and group walks.</p><div class="group-note" style="margin-top:16px">Is this how you meet your new friend group? Your best friend? Your partner?</div></div>
-<div class="payment-detail"><strong>M-PESA Till number:</strong> 1305656</div><div class="payment-detail"><strong>Till name:</strong> Family Forever</div>
-<p>After paying, enter your M-PESA transaction code below. Your payment must be confirmed before you can join the club and be matched with friends. Matches are made individually with up to 15 highly compatible members near you during your membership year. Where applicable, we also form WhatsApp groups of highly compatible people in the same area.</p>
+<div class="fee-panel"><div class="eyebrow">Membership valid for 1 year</div><div class="fee-amount">KSh 2,800</div><div class="fee-label">Individual introductions to up to 15 highly compatible members near you during your membership year.</div><p class="muted">We match you individually with compatible neighbours within a 5 km radius. Where applicable, we also form WhatsApp friendship groups of highly compatible people in the same area.</p><p class="muted">As a member, you will receive monthly invitations to hangouts open to everyone in the greater area. This helps you meet people who could be compatible but were slightly outside your individual matching radius, for example. Hangouts include free or inexpensive activities like picnics and group walks.</p><div class="group-note closing-invitation" style="margin-top:22px"><strong>Is this how you meet your new friend group? Your best friend? The people at your next birthdays? The friends that become family?</strong><p>Join the club and find out.</p></div></div>
+<div class="payment-detail"><strong>M-PESA Till number:</strong> 1305656</div><div class="payment-detail"><strong>Till name:</strong> Family Forever</div><div class="payment-detail membership-amount"><strong>Amount: KSh 2,800</strong><p>1-year membership and up to 15 highly compatible neighbour introductions, plus compatible friend groups where applicable.</p></div>
+
 <label for="mpesaCode">M-PESA transaction code</label>
 <input autocomplete="off" id="mpesaCode" inputmode="text" maxlength="12" minlength="8" name="mpesaCode" pattern="[A-Za-z0-9]{8,12}" placeholder="Enter your M-PESA transaction code" required="" title="Enter your M-PESA transaction code using 8 to 12 letters or numbers"/>
 <label for="paymentDate" style="margin-top:16px">Date of payment</label><input id="paymentDate" name="paymentDate" required="" type="date"/>
@@ -382,15 +389,7 @@ footer{padding:36px 24px;text-align:center;color:var(--muted)}.footer-brand{colo
 <div class="eyebrow">A few things you might be wondering</div>
 <h2>Frequently asked questions</h2>
 <div class="faq-list">
-
-
-
-
-
-
-
-
-<details class="faq-item"><summary>How does Neighbour Friend Finder work?</summary><p>After your payment is confirmed, we review your answers and introduce you individually to compatible people near you. We prioritise location, age, lifestyle and other preferences. Where several members in the same area are highly compatible, we may also form a WhatsApp friendship group.</p></details><details class="faq-item"><summary>How close will my matches be?</summary><p>Individual matches are normally within a 5 km radius of your selected location. We also consider a similar age group and compatible lifestyles. For example, we match non-drinkers with non-drinkers.</p></details><details class="faq-item"><summary>How many friends will I be introduced to?</summary><p>You can receive up to 15 unique individual introductions during your one-year membership, depending on who is available and compatible. We initially work towards five introductions. We do not guarantee 15 matches or force unsuitable introductions.</p></details><details class="faq-item"><summary>Will I automatically be added to a WhatsApp group?</summary><p>No. Individual introductions are our main service. Where multiple highly compatible members live near one another, we may create a WhatsApp friendship group and invite them.</p></details><details class="faq-item"><summary>How much does membership cost, and how long is it valid?</summary><p>Membership costs KSh 2,800 and is valid for one year. If you are still looking for connections after that, you can choose to renew.</p></details><details class="faq-item"><summary>What happens after I pay?</summary><p>Enter your M-PESA transaction code in the form. Once we confirm your payment, your profile is submitted to our member database for matchmaking. Finding suitable connections can take time as compatible people join.</p></details><details class="faq-item"><summary>What if there are no compatible members nearby yet?</summary><p>We keep looking as new members join. We only make introductions when the people involved meet our compatibility criteria, so the number and timing of matches can vary.</p></details><details class="faq-item"><summary>What if my neighbourhood is not listed?</summary><p>You can use your current location or select a point on the map. Your location helps us search for compatible members nearby.</p></details><details class="faq-item"><summary>Can anyone join?</summary><p>Adults of all genders are welcome. Matching depends on proximity and compatibility, not on being placed into a group of a particular gender.</p></details><details class="faq-item"><summary>Are there community events too?</summary><p>Yes. Members receive monthly invitations to affordable or free hangouts in their greater area, such as picnics or group walks. These events offer another way to meet people, including those just outside your usual 5 km matching radius.</p></details></div>
+<details class="faq-item"><summary>How does Neighbour Friend Finder work?</summary><p>After your payment is confirmed, we review your answers and introduce you individually to compatible people near you. We prioritise location, age, lifestyle and other preferences. Where several members in the same area are highly compatible, we may also form a WhatsApp friendship group.</p></details><details class="faq-item"><summary>How close will my matches be?</summary><p>Individual matches are normally within a 5 km radius of your selected location. We also consider a similar age group and compatible lifestyles. For example, we match non-drinkers with non-drinkers.</p></details><details class="faq-item"><summary>How many friends will I be introduced to?</summary><p>You can receive up to 15 unique individual introductions during your one-year membership, depending on who is available and compatible. We initially work towards five introductions. We do not force unsuitable matches.</p></details><details class="faq-item"><summary>How much does membership cost, and how long is it valid?</summary><p>Membership costs KSh 2,800 and is valid for one year.</p></details><details class="faq-item"><summary>What happens after I pay?</summary><p>Enter your M-PESA transaction code in the form. Once we confirm your payment, your profile is submitted to our member database for matchmaking.</p></details><details class="faq-item"><summary>What if there are no compatible members nearby yet?</summary><p>We give you a weekly update on your account status until your first five highly compatible matches have been introduced. After five introductions, we give you time to get to know those neighbours. If you choose to continue matching, we resume introductions towards your next five neighbour matches. In the very unlikely event that we cannot find any compatible matches—for example, if you live in a remote area such as Turkana—we will contact you and offer a choice: a refund, extending your membership for another year, or expanding your matching radius to reach the nearest compatible person, with your agreement.</p></details><details class="faq-item"><summary>Does this service include both men and women?</summary><p>Yes. Both men and women are welcome to join Neighbour Friend Finder. We make individual introductions based on location, age, lifestyle preferences and compatibility.</p></details><details class="faq-item"><summary>Are there community events too?</summary><p>Yes. Members receive monthly invitations to affordable or free hangouts in their greater area, such as picnics or group walks. These events offer another way to meet people, including those just outside your usual 5 km matching radius.</p></details></div>
 </div></section>
 </main>
 <footer><img alt="" src="/friend-finder-mark.png" style="width:58px;height:58px;object-fit:contain;display:block;margin:0 auto 8px;background:transparent;border:0;border-radius:0;box-shadow:none"/><div class="footer-brand">Neighbour Friend Finder</div>Where neighbours become friends and friends become family.<br/><a href="https://neighbourfriendfinder.co.ke">neighbourfriendfinder.co.ke</a></footer>
