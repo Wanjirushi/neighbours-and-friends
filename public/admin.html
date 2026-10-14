@@ -74,6 +74,18 @@
       <div class="table-wrap"><table class="demand-table"><thead><tr><th>Neighbourhood / area</th><th>Total registrations</th><th>Confirmed and waiting</th><th>Pending</th><th>Already grouped</th><th>Demand status</th></tr></thead><tbody id="demandBody"><tr><td colspan="6">Sign in to load demand data.</td></tr></tbody></table></div>
       <p class="small muted">Planning guide: 3 or more confirmed members waiting is a promising cluster; 2 may be enough to review for a match; 1 means keep collecting interest. Compatibility and practical travel distance still matter.</p>
     </div>
+    <div class="panel" id="waitingPanel">
+      <div class="topline"><div><h2>Waiting for matches</h2><p class="muted">Confirmed-payment members who are not assigned to a group. Everyone stays available for future proposals until you approve an assignment.</p></div><button class="secondary" id="refreshWaitingButton">Refresh waiting list</button></div>
+      <div class="stats" style="grid-template-columns:repeat(3,minmax(120px,1fr));margin:14px 0">
+        <div class="stat"><span>Paid and waiting</span><strong id="waitingTotal">0</strong></div>
+        <div class="stat"><span>Registered 7–13 days ago</span><strong id="waitingSoon">0</strong></div>
+        <div class="stat"><span>Registered 14+ days ago</span><strong id="waitingOverdue">0</strong></div>
+      </div>
+      <div class="row"><div><label for="waitingSearch">Search waiting members</label><input id="waitingSearch" placeholder="Name, neighbourhood, phone"></div><div><label for="waitingFilter">Waiting period</label><select id="waitingFilter"><option value="all">All waiting members</option><option value="new">Registered less than 7 days ago</option><option value="soon">Registered 7–13 days ago</option><option value="overdue">Registered 14+ days ago</option><option value="unknown">Registration date unavailable</option></select></div></div>
+      <p class="small muted">Days shown are since registration, not necessarily since payment confirmation. Potential matches are reviewed using “Find group additions” and “Generate proposed groups” below; no one is automatically assigned.</p>
+      <div class="table-wrap"><table><thead><tr><th>Member</th><th>Neighbourhood</th><th>Registered</th><th>Days waiting*</th><th>Matching options</th></tr></thead><tbody id="waitingBody"><tr><td colspan="5">Sign in to load waiting members.</td></tr></tbody></table></div>
+      <p class="small muted">*Registration age. A low-scoring group proposal can remain available without excluding the member from future matches.</p>
+    </div>
     <div class="panel" id="groupManagementPanel">
       <div class="topline"><div><h2>Friendship group management</h2><p class="muted">View approved groups, WhatsApp numbers and manual introductions. Check a member only after you have connected them with their group.</p></div><button id="refreshGroupsButton">Refresh groups</button></div>
       <div class="stats" style="grid-template-columns:repeat(3,minmax(120px,1fr));margin:14px 0">
@@ -177,6 +189,28 @@
       return `<tr><td><strong>${safe(b.key)}</strong></td><td>${b.total}</td><td>${b.confirmedWaiting}</td><td>${b.pending}</td><td>${b.assigned}</td><td><span class="demand-level ${cls}">${safe(label)}</span></td></tr>`;
     }).join('');
   }
+  function renderWaitingMembers() {
+    const waiting = members.filter(m => String(m.payment_status || '').toLowerCase() === 'confirmed' && (m.group_id === null || m.group_id === undefined || String(m.group_id).trim() === ''));
+    const now = Date.now();
+    const info = waiting.map(m => {
+      const parsed = m.created_at ? Date.parse(m.created_at) : NaN;
+      const days = Number.isFinite(parsed) ? Math.max(0, Math.floor((now - parsed) / 86400000)) : null;
+      const period = days === null ? 'unknown' : days >= 14 ? 'overdue' : days >= 7 ? 'soon' : 'new';
+      return { m, days, period };
+    }).sort((a,b) => (b.days ?? -1) - (a.days ?? -1));
+    $('waitingTotal').textContent = waiting.length;
+    $('waitingSoon').textContent = info.filter(x => x.period === 'soon').length;
+    $('waitingOverdue').textContent = info.filter(x => x.period === 'overdue').length;
+    const q = $('waitingSearch').value.trim().toLowerCase();
+    const filter = $('waitingFilter').value;
+    const visible = info.filter(({m,period}) => (filter === 'all' || period === filter) && (!q || [m.first_name,m.phone,m.neighbourhood,m.area,m.county].some(v => String(v ?? '').toLowerCase().includes(q))));
+    $('waitingBody').innerHTML = visible.length ? visible.map(({m,days,period}) => {
+      const location = [m.neighbourhood,m.area,m.county].filter(Boolean).join(', ') || 'Location not provided';
+      const date = m.created_at && Number.isFinite(Date.parse(m.created_at)) ? new Date(m.created_at).toLocaleDateString('en-KE') : 'Unknown';
+      const label = period === 'overdue' ? '14+ days — review' : period === 'soon' ? '7–13 days — approaching 2 weeks' : period === 'new' ? 'Under 7 days' : 'Unknown';
+      return `<tr><td><strong>${safe(m.first_name || 'Unnamed member')}</strong> (${safe(m.age ?? '?')})<br><small>${safe(m.phone || '')}</small><br><small>ID: ${safe(m.id || '')}</small></td><td>${safe(location)}</td><td>${safe(date)}</td><td><strong>${days === null ? 'Unknown' : days + ' days'}</strong><br><small>${safe(label)}</small></td><td><span class="badge confirmed">Available</span><br><small>Check group additions and new-group proposals below. No automatic assignment.</small></td></tr>`;
+    }).join('') : '<tr><td colspan="5">No waiting members match this filter.</td></tr>';
+  }
   function render() {
     const q = $('searchInput').value.trim().toLowerCase();
     const status = $('statusFilter').value;
@@ -189,6 +223,7 @@
     $('confirmedCount').textContent = members.filter(m=>m.payment_status==='confirmed').length;
     $('rejectedCount').textContent = members.filter(m=>m.payment_status==='rejected').length;
     renderDemandTracker();
+    renderWaitingMembers();
     if (!filtered.length) {
       $('membersBody').innerHTML = '<tr><td colspan="7">No matching registrations.</td></tr>';
       return;
@@ -414,6 +449,9 @@
     } finally { $('loginButton').disabled = false; }
   });
   $('refreshButton').addEventListener('click',loadMembers);
+  $('refreshWaitingButton').addEventListener('click',loadMembers);
+  $('waitingSearch').addEventListener('input',renderWaitingMembers);
+  $('waitingFilter').addEventListener('change',renderWaitingMembers);
   $('refreshDemandButton').addEventListener('click',renderDemandTracker);
   $('logoutButton').addEventListener('click',logout);
   $('searchInput').addEventListener('input',render);
