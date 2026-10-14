@@ -20,6 +20,14 @@
 
     .demand-table{min-width:760px}.demand-level{display:inline-block;padding:4px 8px;border-radius:18px;font-size:12px;font-weight:bold;background:#eee8dc}.demand-level.ready{background:#dcebdd;color:#285237}.demand-level.near{background:#f5e7d3;color:#80531d}.demand-level.wait{background:#eee8dc;color:#575c54}
     @media(max-width:640px){.stats{grid-template-columns:repeat(2,minmax(120px,1fr))}.panel{padding:16px}}
+
+    .admin-nav{position:sticky;top:0;z-index:30;background:var(--cream);padding:12px 0 10px;border-bottom:1px solid var(--line)}
+    .admin-nav .nav-buttons{display:flex;flex-wrap:wrap;gap:8px}
+    .admin-nav button{background:#e9e4d9;color:var(--ink);font-size:14px;padding:9px 12px;border:1px solid transparent}
+    .admin-nav button[aria-selected="true"]{background:var(--green);color:#fff}
+    .admin-nav button:focus-visible{outline:3px solid var(--terracotta);outline-offset:2px}
+    .dashboard-tab-panel.hidden{display:none!important}
+    @media(max-width:640px){.admin-nav .nav-buttons{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.admin-nav button{font-size:12px;padding:9px 6px}}
   </style>
 </head>
 <body>
@@ -39,7 +47,19 @@
   </section>
 
   <section id="dashboard" class="hidden">
-    <div class="panel">
+    <nav class="admin-nav" aria-label="Admin dashboard sections">
+      <div class="nav-buttons" role="tablist" aria-label="Admin sections">
+        <button type="button" role="tab" id="tab-overview" aria-controls="overviewPanel" aria-selected="true" data-tab="overviewPanel">Overview</button>
+        <button type="button" role="tab" id="tab-members" aria-controls="membersPanel" aria-selected="false" data-tab="membersPanel">Members</button>
+        <button type="button" role="tab" id="tab-individual" aria-controls="individualPanel" aria-selected="false" data-tab="individualPanel">Individual introductions</button>
+        <button type="button" role="tab" id="tab-updates" aria-controls="operationsPanel" aria-selected="false" data-tab="operationsPanel">Matchmaking & updates</button>
+        <button type="button" role="tab" id="tab-waiting" aria-controls="waitingPanel" aria-selected="false" data-tab="waitingPanel">Waiting list</button>
+        <button type="button" role="tab" id="tab-groups" aria-controls="groupManagementPanel" aria-selected="false" data-tab="groupManagementPanel">Friendship groups</button>
+        <button type="button" role="tab" id="tab-additions" aria-controls="additionsPanel" aria-selected="false" data-tab="additionsPanel">Group additions</button>
+        <button type="button" role="tab" id="tab-matching" aria-controls="matchingPanel" aria-selected="false" data-tab="matchingPanel">New group matching</button>
+      </div>
+    </nav>
+    <div class="panel dashboard-tab-panel" id="overviewPanel" role="tabpanel" aria-labelledby="tab-overview">
       <div class="topline"><h2>Registration overview</h2><div class="actions"><button class="secondary" id="refreshButton">Refresh</button><button class="secondary" id="logoutButton">Log out</button></div></div>
       <div class="stats">
         <div class="stat"><span>Total members</span><strong id="totalCount">0</strong></div>
@@ -49,7 +69,7 @@
       </div>
       <div id="dashboardMessage" class="notice hidden" role="status"></div>
     </div>
-    <div class="panel">
+    <div class="panel dashboard-tab-panel hidden" id="membersPanel" role="tabpanel" aria-labelledby="tab-members">
       <h2>Members</h2>
       <div class="row">
         <div><label for="searchInput">Search</label><input id="searchInput" placeholder="Name, phone, email, area or M-PESA code"></div>
@@ -63,7 +83,7 @@
         </table>
       </div>
     </div>
-    <div class="panel" id="individualPanel">
+    <div class="panel dashboard-tab-panel hidden" id="individualPanel" role="tabpanel" aria-labelledby="tab-individual">
       <div class="topline"><div><h2>Individual introductions</h2><p class="muted">Compatible pairs within 5 km. Approve first, then mark connected only after making the actual introduction. Group members remain eligible.</p></div><button class="secondary" id="refreshIndividualButton">Refresh pairs</button></div>
       <div id="individualMessage" class="notice hidden" role="status"></div>
       <div class="stats" style="margin:14px 0"><div class="stat"><span>Suggested pairs</span><strong id="individualSuggestionsCount">0</strong></div><div class="stat"><span>Approved, awaiting introduction</span><strong id="individualApprovedCount">0</strong></div><div class="stat"><span>Completed individual pairs</span><strong id="individualConnectedCount">0</strong></div><div class="stat"><span>Service completed (5+)</span><strong id="individualCompleteCount">0</strong></div></div>
@@ -71,7 +91,7 @@
       <h3>Suggested individual pairs</h3><div class="table-wrap"><table><thead><tr><th>People</th><th>Compatibility</th><th>Shared strengths / differences</th><th>Action</th></tr></thead><tbody id="individualSuggestionsBody"><tr><td colspan="4">Sign in to load suggestions.</td></tr></tbody></table></div>
       <h3>Approved and completed introductions</h3><div class="table-wrap"><table><thead><tr><th>People</th><th>Status</th><th>Action</th></tr></thead><tbody id="individualExistingBody"><tr><td colspan="3">Sign in to load introductions.</td></tr></tbody></table></div>
     </div>
-    <div class="panel" id="operationsPanel">
+    <div class="panel dashboard-tab-panel hidden" id="operationsPanel" role="tabpanel" aria-labelledby="tab-updates">
       <div class="topline"><div><h2>Matchmaking opportunities & member updates</h2><p class="muted">GPS-based 0–5 km matching, optional 6–9 km opportunities for review, and initial plus weekly follow-up. Every waiting member appears once.</p></div><button class="secondary" id="refreshOperationsButton">Refresh opportunities</button></div>
       <div id="operationsMessage" class="notice hidden" role="status"></div>
       <div class="stats" style="margin:14px 0">
@@ -86,7 +106,7 @@
       <div class="table-wrap"><table><thead><tr><th>Member</th><th>GPS-based opportunities</th><th>Initial update</th><th>Last weekly update / next due</th><th>Next action</th></tr></thead><tbody id="operationsBody"><tr><td colspan="5">Sign in to load opportunities.</td></tr></tbody></table></div>
       <p class="small muted">The initial update is due immediately after payment confirmation. Once it is recorded as sent, the next weekly update is due 7 days later; subsequent updates are due 7 days after the last recorded send. The system prepares text but does not send WhatsApp messages automatically.</p>
     </div>
-    <div class="panel" id="waitingPanel">
+    <div class="panel dashboard-tab-panel hidden" id="waitingPanel" role="tabpanel" aria-labelledby="tab-waiting">
       <div class="topline"><div><h2>Waiting for matches</h2><p class="muted">Confirmed-payment members who are not assigned to a group. Everyone stays available for future proposals until you approve an assignment.</p></div><button class="secondary" id="refreshWaitingButton">Refresh waiting list</button></div>
       <div class="stats" style="grid-template-columns:repeat(3,minmax(120px,1fr));margin:14px 0">
         <div class="stat"><span>Paid and waiting</span><strong id="waitingTotal">0</strong></div>
@@ -98,7 +118,7 @@
       <div class="table-wrap"><table><thead><tr><th>Member</th><th>Neighbourhood</th><th>Registered</th><th>Days waiting*</th><th>Matching options</th></tr></thead><tbody id="waitingBody"><tr><td colspan="5">Sign in to load waiting members.</td></tr></tbody></table></div>
       <p class="small muted">*Registration age. A low-scoring group proposal can remain available without excluding the member from future matches.</p>
     </div>
-    <div class="panel" id="groupManagementPanel">
+    <div class="panel dashboard-tab-panel hidden" id="groupManagementPanel" role="tabpanel" aria-labelledby="tab-groups">
       <div class="topline"><div><h2>Friendship group management</h2><p class="muted">View approved groups, WhatsApp numbers and manual introductions. Check a member only after you have connected them with their group.</p></div><button id="refreshGroupsButton">Refresh groups</button></div>
       <div class="stats" style="grid-template-columns:repeat(3,minmax(120px,1fr));margin:14px 0">
         <div class="stat"><span>Groups</span><strong id="managedGroupCount">0</strong></div>
@@ -108,12 +128,12 @@
       <div id="groupManagementMessage" class="notice hidden" role="status"></div>
       <div id="managedGroups"><p class="muted">Sign in to load approved groups.</p></div>
     </div>
-    <div class="panel" id="additionsPanel">
+    <div class="panel dashboard-tab-panel hidden" id="additionsPanel" role="tabpanel" aria-labelledby="tab-additions">
       <div class="topline"><div><h2>Add members to existing groups</h2><p class="muted">Preview compatible additions to forming groups. Nothing changes until you approve each group separately.</p></div><button id="previewAdditionsButton">Find group additions</button></div>
       <div id="additionsMessage" class="notice hidden" role="status"></div>
       <div id="additionsResults"></div>
     </div>
-    <div class="panel" id="matchingPanel">
+    <div class="panel dashboard-tab-panel hidden" id="matchingPanel" role="tabpanel" aria-labelledby="tab-matching">
       <div class="topline">
         <div><h2>Member matching</h2><p class="muted">Generate proposed friendship groups from members with confirmed payments who are not already assigned to a group.</p></div>
         <div class="actions"><button id="generateMatchesButton">Generate proposed groups</button></div>
@@ -142,6 +162,29 @@
   let adminPassword = '';
   let members = [];
   let proposedGroups = [];
+  const dashboardTabs = [...document.querySelectorAll('.admin-nav button[data-tab]')];
+  function showDashboardTab(panelId) {
+    for (const tab of dashboardTabs) {
+      const selected = tab.dataset.tab === panelId;
+      tab.setAttribute('aria-selected', String(selected));
+      tab.tabIndex = selected ? 0 : -1;
+      $(tab.dataset.tab).classList.toggle('hidden', !selected);
+    }
+    window.scrollTo({top:0,behavior:'instant'});
+  }
+  document.querySelector('.admin-nav').addEventListener('click', event => {
+    const tab = event.target.closest('button[data-tab]');
+    if (tab) showDashboardTab(tab.dataset.tab);
+  });
+  document.querySelector('.admin-nav').addEventListener('keydown', event => {
+    if (!['ArrowRight','ArrowLeft','Home','End'].includes(event.key)) return;
+    const current = dashboardTabs.indexOf(document.activeElement);
+    if (current < 0) return;
+    event.preventDefault();
+    const next = event.key === 'Home' ? 0 : event.key === 'End' ? dashboardTabs.length - 1 : (current + (event.key === 'ArrowRight' ? 1 : -1) + dashboardTabs.length) % dashboardTabs.length;
+    dashboardTabs[next].focus();
+    showDashboardTab(dashboardTabs[next].dataset.tab);
+  });
   const showMessage = (element, message, isSuccess=false) => {
     element.textContent = message;
     element.classList.remove('hidden', 'success');
@@ -155,8 +198,41 @@
     });
     const data = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(data.error || `Request failed (${response.status})`);
+    // Successful writes refresh every section, not just the one being edited.
+    const readOnlyActions = new Set(['operations_overview','individual_overview','group_overview','preview_matches','preview_additions']);
+    if (method === 'PATCH' || (method === 'POST' && payload?.action && !readOnlyActions.has(payload.action))) {
+      queueDashboardRefresh();
+    }
     return data;
   }
+  // Keep all dashboard sections synchronized after changes and periodically.
+  // Refresh only while signed in, and avoid interrupting typing or confirmations.
+  let dashboardRefreshTimer = null;
+  let dashboardRefreshBusy = false;
+  let dashboardRefreshQueued = false;
+  async function refreshEntireDashboard() {
+    if (!adminPassword || $('dashboard').classList.contains('hidden') || dashboardRefreshBusy) return;
+    if (document.hidden) return;
+    const active = document.activeElement;
+    if (active && ['INPUT','SELECT','TEXTAREA'].includes(active.tagName) &&
+        active.id !== 'adminPassword') return;
+    dashboardRefreshBusy = true;
+    try { await loadMembers(); }
+    finally { dashboardRefreshBusy = false; }
+  }
+  function queueDashboardRefresh() {
+    if (dashboardRefreshQueued) return;
+    dashboardRefreshQueued = true;
+    setTimeout(() => {
+      dashboardRefreshQueued = false;
+      refreshEntireDashboard();
+    }, 1000);
+  }
+  dashboardRefreshTimer = setInterval(refreshEntireDashboard, 60000);
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) queueDashboardRefresh();
+  });
+
   function value(obj, key) {
     const v = obj?.[key];
     if (Array.isArray(v)) return v.join(', ');
@@ -301,6 +377,9 @@
       if(!x)return;
       const a={name:x.name_a}, c={name:x.name_b};
       await (op==='copy-a'?copyIntroduction(a,c):copyIntroduction(c,a));
+      const oldLabel=b.textContent;
+      b.textContent='✓ Copied!';
+      setTimeout(()=>{if(b.isConnected)b.textContent=oldLabel;},2500);
       return;
     }
     if(op==='reopen' && !confirm('Has this customer requested more matching? Reopen until their membership expires or they reach 15 introductions?'))return;
@@ -551,6 +630,7 @@
     $('matchingMessage').classList.add('hidden');
   }
   function logout() {
+    showDashboardTab('overviewPanel');
     adminPassword = '';
     members = [];
     $('dashboard').classList.add('hidden');
