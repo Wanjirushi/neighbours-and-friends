@@ -74,6 +74,16 @@
       <div class="table-wrap"><table class="demand-table"><thead><tr><th>Neighbourhood / area</th><th>Total registrations</th><th>Confirmed and waiting</th><th>Pending</th><th>Already grouped</th><th>Demand status</th></tr></thead><tbody id="demandBody"><tr><td colspan="6">Sign in to load demand data.</td></tr></tbody></table></div>
       <p class="small muted">Planning guide: 3 or more confirmed members waiting is a promising cluster; 2 may be enough to review for a match; 1 means keep collecting interest. Compatibility and practical travel distance still matter.</p>
     </div>
+    <div class="panel" id="groupManagementPanel">
+      <div class="topline"><div><h2>Friendship group management</h2><p class="muted">View approved groups, WhatsApp numbers and manual introductions. Check a member only after you have connected them with their group.</p></div><button id="refreshGroupsButton">Refresh groups</button></div>
+      <div class="stats" style="grid-template-columns:repeat(3,minmax(120px,1fr));margin:14px 0">
+        <div class="stat"><span>Groups</span><strong id="managedGroupCount">0</strong></div>
+        <div class="stat"><span>Grouped members</span><strong id="managedMemberCount">0</strong></div>
+        <div class="stat"><span>Introductions completed</span><strong id="managedConnectedCount">0</strong></div>
+      </div>
+      <div id="groupManagementMessage" class="notice hidden" role="status"></div>
+      <div id="managedGroups"><p class="muted">Sign in to load approved groups.</p></div>
+    </div>
     <div class="panel" id="additionsPanel">
       <div class="topline"><div><h2>Add members to existing groups</h2><p class="muted">Preview compatible additions to forming groups. Nothing changes until you approve each group separately.</p></div><button id="previewAdditionsButton">Find group additions</button></div>
       <div id="additionsMessage" class="notice hidden" role="status"></div>
@@ -218,11 +228,73 @@
       members = Array.isArray(data.members) ? data.members : [];
       $('dashboardMessage').classList.add('hidden');
       render();
+      await loadGroups();
     } catch (err) {
       showMessage($('dashboardMessage'),err.message);
       if (/unauthori[sz]ed|password/i.test(err.message)) logout();
     } finally { $('refreshButton').disabled = false; }
   }
+  let managedGroups = [];
+  async function loadGroups() {
+    $('refreshGroupsButton').disabled = true;
+    try {
+      const result = await api('POST', { action: 'group_overview' });
+      managedGroups = Array.isArray(result.groups) ? result.groups : [];
+      renderManagedGroups();
+      $('groupManagementMessage').classList.add('hidden');
+    } catch (err) {
+      showMessage($('groupManagementMessage'), err.message || 'Could not load groups.');
+    } finally { $('refreshGroupsButton').disabled = false; }
+  }
+  function renderManagedGroups() {
+    const count = managedGroups.reduce((n,g)=>n+(g.members||[]).length,0);
+    const connected = managedGroups.reduce((n,g)=>n+(g.members||[]).filter(m=>m.connected).length,0);
+    $('managedGroupCount').textContent = managedGroups.length;
+    $('managedMemberCount').textContent = count;
+    $('managedConnectedCount').textContent = connected;
+    $('managedGroups').innerHTML = managedGroups.length ? managedGroups.map((g,i)=>{
+      const people = g.members || [];
+      const done = people.filter(m=>m.connected).length;
+      return `<details class="group-card" ${i===0?'open':''}>
+        <summary style="cursor:pointer"><strong>${safe(g.display_name || "Unnamed friendship group")}</strong> · ${people.length} of 15 members · ${done}/${people.length} introduced · ${safe(g.status||'')}</summary>
+        <p class="group-meta"><button type="button" data-rename-group="${safe(g.id)}">Rename group</button> · Group ID: ${safe(g.id)} · Created: ${safe(g.created_at ? new Date(g.created_at).toLocaleDateString() : 'Unknown')}</p>
+        <div class="table-wrap"><table><thead><tr><th>Member</th><th>WhatsApp contact</th><th>Introduction status</th></tr></thead><tbody>
+        ${people.map(m=>{ const digits=String(m.phone||'').replace(/[^0-9]/g,''); const wa=digits.startsWith('0')?'254'+digits.slice(1):digits;
+          const link=wa.length>=9&&wa.length<=15?`<a href="https://wa.me/${wa}" target="_blank" rel="noopener noreferrer">Open WhatsApp</a>`:'';
+          return `<tr><td><strong>${safe(m.first_name||'Member')}</strong>${m.age?` (${safe(m.age)})`:''}</td>
+            <td>${safe(m.phone||'Not provided')} ${link}</td>
+            <td><label style="display:flex;gap:8px;align-items:center"><input type="checkbox" data-group-id="${safe(g.id)}" data-member-id="${safe(m.id)}" ${m.connected?'checked':''}> ${m.connected?'Connected':'Not yet connected'}</label>
+            ${m.connected_at?`<small class="muted">Recorded ${safe(new Date(m.connected_at).toLocaleDateString())}</small>`:''}</td></tr>`;
+        }).join('') || '<tr><td colspan="3">No assigned members</td></tr>'}
+        </tbody></table></div></details>`;
+    }).join('') : '<p class="muted">No approved groups found.</p>';
+  }
+  $('managedGroups').addEventListener('change',async e=>{
+    const box=e.target.closest('input[data-member-id]'); if(!box) return;
+    const connected=box.checked;
+    box.disabled=true;
+    try {
+      await api('POST',{action:'set_introduction',group_id:box.dataset.groupId,member_id:box.dataset.memberId,connected});
+      await loadGroups();
+      showMessage($('groupManagementMessage'),connected?'Introduction marked connected.':'Introduction marked pending.',true);
+    } catch(err){ box.checked=!connected; showMessage($('groupManagementMessage'),err.message||'Could not save introduction.'); }
+    finally {box.disabled=false;}
+  });
+  $('managedGroups').addEventListener('click',async e=>{
+    const btn=e.target.closest('button[data-rename-group]'); if(!btn) return;
+    const group=managedGroups.find(g=>g.id===btn.dataset.renameGroup); if(!group) return;
+    const name=prompt('Group name:',group.display_name||'');
+    if(name===null || !name.trim() || name.trim()===group.display_name) return;
+    btn.disabled=true;
+    try {
+      await api('POST',{action:'rename_group',group_id:group.id,display_name:name.trim()});
+      await loadGroups();
+      showMessage($('groupManagementMessage'),'Group renamed successfully.',true);
+    } catch(err){showMessage($('groupManagementMessage'),err.message||'Could not rename group.');}
+    finally {btn.disabled=false;}
+  });
+  $('refreshGroupsButton').addEventListener('click',loadGroups);
+
   function renderProposedGroups() {
     const host = $('proposedGroups');
     if (!proposedGroups.length) {
