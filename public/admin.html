@@ -68,12 +68,6 @@
         <div class="stat"><span>Rejected</span><strong id="rejectedCount">0</strong></div>
       </div>
       <div id="dashboardMessage" class="notice hidden" role="status"></div>
-      <div class="notice" id="completionTestPanel">
-        <strong>Temporary completion test (read-only)</strong>
-        <p class="small">Simulates 4, 5 and 15 introductions, plus reopening matching. No customer records are changed. This checks the test scenarios, not the live end-to-end introduction workflow.</p>
-        <button type="button" id="runCompletionTestButton">Run completion test</button>
-        <div id="completionTestResults" role="status" aria-live="polite" style="margin-top:12px"></div>
-      </div>
     </div>
     <div class="panel dashboard-tab-panel hidden" id="membersPanel" role="tabpanel" aria-labelledby="tab-members">
       <h2>Members</h2>
@@ -205,7 +199,7 @@
     const data = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(data.error || `Request failed (${response.status})`);
     // Successful writes refresh every section, not just the one being edited.
-    const readOnlyActions = new Set(['operations_overview','individual_overview','group_overview','preview_matches','preview_additions','test_completion_readonly']);
+    const readOnlyActions = new Set(['operations_overview','individual_overview','group_overview','preview_matches','preview_additions']);
     if (method === 'PATCH' || (method === 'POST' && payload?.action && !readOnlyActions.has(payload.action))) {
       queueDashboardRefresh();
     }
@@ -664,21 +658,6 @@
       adminPassword = '';
     } finally { $('loginButton').disabled = false; }
   });
-  $('runCompletionTestButton').addEventListener('click', async () => {
-    const button=$('runCompletionTestButton');
-    const host=$('completionTestResults');
-    button.disabled=true;
-    host.textContent='Running read-only simulation…';
-    try {
-      const result=await api('POST',{action:'test_completion_readonly'});
-      const checks=Array.isArray(result.checks)?result.checks:[];
-      if (!result.read_only || !checks.length) throw new Error('Unexpected test response; no records changed by the dashboard.');
-      host.innerHTML=`<strong>${result.passed?'All simulation checks passed':'One or more simulation checks failed'}</strong><ul>${checks.map(c=>`<li>${c.passed?'✓':'✗'} ${safe(c.name)}</li>`).join('')}</ul><p class="small">${safe(result.note||'This is a simulation, not a live end-to-end test.')}</p>`;
-    } catch(err) {
-      host.textContent='Test could not run: '+(err.message||String(err));
-    } finally { button.disabled=false; }
-  });
-
   $('refreshButton').addEventListener('click',loadMembers);
   $('refreshWaitingButton').addEventListener('click',loadMembers);
   $('waitingSearch').addEventListener('input',renderWaitingMembers);
