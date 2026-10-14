@@ -262,6 +262,20 @@
   $('operationsSearch').addEventListener('input',renderOperations);
   $('refreshOperationsButton').addEventListener('click',loadOperations);
 
+  function waLink(phone) {
+    const digits=String(phone||'').replace(/\D/g,'');
+    const intl=digits.startsWith('0')?'254'+digits.slice(1):digits.startsWith('7')&&digits.length===9?'254'+digits:digits;
+    return /^\d{10,15}$/.test(intl)?'https://wa.me/'+intl:null;
+  }
+  function pairContact(name,phone) {
+    const link=waLink(phone);
+    return `<div><strong>${safe(name||'Member')}</strong> · ${safe(phone||'No phone recorded')}${link?` · <a href="${link}" target="_blank" rel="noopener noreferrer">WhatsApp</a>`:''}</div>`;
+  }
+  async function copyIntroduction(a,b) {
+    const text=`Hi ${a.name}, we have a potential friendship introduction for you through Neighbour Friend Finder. ${b.name} may be a compatible friend. Would you be comfortable with us sharing your contact details with each other to make the introduction? We will only proceed once both of you agree.`;
+    try {await navigator.clipboard.writeText(text);showMessage($('individualMessage'),`Copied consent request for ${a.name}. Send it yourself; don't share either person's number without both agreeing.`,true);}
+    catch {prompt('Copy this consent request:',text);}
+  }
   let individualData={suggestions:[],existing:[],progress:[]};
   async function loadIndividual() {
     $('refreshIndividualButton').disabled=true;
@@ -273,8 +287,8 @@
       $('individualConnectedCount').textContent=existing.filter(x=>x.status==='connected').length;
       $('individualCompleteCount').textContent=progress.filter(x=>x.complete).length;
       $('individualProgressBody').innerHTML=progress.map(x=>`<tr><td><strong>${safe(x.name)}</strong><br><small>${safe(x.phone||'')}</small></td><td>${safe(x.count)} unique people / 5 minimum (15 maximum)</td><td><span class="badge ${x.complete?'confirmed':''}">${x.expired?'Membership expired':x.complete?'Completed':x.active?'Actively matching':'15 reached'}</span><br><small>Entitlement until ${safe(x.expires_at?new Date(x.expires_at).toLocaleDateString('en-KE'):'Unknown')}</small></td><td>${x.complete&&!x.expired&&x.count<15?`<button data-individual="reopen" data-id="${safe(x.id)}">Reopen on request</button>`:''}</td></tr>`).join('')||'<tr><td colspan="4">No confirmed members.</td></tr>';
-      $('individualSuggestionsBody').innerHTML=suggestions.map(x=>`<tr><td><strong>${safe(x.name_a)}</strong> (${safe(x.age_a)}) — <strong>${safe(x.name_b)}</strong> (${safe(x.age_b)})<br><small>${safe(x.area_a||'')} / ${safe(x.area_b||'')}</small></td><td>${safe(x.score)}% · ${safe(x.distance_km)} km</td><td><small>Strengths: ${safe((x.strengths||[]).join(', ')||'None noted')}<br>Differences: ${safe((x.differences||[]).join(', ')||'None noted')}</small></td><td><button data-individual="approve" data-a="${safe(x.member_a)}" data-b="${safe(x.member_b)}">Approve pair</button></td></tr>`).join('')||'<tr><td colspan="4">No new eligible pairs.</td></tr>';
-      $('individualExistingBody').innerHTML=existing.map(x=>`<tr><td><strong>${safe(x.name_a)}</strong> — <strong>${safe(x.name_b)}</strong></td><td><span class="badge ${x.status==='connected'?'confirmed':''}">${safe(x.status)}</span>${x.connected_at?`<br><small>${safe(new Date(x.connected_at).toLocaleDateString('en-KE'))}</small>`:''}</td><td>${x.status==='approved'?`<button data-individual="connected" data-a="${safe(x.member_a)}" data-b="${safe(x.member_b)}">Mark actually introduced</button>`:''}</td></tr>`).join('')||'<tr><td colspan="3">No introductions recorded.</td></tr>';
+      $('individualSuggestionsBody').innerHTML=suggestions.map(x=>`<tr><td><strong>${safe(x.name_a)}</strong> (${safe(x.age_a)}) — <strong>${safe(x.name_b)}</strong> (${safe(x.age_b)})<br><small>${safe(x.area_a||'')} / ${safe(x.area_b||'')}</small><div class="small">${pairContact(x.name_a,x.phone_a)}${pairContact(x.name_b,x.phone_b)}</div></td><td>${safe(x.score)}% · ${safe(x.distance_km)} km</td><td><small>Strengths: ${safe((x.strengths||[]).join(', ')||'None noted')}<br>Differences: ${safe((x.differences||[]).join(', ')||'None noted')}</small></td><td><button data-individual="approve" data-a="${safe(x.member_a)}" data-b="${safe(x.member_b)}">Approve pair</button></td></tr>`).join('')||'<tr><td colspan="4">No new eligible pairs.</td></tr>';
+      $('individualExistingBody').innerHTML=existing.map(x=>`<tr><td>${pairContact(x.name_a,x.phone_a)}${pairContact(x.name_b,x.phone_b)}</td><td><span class="badge ${x.status==='connected'?'confirmed':''}">${safe(x.status)}</span>${x.connected_at?`<br><small>${safe(new Date(x.connected_at).toLocaleDateString('en-KE'))}</small>`:''}</td><td>${x.status==='approved'?`<div class="actions"><button class="secondary" data-individual="copy-a" data-a="${safe(x.member_a)}" data-b="${safe(x.member_b)}">Copy message for ${safe(x.name_a)}</button><button class="secondary" data-individual="copy-b" data-a="${safe(x.member_a)}" data-b="${safe(x.member_b)}">Copy message for ${safe(x.name_b)}</button><button data-individual="connected" data-a="${safe(x.member_a)}" data-b="${safe(x.member_b)}">Mark actually introduced</button></div>`:''}</td></tr>`).join('')||'<tr><td colspan="3">No introductions recorded.</td></tr>';
       $('individualMessage').classList.add('hidden');
     } catch(e) {showMessage($('individualMessage'),e.message||'Could not load individual matches.');}
     finally {$('refreshIndividualButton').disabled=false;}
@@ -282,6 +296,13 @@
   $('individualPanel').addEventListener('click',async e=>{
     const b=e.target.closest('button[data-individual]');if(!b)return;
     const op=b.dataset.individual;
+    if(op==='copy-a'||op==='copy-b') {
+      const x=(individualData.existing||[]).find(p=>p.member_a===b.dataset.a&&p.member_b===b.dataset.b);
+      if(!x)return;
+      const a={name:x.name_a}, c={name:x.name_b};
+      await (op==='copy-a'?copyIntroduction(a,c):copyIntroduction(c,a));
+      return;
+    }
     if(op==='reopen' && !confirm('Has this customer requested more matching? Reopen until their membership expires or they reach 15 introductions?'))return;
     if(op==='approve' && !confirm('Approve this compatible pair for an individual introduction? This does not contact them.'))return;
     if(op==='connected' && !confirm('Have you ACTUALLY introduced these two people to each other? Both will receive one unique introduction credit.'))return;
