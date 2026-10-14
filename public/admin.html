@@ -63,16 +63,19 @@
         </table>
       </div>
     </div>
-    <div class="panel" id="demandPanel">
-      <div class="topline"><div><h2>Neighbourhood demand tracker</h2><p class="muted">See where registrations are coming from and which areas are closest to having enough confirmed, unassigned members for a friendship group.</p></div><button class="secondary" id="refreshDemandButton">Refresh tracker</button></div>
-      <div class="notice">This tracker groups people by their most specific available location: neighbourhood, then area, then county. It counts confirmed, unassigned members separately from pending registrations. It does not automatically promise a group or match people.</div>
-      <div class="stats" style="grid-template-columns:repeat(3,minmax(120px,1fr));margin:14px 0">
-        <div class="stat"><span>Areas represented</span><strong id="demandAreaCount">0</strong></div>
-        <div class="stat"><span>Confirmed and waiting</span><strong id="demandWaitingCount">0</strong></div>
-        <div class="stat"><span>Pending registrations</span><strong id="demandPendingCount">0</strong></div>
+    <div class="panel" id="operationsPanel">
+      <div class="topline"><div><h2>Matchmaking opportunities & weekly updates</h2><p class="muted">GPS-based 0–5 km matching, optional 6–9 km opportunities for review, and weekly follow-up. Every waiting member appears once.</p></div><button class="secondary" id="refreshOperationsButton">Refresh opportunities</button></div>
+      <div id="operationsMessage" class="notice hidden" role="status"></div>
+      <div class="stats" style="margin:14px 0">
+        <div class="stat"><span>Paid and waiting</span><strong id="opWaiting">0</strong></div>
+        <div class="stat"><span>Match opportunities</span><strong id="opReady">0</strong></div>
+        <div class="stat"><span>Weekly updates due</span><strong id="opDue">0</strong></div>
+        <div class="stat"><span>No valid GPS</span><strong id="opGps">0</strong></div>
       </div>
-      <div class="table-wrap"><table class="demand-table"><thead><tr><th>Neighbourhood / area</th><th>Total registrations</th><th>Confirmed and waiting</th><th>Pending</th><th>Already grouped</th><th>Demand status</th></tr></thead><tbody id="demandBody"><tr><td colspan="6">Sign in to load demand data.</td></tr></tbody></table></div>
-      <p class="small muted">Planning guide: 3 or more confirmed members waiting is a promising cluster; 2 may be enough to review for a match; 1 means keep collecting interest. Compatibility and practical travel distance still matter.</p>
+      <p class="small muted">Normal matches remain within 5 km. Almost Nearby (over 5–9 km) is review-only and requires consent from everyone involved before any distance exception. No exceptions can be approved using the normal matching buttons. Match opportunities are not assignments. Nearby-but-incompatible means within 5 km but failing one or more hard rules. No matches are promised.</p>
+      <div class="row"><div><label for="operationsFilter">Show members</label><select id="operationsFilter"><option value="all">All paid and waiting</option><option value="due">Weekly update due</option><option value="ready">Compatible match opportunity</option><option value="nearby">Nearby but incompatible</option><option value="almost">Almost nearby (6–9 km)</option><option value="none">Nobody within 5 km</option><option value="gps">GPS missing</option></select></div><div><label for="operationsSearch">Find member</label><input id="operationsSearch" placeholder="Name, area, phone"></div></div>
+      <div class="table-wrap"><table><thead><tr><th>Member</th><th>GPS-based opportunities</th><th>Last weekly update</th><th>Next action</th></tr></thead><tbody id="operationsBody"><tr><td colspan="4">Sign in to load opportunities.</td></tr></tbody></table></div>
+      <p class="small muted">Weekly updates are tracked from the last recorded send (every 7 days). Until the first update is sent, the first follow-up is due 7 days after registration. The system prepares text but does not send WhatsApp messages automatically.</p>
     </div>
     <div class="panel" id="waitingPanel">
       <div class="topline"><div><h2>Waiting for matches</h2><p class="muted">Confirmed-payment members who are not assigned to a group. Everyone stays available for future proposals until you approve an assignment.</p></div><button class="secondary" id="refreshWaitingButton">Refresh waiting list</button></div>
@@ -153,42 +156,95 @@
   function safe(text) {
     return String(text ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
   }
-  function renderDemandTracker() {
-    const buckets = new Map();
-    members.forEach(m => {
-      const neighbourhood = String(m.neighbourhood || '').trim();
-      const area = String(m.area || '').trim();
-      const county = String(m.county || '').trim();
-      const key = neighbourhood || area || county || 'Location not provided';
-      if (!buckets.has(key)) buckets.set(key, { key, total: 0, pending: 0, confirmedWaiting: 0, assigned: 0, confirmed: 0 });
-      const b = buckets.get(key);
-      b.total++;
-      const status = String(m.payment_status || 'pending').toLowerCase();
-      const assigned = m.group_id !== null && m.group_id !== undefined && String(m.group_id).trim() !== '';
-      if (status === 'pending') b.pending++;
-      if (status === 'confirmed') {
-        b.confirmed++;
-        if (assigned) b.assigned++;
-        else b.confirmedWaiting++;
-      }
-    });
-    const rows = [...buckets.values()].sort((a,b) => b.confirmedWaiting-a.confirmedWaiting || b.total-a.total || a.key.localeCompare(b.key));
-    $('demandAreaCount').textContent = rows.length;
-    $('demandWaitingCount').textContent = rows.reduce((n,b)=>n+b.confirmedWaiting,0);
-    $('demandPendingCount').textContent = rows.reduce((n,b)=>n+b.pending,0);
-    const host = $('demandBody');
-    if (!rows.length) {
-      host.innerHTML = '<tr><td colspan="6">No registrations yet.</td></tr>';
+  let operationMembers = [];
+  const weekMs = 7 * 86400000;
+  function updateDue(m) {
+    const date = m.last_update?.sent_at || m.created_at;
+    const parsed = date ? Date.parse(date) : NaN;
+    return !Number.isFinite(parsed) || Date.now() - parsed >= weekMs;
+  }
+  function situation(m) {
+    if (!m.has_valid_gps) return ['GPS missing', 'gps'];
+    if (!m.has_valid_age) return ['Age needs review', 'gps'];
+    if (m.compatible_waiting_count || m.compatible_group_count) return ['Compatible options to review', 'ready'];
+    if ((m.almost_nearby_pairs||[]).length || (m.almost_nearby_groups||[]).length) return ['Almost nearby — review only', 'almost'];
+    if (m.nearby_incompatible_count) return ['Nearby, but incompatible', 'nearby'];
+    return ['No confirmed members within 5 km', 'none'];
+  }
+  function renderOperations() {
+    const all = operationMembers;
+    $('opWaiting').textContent = all.length;
+    $('opReady').textContent = all.filter(m=>m.compatible_waiting_count || m.compatible_group_count).length;
+    $('opDue').textContent = all.filter(updateDue).length;
+    $('opGps').textContent = all.filter(m=>!m.has_valid_gps).length;
+    const filter=$('operationsFilter').value, q=$('operationsSearch').value.trim().toLowerCase();
+    const visible=all.filter(m => (filter==='all' || (filter==='due'?updateDue(m):(filter==='almost' ? (m.almost_nearby_pairs||[]).length+(m.almost_nearby_groups||[]).length>0 : situation(m)[1]===filter))) &&
+      (!q || [m.first_name,m.neighbourhood,m.area,m.county,m.phone].some(v=>String(v||'').toLowerCase().includes(q))));
+    visible.sort((a,b)=>Number(updateDue(b))-Number(updateDue(a)) || Date.parse(a.last_update?.sent_at||a.created_at||0)-Date.parse(b.last_update?.sent_at||b.created_at||0));
+    $('operationsBody').innerHTML=visible.length ? visible.map(m=>{
+      const [status,cat]=situation(m);
+      const last=m.last_update?.sent_at ? new Date(m.last_update.sent_at).toLocaleDateString('en-KE') : 'Never';
+      const due=updateDue(m);
+      const choice=m.choice?.low_compatibility_choice || '';
+      const almost = [ ...(m.almost_nearby_pairs||[]).map(x=>`<li>Person: ${safe(x.first_name)} · ${safe(x.neighbourhood||'Area unknown')} · ${safe(x.distance_km)} km · ${safe(x.compatibility)}%<br><small>Strengths: ${safe((x.strengths||[]).join(', ')||'None noted')} · Differences: ${safe((x.differences||[]).join(', ')||'None noted')}</small></li>`), ...(m.almost_nearby_groups||[]).map(x=>`<li>Group: ${safe(x.display_name||x.group_id)} (${safe(x.group_size)}/15) · farthest member ${safe(x.max_distance_km)} km · minimum score ${safe(x.compatibility)}%</li>`) ];
+      const almostHtml=almost.length ? `<details><summary><strong>Almost Nearby: ${almost.length} option(s)</strong> — consent required</summary><ul>${almost.join('')}</ul><small>Review only. Obtain consent from both people or all existing group members before considering an exception. Normal approval remains limited to 5 km.</small></details>` : '';
+      const opportunities = `Compatible waiting: ${m.compatible_waiting_count} · Eligible groups: ${m.compatible_group_count}<br><small>Nearby confirmed: ${m.nearby_count} · Nearby incompatible: ${m.nearby_incompatible_count}</small>`;
+      return `<tr><td><strong>${safe(m.first_name||'Member')}</strong> (${safe(m.age||'?')})<br><small>${safe([m.neighbourhood,m.area,m.county].filter(Boolean).join(', '))}</small><br><small>${safe(m.phone||'')}</small></td>
+        <td><span class="badge ${cat==='ready'?'confirmed':''}">${safe(status)}</span><br>${opportunities}${m.best_score!==null?`<br><small>Best unassigned pair: ${safe(m.best_score)}%</small>`:''}${almostHtml}</td>
+        <td>${safe(last)}<br><span class="badge ${due?'pending':'confirmed'}">${due?'Update due':'Up to date'}</span><br><small>${safe(m.last_update?.update_type?.replaceAll('_',' ')||'No update recorded')}</small></td>
+        <td><div class="actions"><button data-op="copy" data-id="${safe(m.id)}">Copy update</button><button data-op="sent" data-id="${safe(m.id)}">Mark sent</button><button class="secondary" data-op="choice" data-id="${safe(m.id)}">Member's choice</button></div><small>${choice?'Choice: '+safe(choice.replaceAll('_',' ')):'No preference response recorded'}</small></td></tr>`;
+    }).join('') : '<tr><td colspan="4">No members in this view.</td></tr>';
+  }
+  async function loadOperations() {
+    $('refreshOperationsButton').disabled=true;
+    try { const data=await api('POST',{action:'operations_overview'}); operationMembers=Array.isArray(data.members)?data.members:[];renderOperations();$('operationsMessage').classList.add('hidden'); }
+    catch(e){showMessage($('operationsMessage'),e.message||'Could not load opportunities.');}
+    finally{$('refreshOperationsButton').disabled=false;}
+  }
+  function updateKind(m) {
+    if(m.compatible_waiting_count || m.compatible_group_count) return 'match_found';
+    if(m.nearby_incompatible_count || (m.almost_nearby_pairs||[]).length || (m.almost_nearby_groups||[]).length) return 'nearby_low_compatibility';
+    return 'no_nearby_match';
+  }
+  function updateText(m) {
+    const name=m.first_name||'there';
+    if (!m.has_valid_gps) return `Hi ${name}, here's your weekly Neighbour Friend Finder update. We're still searching for your people. We need to confirm your location before we can check the 5 km radius accurately. Please get in touch so we can help.`;
+    if (updateKind(m)==='match_found') return `Hi ${name}, here's your weekly Neighbour Friend Finder update! We've found a potential friendship match or group within your area that meets our essential matching criteria. We're reviewing compatibility and will contact you about an introduction once it's ready. You're still in the running for other matches too.`;
+    if ((m.almost_nearby_pairs||[]).length || (m.almost_nearby_groups||[]).length) return `Hi ${name}, here's your weekly Neighbour Friend Finder update. We have identified a potential friendship option just beyond our normal 5 km radius (between 5 and 9 km away). Would you be open to considering a slightly longer journey? No introduction will happen without agreement from everyone involved. We are continuing to look for closer options too.`;
+    if (updateKind(m)==='nearby_low_compatibility') return `Hi ${name}, here's your weekly Neighbour Friend Finder update. We have people within 5 km, but haven't found someone who meets all your essential compatibility preferences yet. Would you prefer to discuss the differences with us, or keep waiting for a better fit? We will never override essential safety and lifestyle matching rules or introduce you without your agreement.`;
+    return `Hi ${name}, here's your weekly Neighbour Friend Finder update. We haven't found a suitable person within 5 km of you yet, but we're continuing the search. We'll keep you updated as new people join.`;
+  }
+  $('operationsBody').addEventListener('click',async e=>{
+    const button=e.target.closest('button[data-op]'); if(!button) return;
+    const m=operationMembers.find(x=>x.id===button.dataset.id);if(!m)return;
+    if(button.dataset.op==='copy') {
+      const message=updateText(m);
+      try{await navigator.clipboard.writeText(message);showMessage($('operationsMessage'),`Copied ${m.first_name}'s suggested message. Send it yourself, then mark sent.`,true);}
+      catch{prompt('Copy this update:',message);}
       return;
     }
-    host.innerHTML = rows.map(b => {
-      let label = 'Awaiting confirmed members', cls = 'wait';
-      if (b.confirmedWaiting >= 3) { label = 'Promising cluster'; cls = 'ready'; }
-      else if (b.confirmedWaiting === 2) { label = 'Review for matching'; cls = 'near'; }
-      else if (b.confirmedWaiting === 1) { label = 'Needs more members'; cls = 'wait'; }
-      return `<tr><td><strong>${safe(b.key)}</strong></td><td>${b.total}</td><td>${b.confirmedWaiting}</td><td>${b.pending}</td><td>${b.assigned}</td><td><span class="demand-level ${cls}">${safe(label)}</span></td></tr>`;
-    }).join('');
-  }
+    if(button.dataset.op==='choice'){
+      const answer=prompt(`Member's response for ${m.first_name}: type 1 for awaiting reply, 2 for introduce (member explicitly agrees), or 3 for keep waiting.`,m.choice?.low_compatibility_choice==='introduce'?'2':m.choice?.low_compatibility_choice==='keep_waiting'?'3':'1');
+      const choice=({'1':'awaiting_reply','2':'introduce','3':'keep_waiting'})[answer?.trim()||''];
+      if(!choice)return;
+      if(choice==='introduce' && !confirm('Confirm this member explicitly agreed to DISCUSS a potential introduction? Hard matching rules still apply, and this does NOT assign them to a group.'))return;
+      try{await api('POST',{action:'record_match_choice',member_id:m.id,choice});await loadOperations();showMessage($('operationsMessage'),'Member preference saved. No group assignment was made.',true);}
+      catch(err){showMessage($('operationsMessage'),err.message);}
+      return;
+    }
+    if(button.dataset.op==='sent'){
+      if(!confirm(`Have you ACTUALLY sent ${m.first_name} a weekly update? This records delivery, but does not send a message.`))return;
+      const channel=prompt('Delivery channel: whatsapp, sms, email, or other','whatsapp');
+      if(!channel || !['whatsapp','sms','email','other'].includes(channel.trim().toLowerCase()))return;
+      button.disabled=true;
+      try{await api('POST',{action:'record_weekly_update',member_id:m.id,update_type:updateKind(m),delivery_channel:channel.trim().toLowerCase()});await loadOperations();showMessage($('operationsMessage'),`Update recorded for ${m.first_name}.`,true);}
+      catch(err){showMessage($('operationsMessage'),err.message);button.disabled=false;}
+    }
+  });
+  $('operationsFilter').addEventListener('change',renderOperations);
+  $('operationsSearch').addEventListener('input',renderOperations);
+  $('refreshOperationsButton').addEventListener('click',loadOperations);
+
   function renderWaitingMembers() {
     const waiting = members.filter(m => String(m.payment_status || '').toLowerCase() === 'confirmed' && (m.group_id === null || m.group_id === undefined || String(m.group_id).trim() === ''));
     const now = Date.now();
@@ -222,7 +278,6 @@
     $('pendingCount').textContent = members.filter(m=>(m.payment_status||'pending')==='pending').length;
     $('confirmedCount').textContent = members.filter(m=>m.payment_status==='confirmed').length;
     $('rejectedCount').textContent = members.filter(m=>m.payment_status==='rejected').length;
-    renderDemandTracker();
     renderWaitingMembers();
     if (!filtered.length) {
       $('membersBody').innerHTML = '<tr><td colspan="7">No matching registrations.</td></tr>';
@@ -264,6 +319,7 @@
       $('dashboardMessage').classList.add('hidden');
       render();
       await loadGroups();
+      await loadOperations();
     } catch (err) {
       showMessage($('dashboardMessage'),err.message);
       if (/unauthori[sz]ed|password/i.test(err.message)) logout();
@@ -443,6 +499,8 @@
       $('dashboard').classList.remove('hidden');
       $('loginMessage').classList.add('hidden');
       render();
+      await loadGroups();
+      await loadOperations();
     } catch (err) {
       showMessage($('loginMessage'),err.message || 'Could not connect to the admin service.');
       adminPassword = '';
@@ -452,7 +510,6 @@
   $('refreshWaitingButton').addEventListener('click',loadMembers);
   $('waitingSearch').addEventListener('input',renderWaitingMembers);
   $('waitingFilter').addEventListener('change',renderWaitingMembers);
-  $('refreshDemandButton').addEventListener('click',renderDemandTracker);
   $('logoutButton').addEventListener('click',logout);
   $('searchInput').addEventListener('input',render);
   $('statusFilter').addEventListener('change',render);
