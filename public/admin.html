@@ -63,18 +63,26 @@
         </table>
       </div>
     </div>
+    <div class="panel" id="individualPanel">
+      <div class="topline"><div><h2>Individual introductions</h2><p class="muted">Compatible pairs within 5 km. Approve first, then mark connected only after making the actual introduction. Group members remain eligible.</p></div><button class="secondary" id="refreshIndividualButton">Refresh pairs</button></div>
+      <div id="individualMessage" class="notice hidden" role="status"></div>
+      <div class="stats" style="margin:14px 0"><div class="stat"><span>Suggested pairs</span><strong id="individualSuggestionsCount">0</strong></div><div class="stat"><span>Approved, awaiting introduction</span><strong id="individualApprovedCount">0</strong></div><div class="stat"><span>Completed individual pairs</span><strong id="individualConnectedCount">0</strong></div><div class="stat"><span>Service completed (5+)</span><strong id="individualCompleteCount">0</strong></div></div>
+      <h3>Member introduction progress</h3><div class="table-wrap"><table><thead><tr><th>Member</th><th>Unique introductions</th><th>Status</th><th>Action</th></tr></thead><tbody id="individualProgressBody"><tr><td colspan="4">Sign in to load progress.</td></tr></tbody></table></div>
+      <h3>Suggested individual pairs</h3><div class="table-wrap"><table><thead><tr><th>People</th><th>Compatibility</th><th>Shared strengths / differences</th><th>Action</th></tr></thead><tbody id="individualSuggestionsBody"><tr><td colspan="4">Sign in to load suggestions.</td></tr></tbody></table></div>
+      <h3>Approved and completed introductions</h3><div class="table-wrap"><table><thead><tr><th>People</th><th>Status</th><th>Action</th></tr></thead><tbody id="individualExistingBody"><tr><td colspan="3">Sign in to load introductions.</td></tr></tbody></table></div>
+    </div>
     <div class="panel" id="operationsPanel">
       <div class="topline"><div><h2>Matchmaking opportunities & member updates</h2><p class="muted">GPS-based 0–5 km matching, optional 6–9 km opportunities for review, and initial plus weekly follow-up. Every waiting member appears once.</p></div><button class="secondary" id="refreshOperationsButton">Refresh opportunities</button></div>
       <div id="operationsMessage" class="notice hidden" role="status"></div>
       <div class="stats" style="margin:14px 0">
-        <div class="stat"><span>Paid and waiting</span><strong id="opWaiting">0</strong></div>
+        <div class="stat"><span>Actively matching</span><strong id="opWaiting">0</strong></div>
         <div class="stat"><span>Match opportunities</span><strong id="opReady">0</strong></div>
         <div class="stat"><span>Initial updates due</span><strong id="opInitialDue">0</strong></div>
         <div class="stat"><span>Weekly updates due</span><strong id="opDue">0</strong></div>
         <div class="stat"><span>No valid GPS</span><strong id="opGps">0</strong></div>
       </div>
       <p class="small muted">Normal matches remain within 5 km. Almost Nearby (over 5–9 km) is review-only and requires consent from everyone involved before any distance exception. No exceptions can be approved using the normal matching buttons. Match opportunities are not assignments. Nearby-but-incompatible means within 5 km but failing one or more hard rules. No matches are promised.</p>
-      <div class="row"><div><label for="operationsFilter">Show members</label><select id="operationsFilter"><option value="all">All paid and waiting</option><option value="initial">Initial update due</option><option value="due">Weekly update due</option><option value="ready">Compatible match opportunity</option><option value="nearby">Nearby but incompatible</option><option value="almost">Almost nearby (6–9 km)</option><option value="none">Nobody within 5 km</option><option value="gps">GPS missing</option></select></div><div><label for="operationsSearch">Find member</label><input id="operationsSearch" placeholder="Name, area, phone"></div></div>
+      <div class="row"><div><label for="operationsFilter">Show members</label><select id="operationsFilter"><option value="all">All actively matching</option><option value="initial">Initial update due</option><option value="due">Weekly update due</option><option value="ready">Compatible match opportunity</option><option value="nearby">Nearby but incompatible</option><option value="almost">Almost nearby (6–9 km)</option><option value="none">Nobody within 5 km</option><option value="gps">GPS missing</option></select></div><div><label for="operationsSearch">Find member</label><input id="operationsSearch" placeholder="Name, area, phone"></div></div>
       <div class="table-wrap"><table><thead><tr><th>Member</th><th>GPS-based opportunities</th><th>Initial update</th><th>Last weekly update / next due</th><th>Next action</th></tr></thead><tbody id="operationsBody"><tr><td colspan="5">Sign in to load opportunities.</td></tr></tbody></table></div>
       <p class="small muted">The initial update is due immediately after payment confirmation. Once it is recorded as sent, the next weekly update is due 7 days later; subsequent updates are due 7 days after the last recorded send. The system prepares text but does not send WhatsApp messages automatically.</p>
     </div>
@@ -193,7 +201,7 @@
       const choice=m.choice?.low_compatibility_choice || '';
       const almost = [ ...(m.almost_nearby_pairs||[]).map(x=>`<li>Person: ${safe(x.first_name)} · ${safe(x.neighbourhood||'Area unknown')} · ${safe(x.distance_km)} km · ${safe(x.compatibility)}%<br><small>Strengths: ${safe((x.strengths||[]).join(', ')||'None noted')} · Differences: ${safe((x.differences||[]).join(', ')||'None noted')}</small></li>`), ...(m.almost_nearby_groups||[]).map(x=>`<li>Group: ${safe(x.display_name||x.group_id)} (${safe(x.group_size)}/15) · farthest member ${safe(x.max_distance_km)} km · minimum score ${safe(x.compatibility)}%</li>`) ];
       const almostHtml=almost.length ? `<details><summary><strong>Almost Nearby: ${almost.length} option(s)</strong> — consent required</summary><ul>${almost.join('')}</ul><small>Review only. Obtain consent from both people or all existing group members before considering an exception. Normal approval remains limited to 5 km.</small></details>` : '';
-      const opportunities = `Compatible waiting: ${m.compatible_waiting_count} · Eligible groups: ${m.compatible_group_count}<br><small>Nearby confirmed: ${m.nearby_count} · Nearby incompatible: ${m.nearby_incompatible_count}</small>`;
+      const opportunities = `Introductions: ${m.introduction_count||0}/5 minimum · Compatible waiting: ${m.compatible_waiting_count} · Eligible groups: ${m.compatible_group_count}<br><small>Nearby confirmed: ${m.nearby_count} · Nearby incompatible: ${m.nearby_incompatible_count}</small>`;
       return `<tr><td><strong>${safe(m.first_name||'Member')}</strong> (${safe(m.age||'?')})<br><small>${safe([m.neighbourhood,m.area,m.county].filter(Boolean).join(', '))}</small><br><small>${safe(m.phone||'')}</small></td>
         <td><span class="badge ${cat==='ready'?'confirmed':''}">${safe(status)}</span><br>${opportunities}${m.best_score!==null?`<br><small>Best unassigned pair: ${safe(m.best_score)}%</small>`:''}${almostHtml}</td>
         <td>${initial ? safe(initial)+'<br><span class="badge confirmed">Sent</span>' : '<span class="badge pending">Initial due now</span>'}</td>
@@ -253,6 +261,38 @@
   $('operationsFilter').addEventListener('change',renderOperations);
   $('operationsSearch').addEventListener('input',renderOperations);
   $('refreshOperationsButton').addEventListener('click',loadOperations);
+
+  let individualData={suggestions:[],existing:[],progress:[]};
+  async function loadIndividual() {
+    $('refreshIndividualButton').disabled=true;
+    try {
+      individualData=await api('POST',{action:'individual_overview'});
+      const {suggestions=[],existing=[],progress=[]}=individualData;
+      $('individualSuggestionsCount').textContent=suggestions.length;
+      $('individualApprovedCount').textContent=existing.filter(x=>x.status==='approved').length;
+      $('individualConnectedCount').textContent=existing.filter(x=>x.status==='connected').length;
+      $('individualCompleteCount').textContent=progress.filter(x=>x.complete).length;
+      $('individualProgressBody').innerHTML=progress.map(x=>`<tr><td><strong>${safe(x.name)}</strong><br><small>${safe(x.phone||'')}</small></td><td>${safe(x.count)} unique people / 5 minimum (15 maximum)</td><td><span class="badge ${x.complete?'confirmed':''}">${x.expired?'Membership expired':x.complete?'Completed':x.active?'Actively matching':'15 reached'}</span><br><small>Entitlement until ${safe(x.expires_at?new Date(x.expires_at).toLocaleDateString('en-KE'):'Unknown')}</small></td><td>${x.complete&&!x.expired&&x.count<15?`<button data-individual="reopen" data-id="${safe(x.id)}">Reopen on request</button>`:''}</td></tr>`).join('')||'<tr><td colspan="4">No confirmed members.</td></tr>';
+      $('individualSuggestionsBody').innerHTML=suggestions.map(x=>`<tr><td><strong>${safe(x.name_a)}</strong> (${safe(x.age_a)}) — <strong>${safe(x.name_b)}</strong> (${safe(x.age_b)})<br><small>${safe(x.area_a||'')} / ${safe(x.area_b||'')}</small></td><td>${safe(x.score)}% · ${safe(x.distance_km)} km</td><td><small>Strengths: ${safe((x.strengths||[]).join(', ')||'None noted')}<br>Differences: ${safe((x.differences||[]).join(', ')||'None noted')}</small></td><td><button data-individual="approve" data-a="${safe(x.member_a)}" data-b="${safe(x.member_b)}">Approve pair</button></td></tr>`).join('')||'<tr><td colspan="4">No new eligible pairs.</td></tr>';
+      $('individualExistingBody').innerHTML=existing.map(x=>`<tr><td><strong>${safe(x.name_a)}</strong> — <strong>${safe(x.name_b)}</strong></td><td><span class="badge ${x.status==='connected'?'confirmed':''}">${safe(x.status)}</span>${x.connected_at?`<br><small>${safe(new Date(x.connected_at).toLocaleDateString('en-KE'))}</small>`:''}</td><td>${x.status==='approved'?`<button data-individual="connected" data-a="${safe(x.member_a)}" data-b="${safe(x.member_b)}">Mark actually introduced</button>`:''}</td></tr>`).join('')||'<tr><td colspan="3">No introductions recorded.</td></tr>';
+      $('individualMessage').classList.add('hidden');
+    } catch(e) {showMessage($('individualMessage'),e.message||'Could not load individual matches.');}
+    finally {$('refreshIndividualButton').disabled=false;}
+  }
+  $('individualPanel').addEventListener('click',async e=>{
+    const b=e.target.closest('button[data-individual]');if(!b)return;
+    const op=b.dataset.individual;
+    if(op==='reopen' && !confirm('Has this customer requested more matching? Reopen until their membership expires or they reach 15 introductions?'))return;
+    if(op==='approve' && !confirm('Approve this compatible pair for an individual introduction? This does not contact them.'))return;
+    if(op==='connected' && !confirm('Have you ACTUALLY introduced these two people to each other? Both will receive one unique introduction credit.'))return;
+    b.disabled=true;
+    try {
+      await api('POST',op==='reopen'?{action:'reopen_matching',member_id:b.dataset.id}:{action:op==='approve'?'approve_individual':'set_individual_connected',member_a:b.dataset.a,member_b:b.dataset.b});
+      await loadIndividual();await loadOperations();
+      showMessage($('individualMessage'),'Saved. Introduction progress and update eligibility refreshed.',true);
+    }catch(err){showMessage($('individualMessage'),err.message||'Could not save.');b.disabled=false;}
+  });
+  $('refreshIndividualButton').addEventListener('click',loadIndividual);
 
   function renderWaitingMembers() {
     const waiting = members.filter(m => String(m.payment_status || '').toLowerCase() === 'confirmed' && (m.group_id === null || m.group_id === undefined || String(m.group_id).trim() === ''));
@@ -329,6 +369,7 @@
       render();
       await loadGroups();
       await loadOperations();
+      await loadIndividual();
     } catch (err) {
       showMessage($('dashboardMessage'),err.message);
       if (/unauthori[sz]ed|password/i.test(err.message)) logout();
@@ -510,6 +551,7 @@
       render();
       await loadGroups();
       await loadOperations();
+      await loadIndividual();
     } catch (err) {
       showMessage($('loginMessage'),err.message || 'Could not connect to the admin service.');
       adminPassword = '';
