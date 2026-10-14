@@ -74,12 +74,17 @@
       <div class="table-wrap"><table class="demand-table"><thead><tr><th>Neighbourhood / area</th><th>Total registrations</th><th>Confirmed and waiting</th><th>Pending</th><th>Already grouped</th><th>Demand status</th></tr></thead><tbody id="demandBody"><tr><td colspan="6">Sign in to load demand data.</td></tr></tbody></table></div>
       <p class="small muted">Planning guide: 3 or more confirmed members waiting is a promising cluster; 2 may be enough to review for a match; 1 means keep collecting interest. Compatibility and practical travel distance still matter.</p>
     </div>
+    <div class="panel" id="additionsPanel">
+      <div class="topline"><div><h2>Add members to existing groups</h2><p class="muted">Preview compatible additions to forming groups. Nothing changes until you approve each group separately.</p></div><button id="previewAdditionsButton">Find group additions</button></div>
+      <div id="additionsMessage" class="notice hidden" role="status"></div>
+      <div id="additionsResults"></div>
+    </div>
     <div class="panel" id="matchingPanel">
       <div class="topline">
         <div><h2>Member matching</h2><p class="muted">Generate proposed friendship groups from members with confirmed payments who are not already assigned to a group.</p></div>
         <div class="actions"><button id="generateMatchesButton">Generate proposed groups</button></div>
       </div>
-      <div class="notice">Proposals are suggestions for your review. The system prioritises location, activities, budget, availability, friendship goals and shared interests. Groups contain 2 to 15 members. Drinking, cannabis-use status, budget, age and distance restrictions are enforced automatically. Availability and other preferences help rank compatible members but do not automatically exclude them. Compatibility percentages are provided for comparison, not as minimum requirements. Generating proposals does not assign anyone yet.</div>
+      <div class="notice">Proposals are suggestions for your review. The system prioritises location, activities, budget, availability, friendship goals and shared interests. Groups contain 2 to 15 members. Generating proposals does not assign anyone yet.</div>
       <div id="matchingMessage" class="notice hidden" role="status"></div>
       <div id="matchingResults" class="hidden">
         <div class="stats" style="grid-template-columns:repeat(2,minmax(120px,1fr));margin:14px 0">
@@ -229,12 +234,47 @@
       <article class="group-card">
         <h3>Group ${index + 1} · ${group.members.length} members</h3>
         <div class="group-meta">${safe(group.summary || '')}</div>
-        <p><strong>${safe(group.compatibility ?? '—')}% compatibility</strong> · Minimum pairwise score in this group</p>
-        <p><strong>Shared strengths:</strong> ${safe((group.strengths || []).join(' · ') || 'Hard compatibility rules passed')}</p>
-        <p><strong>Minor differences:</strong> ${safe((group.differences || []).join(' · ') || 'None identified')}</p>
         <ul>${group.members.map(m => `<li><strong>${safe(m.first_name || 'Member')}</strong>${m.age ? `, age ${safe(m.age)}` : ''} - ${safe([m.neighbourhood,m.area,m.county].filter(Boolean).join(', ') || 'Location not provided')}<br><small>${safe(m.primary_activity || 'Activity not specified')} · Budget: ${safe(m.budget || 'Not provided')}</small></li>`).join('')}</ul>
       </article>`).join('');
     $('approveGroupsButton').disabled = false;
+  }
+  let proposedAdditions = [];
+  function renderAdditions() {
+    const host = $('additionsResults');
+    if (!proposedAdditions.length) { host.innerHTML = '<p class="small muted">No compatible additions available for forming groups.</p>'; return; }
+    host.innerHTML = proposedAdditions.map((g, i) => `
+      <article class="group-card">
+        <h3>Existing group · ${g.current_members.length} current + ${g.members.length} proposed</h3>
+        <div class="group-meta">Group ID: ${safe(g.group_id)} · Minimum pair compatibility: ${safe(g.compatibility)}%</div>
+        <p><strong>Current:</strong> ${g.current_members.map(m => safe(m.first_name || 'Member')).join(', ')}</p>
+        <p><strong>Proposed:</strong> ${g.members.map(m => safe(m.first_name || 'Member') + ' (' + safe(m.age) + ')').join(', ')}</p>
+        <p class="small"><strong>Shared strengths:</strong> ${safe((g.strengths || []).join(', ') || 'None identified')}</p>
+        <p class="small"><strong>Differences:</strong> ${safe((g.differences || []).join(', ') || 'None identified')}</p>
+        <button class="approve-addition" data-index="${i}">Approve these additions</button>
+      </article>`).join('');
+    host.querySelectorAll('.approve-addition').forEach(button => button.addEventListener('click', () => approveAddition(Number(button.dataset.index))));
+  }
+  async function previewAdditions() {
+    $('previewAdditionsButton').disabled = true;
+    showMessage($('additionsMessage'), 'Checking existing groups…');
+    try {
+      const data = await api('POST', { action: 'preview_additions' });
+      proposedAdditions = Array.isArray(data.additions) ? data.additions : [];
+      renderAdditions();
+      showMessage($('additionsMessage'), `${proposedAdditions.length} existing group(s) have proposed additions. Nothing has been assigned.`, true);
+    } catch (err) { showMessage($('additionsMessage'), err.message || 'Could not preview additions.'); }
+    finally { $('previewAdditionsButton').disabled = false; }
+  }
+  async function approveAddition(index) {
+    const group = proposedAdditions[index]; if (!group) return;
+    if (!confirm(`Add ${group.members.length} member(s) to the existing group with ${group.current_members.length} members?`)) return;
+    $('additionsResults').querySelectorAll('button').forEach(b => b.disabled = true);
+    try {
+      const result = await api('POST', { action: 'approve_addition', group_id: group.group_id, member_ids: group.members.map(m => m.id) });
+      showMessage($('additionsMessage'), `Success: ${result.result?.members_added ?? group.members.length} member(s) added.`, true);
+      proposedAdditions = []; $('additionsResults').innerHTML = '';
+      await loadMembers();
+    } catch (err) { showMessage($('additionsMessage'), err.message || 'Could not add members.'); renderAdditions(); }
   }
   async function generateMatches() {
     $('generateMatchesButton').disabled = true;
@@ -308,6 +348,7 @@
   $('statusFilter').addEventListener('change',render);
   $('generateMatchesButton').addEventListener('click', generateMatches);
   $('approveGroupsButton').addEventListener('click', approveGroups);
+  $('previewAdditionsButton').addEventListener('click', previewAdditions);
   $('discardGroupsButton').addEventListener('click', discardGroups);
   $('membersBody').addEventListener('click',async e=>{
     const button=e.target.closest('button[data-action]');
