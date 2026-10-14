@@ -205,7 +205,15 @@ footer{padding:36px 24px;text-align:center;color:var(--muted)}.footer-brand{colo
 .closing-invitation p{margin:16px 0 0;font-weight:800;font-size:19px;color:#fffdf8}
 .membership-amount strong{display:block;font-size:19px;color:var(--green)}
 .membership-amount p{margin:6px 0 0;font-size:14px;color:var(--muted);line-height:1.6}
-</style></head>
+</style>
+<!-- Meta Pixel: website visits and successful registrations -->
+<script>
+!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', '1141268988254114');
+fbq('track', 'PageView');
+</script>
+<noscript><img height="1" width="1" style="display:none" alt="" src="https://www.facebook.com/tr?id=1141268988254114&amp;ev=PageView&amp;noscript=1"/></noscript>
+</head>
 <body>
 <header><div class="brand-lockup"><img alt="" class="brand-logo" src="/friend-finder-mark.png"/><div class="brand">Neighbour Friend Finder</div></div><a class="nav-link" href="#how">How it works ↓</a></header>
 <main>
@@ -572,6 +580,11 @@ form.addEventListener('submit', async (event) => {
       throw new Error(result.error || 'We could not submit your registration. Please check your answers and try again.');
     }
 
+    // Track registration only after Supabase confirms the record was saved.
+    if (typeof window.fbq === 'function') {
+      window.fbq('track', 'CompleteRegistration', { content_name: 'Neighbour Friend Finder Membership', status: 'pending_payment' });
+    }
+
     const formWrap = form.closest('.form-wrap');
     formWrap.innerHTML = `
       <div class="thank-you-page" role="status" aria-live="polite">
@@ -608,5 +621,7 @@ form.addEventListener('submit', async (event) => {
   }
 });
 </script>
+
+
 </body>
 </html>
