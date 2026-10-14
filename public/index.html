@@ -379,6 +379,8 @@ footer{padding:36px 24px;text-align:center;color:var(--muted)}.footer-brand{colo
 <select id="paymentPeriod" required=""><option value="">Choose AM or PM</option><option value="AM">AM</option><option value="PM">PM</option></select>
 <p class="field-hint">Choose the time shown in your M-PESA confirmation message.</p>
 <label class="choice" style="margin-top:20px"><input id="consent" name="consent" required="" type="checkbox"/> I agree that my answers and contact details may be used to match me with compatible members and contact me about my neighbour friends.</label>
+<label class="choice" style="margin-top:10px"><input id="whatsappOptIn" name="whatsappOptIn" type="checkbox"/> I agree to receive WhatsApp messages from Neighbour Friend Finder at the phone number I provided about my membership, payment confirmation, friendship introductions and matching updates. I understand I can opt out of WhatsApp messages at any time.</label>
+<label class="choice" style="margin-top:10px"><input id="whatsappEventsOptIn" name="whatsappEventsOptIn" type="checkbox"/> I would also like to receive WhatsApp invitations to community hangouts and other club events. I can opt out at any time.</label>
 <p class="small muted" style="margin-top:14px">Your profile will be submitted to our database when your payment is confirmed. We will prioritise your neighbourhood and compatibility based on your answers to the questions.</p>
 </div>
 <div class="form-actions"><button class="button secondary" id="backBtn" style="display:none" type="button">Back</button><button class="button" id="nextBtn" type="button">Join the Club</button><button class="button" id="submitBtn" style="display:none" type="submit">Join the Club</button></div>
@@ -546,7 +548,9 @@ form.addEventListener('submit', async (event) => {
     mpesaCode: String(values.get('mpesaCode') || '').trim().toUpperCase(),
     paymentDate: String(values.get('paymentDate') || ''),
     paymentTime: paymentTime24,
-    consent: values.get('consent') === 'on'
+    consent: values.get('consent') === 'on',
+    whatsappOptIn: values.get('whatsappOptIn') === 'on',
+    whatsappEventsOptIn: values.get('whatsappEventsOptIn') === 'on'
   };
 
   submitBtn.disabled = true;
