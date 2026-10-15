@@ -95,8 +95,8 @@
     <div class="panel dashboard-tab-panel hidden" id="tasksPanel" role="tabpanel" aria-labelledby="tab-tasks">
       <div class="topline"><div><h2>Action centre</h2><p class="muted">Manual tasks, recurring reminders and member-specific weekly update decisions.</p></div><button class="secondary" id="refreshTasksButton">Refresh</button></div>
       <div id="tasksMessage" class="notice hidden" role="status"></div>
-      <form id="taskForm"><div class="row"><div><label for="taskTitle">New task</label><input id="taskTitle" required placeholder="Review Lavington matches"></div><div><label for="taskRecurrence">Repeat</label><select id="taskRecurrence"><option value="none">Once</option><option value="weekly">Weekly</option><option value="monthly">Monthly</option></select></div><div><label for="taskDue">Due date (optional)</label><input type="date" id="taskDue"></div></div><button type="submit">Add task</button></form>
-      <h3>Tasks</h3><div id="taskList">No tasks loaded.</div>
+      <form id="taskForm"><div class="row"><div><label for="taskTitle">New task</label><input id="taskTitle" required placeholder="Review Lavington matches"></div><div><label for="taskArea">Neighbourhood (optional)</label><select id="taskArea"><option value="">All neighbourhoods / general</option></select></div><div><label for="taskRecurrence">Repeat</label><select id="taskRecurrence"><option value="none">Once</option><option value="weekly">Weekly</option><option value="monthly">Monthly</option></select></div><div><label for="taskDue">Due date (optional)</label><input type="date" id="taskDue"></div></div><button type="submit">Add task</button></form>
+      <h3>Automatic priorities</h3><p class="small muted">Calculated from current paid members, introductions and upcoming events. These are recommendations, not messages sent to members.</p><div id="automaticPriorities">Loading priorities…</div><h3>Tasks</h3><div id="taskList">No tasks loaded.</div>
       <h3>Weekly update reviews</h3><p class="small muted">Review each draft before messaging. Skipping or snoozing a review does not send a message.</p><div id="weeklyReviewList">Loading...</div>
     </div>
     <div class="panel dashboard-tab-panel hidden" id="membersPanel" role="tabpanel" aria-labelledby="tab-members">
@@ -317,7 +317,7 @@
   }
   async function loadOperations() {
     $('refreshOperationsButton').disabled=true;
-    try { const data=await api('POST',{action:'operations_overview'}); operationMembers=Array.isArray(data.members)?data.members:[];renderOperations();$('operationsMessage').classList.add('hidden'); }
+    try { const data=await api('POST',{action:'operations_overview'}); operationMembers=Array.isArray(data.members)?data.members:[];renderOperations();renderAutomaticPriorities();$('operationsMessage').classList.add('hidden'); }
     catch(e){showMessage($('operationsMessage'),e.message||'Could not load opportunities.');}
     finally{$('refreshOperationsButton').disabled=false;}
   }
@@ -728,14 +728,15 @@
       $('areasBody').innerHTML=nbffAreas.map(a=>`<tr><td><strong>${safe(a.label)}</strong><br><small>${safe(a.invalid_gps)} paid members missing GPS</small></td><td>${a.paid} / ${a.registered}<br><small>${a.pending} pending</small></td><td>${a.zero}</td><td>${a.one}</td><td>${a.two_to_four}</td><td>${a.phase1}</td><td>${a.six_to_nine}</td><td>${a.phase2}</td><td>${a.eleven_to_fourteen}</td><td>${a.phase3}</td><td>${a.paused}</td></tr>`).join('')||'<tr><td colspan="11">No neighbourhoods yet.</td></tr>';
       const checked=new Set([...document.querySelectorAll('#eventAreaChoices input:checked')].map(x=>x.value));
       $('eventAreaChoices').innerHTML=nbffAreas.filter(a=>a.paid>0).map(a=>`<label><input type="checkbox" value="${safe(a.label)}" ${checked.has(a.label)?'checked':''}><span><strong>${safe(a.label)}</strong><br><small>${safe(areaSummary(a))}</small></span></label>`).join('')||'<p>No paid members in neighbourhoods yet.</p>';
-      updateAreaSelection();
+      $('taskArea').innerHTML='<option value="">All neighbourhoods / general</option>'+nbffAreas.map(a=>`<option value="${safe(a.key)}">${safe(a.label)} (${a.paid} paid)</option>`).join('');
+      updateAreaSelection();renderAutomaticPriorities();
     }catch(e){$('areasBody').innerHTML=`<tr><td colspan="11">${safe(e.message)}</td></tr>`;}
   }
   function selectedEventAreas(){return [...document.querySelectorAll('#eventAreaChoices input:checked')].map(x=>x.value);}
   function updateAreaSelection(){const labels=selectedEventAreas();const chosen=nbffAreas.filter(a=>labels.includes(a.label));$('eventAreaSummary').textContent=`${labels.length} neighbourhoods · ${chosen.reduce((n,a)=>n+a.paid,0)} paid members (before WhatsApp consent filtering).`;}
   $('eventAreaChoices').addEventListener('change',updateAreaSelection);
   async function loadWorkspace(){
-    try{nbffWorkspace=await api('POST',{action:'admin_workspace'});renderEvents();renderTasks();renderWeeklyReviews();}
+    try{nbffWorkspace=await api('POST',{action:'admin_workspace'});renderEvents();renderTasks();renderWeeklyReviews();renderAutomaticPriorities();}
     catch(e){showMessage($('eventsMessage'),e.message);showMessage($('tasksMessage'),e.message);}
   }
   function renderEvents(){
@@ -771,13 +772,40 @@
       await loadWorkspace();
     }catch(err){showMessage($('eventsMessage'),err.message);}finally{b.disabled=false;}
   });
+  function renderAutomaticPriorities(){
+    const now=Date.now(), upcoming=(nbffWorkspace.events||[]).filter(e=>Date.parse(e.starts_at)>=now);
+    const paid=members.filter(m=>m.payment_status==='confirmed');
+    const byArea=a=>paid.filter(m=>String(m.neighbourhood||m.area||m.county||'Unknown').trim().toLowerCase()===a.key);
+    const cards=[];
+    for(const a of nbffAreas.filter(x=>x.paid>0)){
+      const areaEvents=upcoming.filter(ev=>(ev.areas||[]).some(x=>x.area_key===a.key));
+      const affected=byArea(a);
+      const waiting=affected.filter(m=>!m.group_id);
+      const older=waiting.filter(m=>m.created_at && now-Date.parse(m.created_at)>=7*86400000);
+      const urgent=older.filter(m=>now-Date.parse(m.created_at)>=14*86400000);
+      const noMatches=a.zero||0;
+      const reasons=[];
+      if(!areaEvents.length)reasons.push('No upcoming neighbourhood event scheduled');
+      if(noMatches)reasons.push(`${noMatches} paid member(s) have zero introductions`);
+      if(older.length)reasons.push(`${older.length} ungrouped member(s) registered 7+ days ago (${urgent.length} at 14+ days)`);
+      if(a.invalid_gps)reasons.push(`${a.invalid_gps} member(s) need GPS review`);
+      if(reasons.length)cards.push({a,priority:urgent.length?0:noMatches?1:2,text:reasons.join(' · ')});
+    }
+    cards.sort((x,y)=>x.priority-y.priority||y.a.paid-x.a.paid);
+    const almost=operationMembers.filter(m=>(m.almost_nearby_pairs||[]).length+(m.almost_nearby_groups||[]).length>0 && (m.introduction_count||0)===0);
+    const due=operationMembers.filter(m=>initialDue(m)||updateDue(m));
+    const overview=`<p class="small"><strong>${due.length}</strong> member updates due · <strong>${almost.length}</strong> zero-introduction members with 5–9 km possibilities · <strong>${cards.length}</strong> neighbourhoods requiring attention</p>`;
+    const reviewLinks=almost.slice(0,8).map(m=>{const a=nbffAreas.find(a=>a.key===String(m.neighbourhood||m.area||m.county||'Unknown').trim().toLowerCase());return `<div class="event-card"><strong>Review 5–9 km possibility: ${safe(m.first_name||'Member')}</strong><p class="small muted">${safe(m.neighbourhood||m.area||'Unknown area')} · ${a?safe(areaSummary(a)):'No area statistics available'} · consent required before any distance exception</p><button class="secondary" type="button" data-go-panel="operationsPanel">Review matching opportunities</button></div>`;}).join('');
+    $('automaticPriorities').innerHTML=overview+cards.map(({a,text})=>`<div class="event-card"><strong>${safe(a.label)}</strong><p class="small muted">${safe(areaSummary(a))}</p><p>${safe(text)}</p><div class="actions"><button class="secondary" type="button" data-go-panel="areasPanel">Neighbourhood details</button><button class="secondary" type="button" data-go-panel="eventsPanel">Plan an event</button></div></div>`).join('')+reviewLinks+(!cards.length&&!almost.length?'<p class="muted">No automatic neighbourhood alerts right now.</p>':'');
+  }
+  $('automaticPriorities').addEventListener('click',e=>{const b=e.target.closest('button[data-go-panel]');if(b)showDashboardTab(b.dataset.goPanel);});
   function renderTasks(){
     $('taskList').innerHTML=(nbffWorkspace.tasks||[]).map(t=>{
       const a=nbffAreas.find(a=>a.key===t.area_key);
       return `<div class="event-card"><strong>${safe(t.title)}</strong> <span class="badge ${t.status==='done'?'confirmed':'pending'}">${safe(t.status)}</span><p class="small muted">${safe(t.recurrence)} · ${safe(t.due_at?new Date(t.due_at).toLocaleDateString('en-KE'):'No due date')}${a?' · '+safe(areaSummary(a)):''}</p><div class="actions"><button class="secondary" data-task="done" data-id="${safe(t.id)}">Complete</button><button class="secondary" data-task="snoozed" data-id="${safe(t.id)}">Snooze 7 days</button><button class="secondary" data-task="open" data-id="${safe(t.id)}">Reopen</button></div></div>`;
     }).join('')||'<p class="muted">No tasks yet.</p>';
   }
-  $('taskForm').addEventListener('submit',async e=>{e.preventDefault();try{await api('POST',{action:'save_admin_task',title:$('taskTitle').value,recurrence:$('taskRecurrence').value,due_at:$('taskDue').value?$('taskDue').value+'T12:00:00+03:00':null});$('taskForm').reset();await loadWorkspace();showMessage($('tasksMessage'),'Task created.',true);}catch(err){showMessage($('tasksMessage'),err.message);}});
+  $('taskForm').addEventListener('submit',async e=>{e.preventDefault();try{await api('POST',{action:'save_admin_task',title:$('taskTitle').value,recurrence:$('taskRecurrence').value,area_key:$('taskArea').value,due_at:$('taskDue').value?$('taskDue').value+'T12:00:00+03:00':null});$('taskForm').reset();await loadWorkspace();showMessage($('tasksMessage'),'Task created.',true);}catch(err){showMessage($('tasksMessage'),err.message);}});
   $('taskList').addEventListener('click',async e=>{const b=e.target.closest('button[data-task]');if(!b)return;try{await api('POST',{action:'set_admin_task_status',task_id:b.dataset.id,status:b.dataset.task});await loadWorkspace();}catch(err){showMessage($('tasksMessage'),err.message);}});
   function currentWeek(){const d=new Date();const wd=(d.getUTCDay()+6)%7;d.setUTCDate(d.getUTCDate()-wd);return d.toISOString().slice(0,10);}
   function renderWeeklyReviews(){
