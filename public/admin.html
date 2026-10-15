@@ -21,6 +21,7 @@
     .demand-table{min-width:760px}.demand-level{display:inline-block;padding:4px 8px;border-radius:18px;font-size:12px;font-weight:bold;background:#eee8dc}.demand-level.ready{background:#dcebdd;color:#285237}.demand-level.near{background:#f5e7d3;color:#80531d}.demand-level.wait{background:#eee8dc;color:#575c54}
     @media(max-width:640px){.stats{grid-template-columns:repeat(2,minmax(120px,1fr))}.panel{padding:16px}}
 
+    .area-checks{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:7px;margin:12px 0}.area-checks label{display:flex;align-items:center;gap:7px;font-weight:normal;margin:0;padding:8px;border:1px solid var(--line);border-radius:7px}.area-checks input{width:auto}.event-card{border:1px solid var(--line);padding:15px;border-radius:10px;margin:12px 0}.event-card h3{margin:0 0 6px}.event-card .actions{margin-top:12px}textarea{width:100%;min-height:100px;padding:10px;font:inherit;border:1px solid var(--line);border-radius:6px}
     .admin-nav{position:sticky;top:0;z-index:30;background:var(--cream);padding:12px 0 10px;border-bottom:1px solid var(--line)}
     .admin-nav .nav-buttons{display:flex;flex-wrap:wrap;gap:8px}
     .admin-nav button{background:#e9e4d9;color:var(--ink);font-size:14px;padding:9px 12px;border:1px solid transparent}
@@ -50,6 +51,9 @@
     <nav class="admin-nav" aria-label="Admin dashboard sections">
       <div class="nav-buttons" role="tablist" aria-label="Admin sections">
         <button type="button" role="tab" id="tab-overview" aria-controls="overviewPanel" aria-selected="true" data-tab="overviewPanel">Overview</button>
+        <button type="button" role="tab" id="tab-areas" aria-controls="areasPanel" aria-selected="false" data-tab="areasPanel">Neighbourhoods</button>
+        <button type="button" role="tab" id="tab-events" aria-controls="eventsPanel" aria-selected="false" data-tab="eventsPanel">Events & invitations</button>
+        <button type="button" role="tab" id="tab-tasks" aria-controls="tasksPanel" aria-selected="false" data-tab="tasksPanel">Action centre</button>
         <button type="button" role="tab" id="tab-members" aria-controls="membersPanel" aria-selected="false" data-tab="membersPanel">Members</button>
         <button type="button" role="tab" id="tab-individual" aria-controls="individualPanel" aria-selected="false" data-tab="individualPanel">Individual introductions</button>
         <button type="button" role="tab" id="tab-updates" aria-controls="operationsPanel" aria-selected="false" data-tab="operationsPanel">Matchmaking & updates</button>
@@ -68,6 +72,32 @@
         <div class="stat"><span>Rejected</span><strong id="rejectedCount">0</strong></div>
       </div>
       <div id="dashboardMessage" class="notice hidden" role="status"></div>
+    </div>
+
+    <div class="panel dashboard-tab-panel hidden" id="areasPanel" role="tabpanel" aria-labelledby="tab-areas">
+      <div class="topline"><h2>Neighbourhood intelligence</h2><button class="secondary" id="refreshAreasButton">Refresh neighbourhoods</button></div>
+      <p class="muted">Paid members and their unique introductions. Area labels are based on saved neighbourhood data; GPS coordinates remain the source for distance matching.</p>
+      <div class="table-wrap"><table><thead><tr><th>Neighbourhood</th><th>Paid / registered</th><th>0 matches</th><th>1 match</th><th>2–4</th><th>5/15</th><th>6–9</th><th>10/15</th><th>11–14</th><th>15/15</th><th>Paused</th></tr></thead><tbody id="areasBody"><tr><td colspan="11">Sign in to load neighbourhoods.</td></tr></tbody></table></div>
+    </div>
+    <div class="panel dashboard-tab-panel hidden" id="eventsPanel" role="tabpanel" aria-labelledby="tab-events">
+      <div class="topline"><div><h2>Multi-neighbourhood events</h2><p class="muted">Schedule multiple independent cluster events on the same day. Each has its own location, invitation queue and RSVPs.</p></div><button class="secondary" id="refreshWorkspaceButton">Refresh</button></div>
+      <div id="eventsMessage" class="notice hidden" role="status"></div>
+      <h3>Create a cluster event</h3>
+      <form id="eventForm">
+        <div class="row"><div><label for="eventTitle">Event title</label><input id="eventTitle" required placeholder="Saturday morning walk"></div><div><label for="eventStarts">Date and time (Nairobi)</label><input id="eventStarts" type="datetime-local" required></div></div>
+        <div class="row"><div><label for="eventVenue">Venue name</label><input id="eventVenue" placeholder="Karura Forest"></div><div><label for="eventDescription">Notes (optional)</label><input id="eventDescription" placeholder="What members should bring"></div></div>
+        <label>Neighbourhoods for this cluster — select at least two</label><div id="eventAreaChoices" class="area-checks"></div>
+        <p class="small muted" id="eventAreaSummary">Choose neighbourhoods to preview eligible members.</p>
+        <button type="submit">Create cluster event</button>
+      </form>
+      <h3 style="margin-top:24px">Upcoming and past cluster events</h3><div id="eventsList">No events loaded.</div>
+    </div>
+    <div class="panel dashboard-tab-panel hidden" id="tasksPanel" role="tabpanel" aria-labelledby="tab-tasks">
+      <div class="topline"><div><h2>Action centre</h2><p class="muted">Manual tasks, recurring reminders and member-specific weekly update decisions.</p></div><button class="secondary" id="refreshTasksButton">Refresh</button></div>
+      <div id="tasksMessage" class="notice hidden" role="status"></div>
+      <form id="taskForm"><div class="row"><div><label for="taskTitle">New task</label><input id="taskTitle" required placeholder="Review Lavington matches"></div><div><label for="taskRecurrence">Repeat</label><select id="taskRecurrence"><option value="none">Once</option><option value="weekly">Weekly</option><option value="monthly">Monthly</option></select></div><div><label for="taskDue">Due date (optional)</label><input type="date" id="taskDue"></div></div><button type="submit">Add task</button></form>
+      <h3>Tasks</h3><div id="taskList">No tasks loaded.</div>
+      <h3>Weekly update reviews</h3><p class="small muted">Review each draft before messaging. Skipping or snoozing a review does not send a message.</p><div id="weeklyReviewList">Loading...</div>
     </div>
     <div class="panel dashboard-tab-panel hidden" id="membersPanel" role="tabpanel" aria-labelledby="tab-members">
       <h2>Members</h2>
@@ -470,6 +500,8 @@
       await loadGroups();
       await loadOperations();
       await loadIndividual();
+      await loadAreas();
+      await loadWorkspace();
     } catch (err) {
       showMessage($('dashboardMessage'),err.message);
       if (/unauthori[sz]ed|password/i.test(err.message)) logout();
@@ -687,6 +719,93 @@
       button.disabled=false;
     }
   });
+
+  // New dashboard features use the existing password-protected admin API.
+  let nbffAreas=[], nbffWorkspace={events:[],tasks:[],reviews:[]};
+  function areaSummary(a){return `${a.paid} paid · ${a.zero} unmatched · ${a.one} with 1 · ${a.phase1} at 5/15 · ${a.phase2} at 10/15 · ${a.phase3} at 15/15`;}
+  async function loadAreas(){
+    try{const data=await api('POST',{action:'neighbourhood_overview'});nbffAreas=data.areas||[];
+      $('areasBody').innerHTML=nbffAreas.map(a=>`<tr><td><strong>${safe(a.label)}</strong><br><small>${safe(a.invalid_gps)} paid members missing GPS</small></td><td>${a.paid} / ${a.registered}<br><small>${a.pending} pending</small></td><td>${a.zero}</td><td>${a.one}</td><td>${a.two_to_four}</td><td>${a.phase1}</td><td>${a.six_to_nine}</td><td>${a.phase2}</td><td>${a.eleven_to_fourteen}</td><td>${a.phase3}</td><td>${a.paused}</td></tr>`).join('')||'<tr><td colspan="11">No neighbourhoods yet.</td></tr>';
+      const checked=new Set([...document.querySelectorAll('#eventAreaChoices input:checked')].map(x=>x.value));
+      $('eventAreaChoices').innerHTML=nbffAreas.filter(a=>a.paid>0).map(a=>`<label><input type="checkbox" value="${safe(a.label)}" ${checked.has(a.label)?'checked':''}><span><strong>${safe(a.label)}</strong><br><small>${safe(areaSummary(a))}</small></span></label>`).join('')||'<p>No paid members in neighbourhoods yet.</p>';
+      updateAreaSelection();
+    }catch(e){$('areasBody').innerHTML=`<tr><td colspan="11">${safe(e.message)}</td></tr>`;}
+  }
+  function selectedEventAreas(){return [...document.querySelectorAll('#eventAreaChoices input:checked')].map(x=>x.value);}
+  function updateAreaSelection(){const labels=selectedEventAreas();const chosen=nbffAreas.filter(a=>labels.includes(a.label));$('eventAreaSummary').textContent=`${labels.length} neighbourhoods · ${chosen.reduce((n,a)=>n+a.paid,0)} paid members (before WhatsApp consent filtering).`;}
+  $('eventAreaChoices').addEventListener('change',updateAreaSelection);
+  async function loadWorkspace(){
+    try{nbffWorkspace=await api('POST',{action:'admin_workspace'});renderEvents();renderTasks();renderWeeklyReviews();}
+    catch(e){showMessage($('eventsMessage'),e.message);showMessage($('tasksMessage'),e.message);}
+  }
+  function renderEvents(){
+    $('eventsList').innerHTML=(nbffWorkspace.events||[]).map(ev=>{
+      const count={};for(const i of ev.invitations||[])count[i.status]=(count[i.status]||0)+1;
+      const keys=ev.areas.map(x=>x.area_key);const selected=nbffAreas.filter(a=>keys.includes(a.key));
+      const sum=selected.reduce((n,a)=>n+a.paid,0);
+      return `<div class="event-card"><h3>${safe(ev.title)}</h3><p class="small muted">${safe(new Date(ev.starts_at).toLocaleString('en-KE',{dateStyle:'full',timeStyle:'short',timeZone:'Africa/Nairobi'}))} · ${safe(ev.venue_name||'Venue not set')}</p><p>${ev.areas.map(x=>safe(x.area_label)).join(' · ')}</p><details><summary>Area statistics · ${sum} paid members</summary>${selected.map(a=>`<p class="small">${safe(a.label)}: ${safe(areaSummary(a))}</p>`).join('')}</details><p class="small">Invitations: ${ev.invitations.length} queued/processed · ${count.sent||0} accepted by WhatsApp · ${count.delivered||0} delivered · ${count.failed||0} failed · ${count.queued||0} awaiting send · ${count.sending||0} processing · ${count.skipped||0} skipped</p><div class="actions"><button class="secondary" data-event-action="preview" data-id="${safe(ev.id)}">Preview recipients</button><button data-event-action="queue" data-id="${safe(ev.id)}">Queue invitations</button><button data-event-action="send" data-id="${safe(ev.id)}">Send next 15 via WhatsApp</button></div></div>`;
+    }).join('')||'<p class="muted">No cluster events yet.</p>';
+  }
+  $('eventForm').addEventListener('submit',async e=>{
+    e.preventDefault();const areas=selectedEventAreas();if(areas.length<2){showMessage($('eventsMessage'),'Select at least two neighbourhoods.');return;}
+    const raw=$('eventStarts').value;if(!raw){showMessage($('eventsMessage'),'Choose a date and time.');return;}
+    // datetime-local is entered as Nairobi local time; convert with explicit +03:00.
+    const starts_at=new Date(raw+':00+03:00').toISOString();
+    try{await api('POST',{action:'save_event',title:$('eventTitle').value,starts_at,venue_name:$('eventVenue').value,description:$('eventDescription').value,areas});$('eventForm').reset();updateAreaSelection();await loadWorkspace();showMessage($('eventsMessage'),'Cluster event created. Invitations have NOT been sent.',true);}
+    catch(err){showMessage($('eventsMessage'),err.message);}
+  });
+  $('eventsList').addEventListener('click',async e=>{
+    const b=e.target.closest('button[data-event-action]');if(!b)return;b.disabled=true;
+    try{
+      const id=b.dataset.id,op=b.dataset.eventAction;
+      if(op==='preview'){const x=await api('POST',{action:'event_recipients',event_id:id});alert(`${x.event.title}\nEligible WhatsApp recipients: ${x.total_eligible}\nAlready queued: ${x.already_queued}\nNew to queue: ${x.new_recipients}\n\n${x.by_area.map(a=>a.area+': '+a.count).join('\n')}`);}
+      if(op==='queue'){
+        const x=await api('POST',{action:'event_recipients',event_id:id});
+        if(!confirm(`Queue ${x.new_recipients} new opted-in paid members for this event? This does not send WhatsApp messages.`))return;
+        const r=await api('POST',{action:'queue_event_invitations',event_id:id,confirmed:true});showMessage($('eventsMessage'),`${r.queued} invitations queued. Not yet sent.`,true);
+      }
+      if(op==='send'){
+        if(!confirm('Send up to 15 QUEUED invitations via WhatsApp now? Only proceed if your neighbourhood_event_invitation template is APPROVED and has 4 body variables: first name, event title, date/time, venue. This action contacts real members.'))return;
+        const r=await api('POST',{action:'send_event_invitations',event_id:id,confirmed:true});showMessage($('eventsMessage'),`WhatsApp: ${r.sent} accepted, ${r.failed} failed, ${r.skipped} skipped. ${r.has_more?'More may remain queued: click Send next 15 again.':''}`,true);
+      }
+      await loadWorkspace();
+    }catch(err){showMessage($('eventsMessage'),err.message);}finally{b.disabled=false;}
+  });
+  function renderTasks(){
+    $('taskList').innerHTML=(nbffWorkspace.tasks||[]).map(t=>{
+      const a=nbffAreas.find(a=>a.key===t.area_key);
+      return `<div class="event-card"><strong>${safe(t.title)}</strong> <span class="badge ${t.status==='done'?'confirmed':'pending'}">${safe(t.status)}</span><p class="small muted">${safe(t.recurrence)} · ${safe(t.due_at?new Date(t.due_at).toLocaleDateString('en-KE'):'No due date')}${a?' · '+safe(areaSummary(a)):''}</p><div class="actions"><button class="secondary" data-task="done" data-id="${safe(t.id)}">Complete</button><button class="secondary" data-task="snoozed" data-id="${safe(t.id)}">Snooze 7 days</button><button class="secondary" data-task="open" data-id="${safe(t.id)}">Reopen</button></div></div>`;
+    }).join('')||'<p class="muted">No tasks yet.</p>';
+  }
+  $('taskForm').addEventListener('submit',async e=>{e.preventDefault();try{await api('POST',{action:'save_admin_task',title:$('taskTitle').value,recurrence:$('taskRecurrence').value,due_at:$('taskDue').value?$('taskDue').value+'T12:00:00+03:00':null});$('taskForm').reset();await loadWorkspace();showMessage($('tasksMessage'),'Task created.',true);}catch(err){showMessage($('tasksMessage'),err.message);}});
+  $('taskList').addEventListener('click',async e=>{const b=e.target.closest('button[data-task]');if(!b)return;try{await api('POST',{action:'set_admin_task_status',task_id:b.dataset.id,status:b.dataset.task});await loadWorkspace();}catch(err){showMessage($('tasksMessage'),err.message);}});
+  function currentWeek(){const d=new Date();const wd=(d.getUTCDay()+6)%7;d.setUTCDate(d.getUTCDate()-wd);return d.toISOString().slice(0,10);}
+  function renderWeeklyReviews(){
+    const week=currentWeek(), reviews=new Map((nbffWorkspace.reviews||[]).filter(x=>x.review_week===week).map(x=>[x.member_id,x]));
+    const due=operationMembers.filter(m=>initialDue(m)||updateDue(m));
+    $('weeklyReviewList').innerHTML=due.map(m=>{
+      const r=reviews.get(m.id),message=r?.draft_message||updateText(m);
+      const a=nbffAreas.find(a=>a.key===String(m.neighbourhood||m.area||m.county||'').trim().toLowerCase());
+      return `<div class="event-card" data-review-id="${safe(m.id)}"><strong>${safe(m.first_name||'Member')}</strong> · ${safe(m.neighbourhood||m.area||'Unknown area')} <span class="badge">${safe(r?.status||'pending')}</span><p class="small muted">${safe(m.introduction_count||0)}/15 introductions · ${safe(situation(m)[0])}${a?' · '+safe(areaSummary(a)):''}</p><textarea aria-label="Draft for ${safe(m.first_name||'member')}">${safe(message)}</textarea><div class="actions"><button data-review="approved">Approve draft</button><button class="secondary" data-review="skipped">Skip this week</button><button class="secondary" data-review="snoozed">Snooze</button><button class="secondary" data-review="sent">Mark manually sent</button><button class="secondary" data-review="copy">Copy draft</button></div></div>`;
+    }).join('')||'<p class="muted">No initial or weekly updates currently due.</p>';
+  }
+  $('weeklyReviewList').addEventListener('click',async e=>{
+    const b=e.target.closest('button[data-review]');if(!b)return;
+    const card=b.closest('[data-review-id]'),member_id=card.dataset.reviewId,draft_message=card.querySelector('textarea').value,status=b.dataset.review;
+    if(status==='copy'){try{await navigator.clipboard.writeText(draft_message);showMessage($('tasksMessage'),'Draft copied. No message sent.',true);}catch{prompt('Copy draft:',draft_message);}return;}
+    if(status==='sent'&&!confirm('Have you ACTUALLY sent this message? This records a manual action; it does not send WhatsApp.'))return;
+    try{await api('POST',{action:'save_weekly_review',member_id,review_week:currentWeek(),draft_message,status});await loadWorkspace();showMessage($('tasksMessage'),'Review decision saved. No automatic WhatsApp message sent.',true);}catch(err){showMessage($('tasksMessage'),err.message);}
+  });
+  $('refreshAreasButton').addEventListener('click',loadAreas);
+  $('refreshWorkspaceButton').addEventListener('click',loadWorkspace);
+  $('refreshTasksButton').addEventListener('click',async()=>{await loadOperations();await loadWorkspace();});
+  const originalLoadMembers=loadMembers;
+  // Refresh new sections after the existing overview has loaded.
+  const originalLoginFormHandler=null;
+  document.getElementById('loginForm').addEventListener('submit',()=>{setTimeout(async()=>{if(adminPassword&&!$('dashboard').classList.contains('hidden')){await loadAreas();await loadWorkspace();}},1200);});
+  document.getElementById('refreshButton').addEventListener('click',async()=>{await loadAreas();await loadWorkspace();});
+  document.querySelector('.admin-nav').addEventListener('click',async e=>{const t=e.target.closest('button[data-tab]');if(!t||!adminPassword)return;if(t.dataset.tab==='areasPanel')await loadAreas();if(t.dataset.tab==='eventsPanel'){await loadAreas();await loadWorkspace();}if(t.dataset.tab==='tasksPanel'){await loadAreas();await loadOperations();await loadWorkspace();}});
+
 })();
 </script>
 </body>
