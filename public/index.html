@@ -197,6 +197,7 @@ footer{padding:36px 24px;text-align:center;color:var(--muted)}.footer-brand{colo
 .payment-time-row select{min-width:0}
 .form-message.is-error{color:#a13f2b;font-weight:700;padding:12px;background:#fff2ed;border-radius:7px}
 @media(max-width:520px){#locationMap{height:300px}}
+ .county-select-wrap{display:flex;align-items:stretch;gap:5px}.county-select-wrap input{flex:1;min-width:0}.county-dropdown-trigger{width:44px;flex:0 0 44px;padding:0;background:#e9e4d9;color:#354f40;border:1px solid #cfcfc5;font-size:22px}
 </style>
 <link href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" rel="stylesheet"/>
 <style>
@@ -272,15 +273,15 @@ fbq('track', 'PageView');
 <div class="step active"><p class="step-kicker">01 · Your details</p><h3>First, a little about you</h3>
 <label for="firstName">First name</label><input autocomplete="given-name" id="firstName" name="firstName" required=""/>
 <label for="age">Age</label><input id="age" max="100" min="18" name="age" required="" type="number"/>
-<label for="countryCallingCode">WhatsApp country calling code</label>
+<label for="countryCallingCode">WhatsApp number</label>
 <div style="display:grid;grid-template-columns:minmax(100px,1fr) minmax(150px,2fr);gap:10px;align-items:end">
-<div><input id="countryCallingCode" name="countryCallingCode" type="tel" value="+254" placeholder="+254" inputmode="tel" pattern="\+[1-9][0-9]{0,3}" title="Enter a calling code such as +254 or +44" required aria-label="Country calling code"></div>
-<div><label for="phone">WhatsApp number (without country code)</label><input autocomplete="tel-national" id="phone" name="phone" placeholder="712345678" required type="tel" inputmode="tel" pattern="[0-9\s()\-]{6,18}" title="Enter your phone number without its country code"></div></div>
-<p class="field-hint">For example: +254 and 712345678, or +44 and 7700900123. Enter the code and number separately.</p>
+<div><input id="countryCallingCode" name="countryCallingCode" type="tel" value="+254" inputmode="tel" pattern="\+[1-9][0-9]{0,3}" title="Country calling code" required aria-label="Country calling code"></div>
+<div><input autocomplete="tel-national" id="phone" name="phone" required type="tel" inputmode="tel" pattern="[0-9\s()\-]{6,18}" title="WhatsApp phone number" aria-label="WhatsApp phone number"></div></div>
+
 <label for="email">Email (optional)</label><input autocomplete="email" id="email" name="email" type="email"/>
 </div>
 <div class="step active"><p class="step-kicker">02 · Your neighbourhood</p><h3>Where are you based?</h3>
-<label for="county">County</label><input id="county" name="county" type="text" list="kenyaCounties" placeholder="Search 47 counties (Nairobi first)" autocomplete="off" required/><datalist id="kenyaCounties"><option value="Nairobi"></option><option value="Baringo"></option><option value="Bomet"></option><option value="Bungoma"></option><option value="Busia"></option><option value="Elgeyo-Marakwet"></option><option value="Embu"></option><option value="Garissa"></option><option value="Homa Bay"></option><option value="Isiolo"></option><option value="Kajiado"></option><option value="Kakamega"></option><option value="Kericho"></option><option value="Kiambu"></option><option value="Kilifi"></option><option value="Kirinyaga"></option><option value="Kisii"></option><option value="Kisumu"></option><option value="Kitui"></option><option value="Kwale"></option><option value="Laikipia"></option><option value="Lamu"></option><option value="Machakos"></option><option value="Makueni"></option><option value="Mandera"></option><option value="Marsabit"></option><option value="Meru"></option><option value="Migori"></option><option value="Mombasa"></option><option value="Murang&#x27;a"></option><option value="Nakuru"></option><option value="Nandi"></option><option value="Narok"></option><option value="Nyamira"></option><option value="Nyandarua"></option><option value="Nyeri"></option><option value="Samburu"></option><option value="Siaya"></option><option value="Taita-Taveta"></option><option value="Tana River"></option><option value="Tharaka-Nithi"></option><option value="Trans Nzoia"></option><option value="Turkana"></option><option value="Uasin Gishu"></option><option value="Vihiga"></option><option value="Wajir"></option><option value="West Pokot"></option></datalist><p class="field-hint">Start typing your county. Nairobi is the first suggestion.</p>
+<label for="county">County</label><div class="county-select-wrap"><input id="county" name="county" type="text" list="kenyaCounties" placeholder="Select county" autocomplete="off" required/><datalist id="kenyaCounties"><option value="Nairobi"></option><option value="Baringo"></option><option value="Bomet"></option><option value="Bungoma"></option><option value="Busia"></option><option value="Elgeyo-Marakwet"></option><option value="Embu"></option><option value="Garissa"></option><option value="Homa Bay"></option><option value="Isiolo"></option><option value="Kajiado"></option><option value="Kakamega"></option><option value="Kericho"></option><option value="Kiambu"></option><option value="Kilifi"></option><option value="Kirinyaga"></option><option value="Kisii"></option><option value="Kisumu"></option><option value="Kitui"></option><option value="Kwale"></option><option value="Laikipia"></option><option value="Lamu"></option><option value="Machakos"></option><option value="Makueni"></option><option value="Mandera"></option><option value="Marsabit"></option><option value="Meru"></option><option value="Migori"></option><option value="Mombasa"></option><option value="Murang&#x27;a"></option><option value="Nakuru"></option><option value="Nandi"></option><option value="Narok"></option><option value="Nyamira"></option><option value="Nyandarua"></option><option value="Nyeri"></option><option value="Samburu"></option><option value="Siaya"></option><option value="Taita-Taveta"></option><option value="Tana River"></option><option value="Tharaka-Nithi"></option><option value="Trans Nzoia"></option><option value="Turkana"></option><option value="Uasin Gishu"></option><option value="Vihiga"></option><option value="Wajir"></option><option value="West Pokot"></option></datalist><button type="button" id="showCountyOptions" class="county-dropdown-trigger" aria-label="Show counties">⌄</button></div>
 <label for="area">Area or sub-county</label><input id="area" name="area" placeholder="e.g. Westlands, Kajiado North" required=""/>
 <p class="field-hint">Select the place you want us to use for nearby friendship matching.</p>
 <div class="location-methods">
@@ -726,11 +727,12 @@ form.addEventListener('submit', async (event) => {
 
 <script>
 (()=>{
+ document.getElementById('showCountyOptions')?.addEventListener('click',()=>{const el=document.getElementById('county');el.focus();if(typeof el.showPicker==='function'){try{el.showPicker()}catch(e){}}});
  const county=document.getElementById('county'),dial=document.getElementById('countryCallingCode'),num=document.getElementById('phone');
  const counties=new Set([...document.querySelectorAll('#kenyaCounties option')].map(o=>o.value.toLowerCase()));
  function validate(){const valid=counties.has(county.value.trim().toLowerCase());county.setCustomValidity(valid?'':'Please select one of the 47 Kenyan counties.');
  const code=/^\+[1-9]\d{0,3}$/.test(dial.value.trim());dial.setCustomValidity(code?'':'Enter a valid country calling code starting with +.');
- const digits=num.value.replace(/\D/g,'').replace(/^0+/, '');num.setCustomValidity(digits.length>=6&&digits.length<=14?'':'Enter a valid phone number without the country code.');}
+ const digits=num.value.replace(/\D/g,'').replace(/^0+/, '');num.setCustomValidity(digits.length>=6&&digits.length<=14?'':'Enter a valid WhatsApp number.');}
  [county,dial,num].forEach(el=>{el.addEventListener('input',validate);el.addEventListener('change',validate);});
  document.getElementById('joinForm')?.addEventListener('submit',e=>{validate();if(!county.checkValidity()||!dial.checkValidity()||!num.checkValidity()){e.preventDefault();[county,dial,num].find(x=>!x.checkValidity())?.reportValidity();}},true);
 })();
