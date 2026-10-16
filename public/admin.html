@@ -117,6 +117,7 @@
     <div class="panel dashboard-tab-panel hidden" id="individualPanel" role="tabpanel" aria-labelledby="tab-individual">
       <div class="topline"><div><h2>Individual introductions</h2><p class="muted">Compatible pairs within 5 km. Approve first, then mark connected only after making the actual introduction. Group members remain eligible.</p></div><button class="secondary" id="refreshIndividualButton">Refresh pairs</button></div>
       <div id="individualMessage" class="notice hidden" role="status"></div>
+      <section style="margin:16px 0;padding:16px;border:1px solid #ddd;border-radius:10px"><h3>WhatsApp introductions &amp; waiting updates</h3><p class="small">Messages are queued after your approval. Sending is disabled unless enabled in Supabase. Check status and alerts here.</p><div class="actions"><button type="button" id="refreshMessagingStatus" class="secondary">Refresh messaging status</button><button type="button" id="queueWaitingUpdates" class="secondary">Prepare weekly waiting updates</button></div><div id="messagingStatusMessage" class="notice hidden" role="status"></div><div id="messagingStatusList" style="margin-top:12px">Not loaded yet.</div></section>
       <div class="stats" style="margin:14px 0"><div class="stat"><span>Suggested pairs</span><strong id="individualSuggestionsCount">0</strong></div><div class="stat"><span>Approved, awaiting introduction</span><strong id="individualApprovedCount">0</strong></div><div class="stat"><span>Completed individual pairs</span><strong id="individualConnectedCount">0</strong></div><div class="stat"><span>Service completed (5+)</span><strong id="individualCompleteCount">0</strong></div></div>
       <h3>Matchmaking queue — oldest confirmed member first</h3>
       <p class="muted">Members with available matches are queued by payment confirmation date, oldest first; completed introductions create a seven-day cooldown. Review their eligible candidates ranked by compatibility. Moving on does not remove anyone from future reviews. Scores of 70% or more are labelled highly compatible; lower scores remain eligible.</p>
@@ -432,12 +433,35 @@
       memberSelect.value=memberQueue.some(x=>String(x.id)===previous)?previous:(memberQueue[0]?.id||'');
       updateQueueControls();
       if(memberSelect.value) await loadMemberCandidates();
-      $('individualSuggestionsBody').innerHTML=suggestions.map(x=>`<tr><td><strong>${safe(x.name_a)}</strong> (${safe(x.age_a)}) — <strong>${safe(x.name_b)}</strong> (${safe(x.age_b)})<br><small>${safe(x.area_a||'')} / ${safe(x.area_b||'')}</small><div class="small">${pairContact(x.name_a,x.phone_a)}${pairContact(x.name_b,x.phone_b)}</div></td><td>${safe(x.score)}% · ${safe(x.distance_km)} km</td><td><small>Strengths: ${safe((x.strengths||[]).join(', ')||'None noted')}<br>Differences: ${safe((x.differences||[]).join(', ')||'None noted')}</small></td><td><button data-individual="approve" data-a="${safe(x.member_a)}" data-b="${safe(x.member_b)}">Approve pair</button></td></tr>`).join('')||'<tr><td colspan="4">No new eligible pairs.</td></tr>';
+      $('individualSuggestionsBody').innerHTML=suggestions.map(x=>`<tr><td><strong>${safe(x.name_a)}</strong> (${safe(x.age_a)}) — <strong>${safe(x.name_b)}</strong> (${safe(x.age_b)})<br><small>${safe(x.area_a||'')} / ${safe(x.area_b||'')}</small><div class="small">${pairContact(x.name_a,x.phone_a)}${pairContact(x.name_b,x.phone_b)}</div></td><td>${safe(x.score)}% · ${safe(x.distance_km)} km</td><td><small>Strengths: ${safe((x.strengths||[]).join(', ')||'None noted')}<br>Differences: ${safe((x.differences||[]).join(', ')||'None noted')}</small></td><td><button data-individual="approve" data-a="${safe(x.member_a)}" data-b="${safe(x.member_b)}">Approve &amp; Introduce</button></td></tr>`).join('')||'<tr><td colspan="4">No new eligible pairs.</td></tr>';
       $('individualExistingBody').innerHTML=existing.map(x=>`<tr><td>${pairContact(x.name_a,x.phone_a)}${pairContact(x.name_b,x.phone_b)}</td><td><span class="badge ${x.status==='connected'?'confirmed':''}">${safe(x.status)}</span>${x.connected_at?`<br><small>${safe(new Date(x.connected_at).toLocaleDateString('en-KE'))}</small>`:''}</td><td>${x.status==='approved'?`<div class="actions"><button class="secondary" data-individual="copy-a" data-a="${safe(x.member_a)}" data-b="${safe(x.member_b)}">Copy message for ${safe(x.name_a)}</button><button class="secondary" data-individual="copy-b" data-a="${safe(x.member_a)}" data-b="${safe(x.member_b)}">Copy message for ${safe(x.name_b)}</button><button data-individual="connected" data-a="${safe(x.member_a)}" data-b="${safe(x.member_b)}">Mark actually introduced</button></div>`:''}</td></tr>`).join('')||'<tr><td colspan="3">No introductions recorded.</td></tr>';
       $('individualMessage').classList.add('hidden');
     } catch(e) {showMessage($('individualMessage'),e.message||'Could not load individual matches.');}
     finally {$('refreshIndividualButton').disabled=false;$('refreshIndividualButton').textContent=refreshLabel;}
   }
+  async function loadMessagingStatus(){
+    const button=$('refreshMessagingStatus');button.disabled=true;button.textContent='Refreshing…';
+    try{
+      const data=await api('POST',{action:'messaging_overview'});
+      const alerts=(data.alerts||[]).map(a=>`<li><strong>${safe(a.severity)}: ${safe(a.kind)}</strong> — ${safe(a.created_at)}</li>`).join('');
+      const jobs=(data.jobs||[]).map(j=>`<tr><td>${safe(j.kind)}</td><td>${safe(j.status)}</td><td>${safe(j.created_at)}</td><td>${j.status==='pending'?`<button data-process-job="${safe(j.id)}">Process queued message</button>`:''}</td></tr>`).join('');
+      $('messagingStatusList').innerHTML=`<h4>Introductions needing attention (${(data.alerts||[]).length})</h4><ul>${alerts||'<li>No active alerts</li>'}</ul><h4>Recent message jobs</h4><div class="table-wrap"><table><thead><tr><th>Type</th><th>Status</th><th>Created</th><th>Action</th></tr></thead><tbody>${jobs||'<tr><td colspan="4">No jobs yet</td></tr>'}</tbody></table></div>`;
+      showMessage($('messagingStatusMessage'),'Updated at '+new Date().toLocaleTimeString('en-KE'),true);
+    }catch(e){showMessage($('messagingStatusMessage'),e.message||'Could not load messaging status');}
+    finally{button.disabled=false;button.textContent='Refresh messaging status';}
+  }
+  $('refreshMessagingStatus').addEventListener('click',loadMessagingStatus);
+  $('queueWaitingUpdates').addEventListener('click',async()=>{
+    if(!confirm('Prepare one weekly update per eligible waiting member? This queues messages but does not bypass WhatsApp sending safeguards.'))return;
+    try{const r=await api('POST',{action:'queue_weekly_waiting_updates'});showMessage($('messagingStatusMessage'),`${r.queued} weekly updates queued.`,true);await loadMessagingStatus();}
+    catch(e){showMessage($('messagingStatusMessage'),e.message||'Could not prepare updates');}
+  });
+  $('messagingStatusList').addEventListener('click',async e=>{
+    const b=e.target.closest('[data-process-job]');if(!b)return;
+    if(!confirm('Process this one approved, queued WhatsApp message?'))return;
+    b.disabled=true;try{const r=await api('POST',{action:'process_message_job',job_id:b.dataset.processJob});showMessage($('messagingStatusMessage'),r.dry_run?'Sending disabled; no message sent.':'Message submitted for processing.',true);await loadMessagingStatus();}
+    catch(err){showMessage($('messagingStatusMessage'),err.message||'Could not process message');b.disabled=false;}
+  });
   $('individualPanel').addEventListener('click',async e=>{
     const b=e.target.closest('button[data-individual]');if(!b)return;
     const op=b.dataset.individual;
@@ -452,7 +476,7 @@
       return;
     }
     if(op==='reopen' && !confirm('Has this customer requested more matching? Reopen until their membership expires or they reach 15 introductions?'))return;
-    if(op==='approve' && !confirm('Approve this compatible pair for an individual introduction? This does not contact them.'))return;
+    if(op==='approve' && !confirm('Approve this pair and queue WhatsApp introductions for both members? If live sending is enabled, the messages will be sent automatically.'))return;
     if(op==='connected' && !confirm('Have you ACTUALLY introduced these two people to each other? Both will receive one unique introduction credit.'))return;
     b.disabled=true;
     try {
@@ -473,7 +497,7 @@
       $('candidateResults').innerHTML=`<h3>${safe(result.member.name)} — ${result.total} eligible potential friends</h3>`+
         (result.candidates||[]).map((x,i)=>`<div class="group-card"><div class="topline"><div><strong>${i+1}. ${safe(x.name_b)}</strong> · ${safe(x.age_b)} years · ${safe(x.area_b||'')} · ${safe(x.distance_km)} km</div><div><strong style="color:${x.score>=70?'#285237':'#575c54'}">${safe(x.score)}%</strong> <span class="badge ${x.score>=70?'confirmed':''}">${x.score>=70?'Highly compatible':'Eligible'}</span></div></div>
         <details data-candidate="${safe(x.member_b)}" ${openDetails.has(String(x.member_b))?'open':''} style="margin-top:10px"><summary style="cursor:pointer;font-weight:bold">View shared traits, differences and score</summary><div class="row" style="align-items:start"><div><h4>What they share</h4><ul>${(x.strengths||[]).map(v=>`<li>${safe(v)}</li>`).join('')||'<li>No scored similarities identified</li>'}</ul></div><div><h4>Where they differ</h4><ul>${(x.differences||[]).map(v=>`<li>${safe(v)}</li>`).join('')||'<li>No recorded differences</li>'}</ul></div></div><h4>Compatibility explained</h4><table style="width:100%"><thead><tr><th>Category</th><th>Assessment</th><th>${safe(x.name_a)}</th><th>${safe(x.name_b)}</th></tr></thead><tbody>${(x.score_breakdown||[]).map(r=>`<tr><td>${safe(r.category)}</td><td>${safe(r.assessment||"Not assessed")}</td><td>${safe(r.answer_a)}</td><td>${safe(r.answer_b)}</td></tr>`).join('')}</tbody></table></details>
-        <div class="actions" style="margin-top:12px"><button data-individual="approve" data-a="${safe(x.member_a)}" data-b="${safe(x.member_b)}">Approve pair</button></div></div>`).join('') || '<p class="muted">No new eligible candidates currently available.</p>';
+        <div class="actions" style="margin-top:12px"><button data-individual="approve" data-a="${safe(x.member_a)}" data-b="${safe(x.member_b)}">Approve &amp; Introduce</button></div></div>`).join('') || '<p class="muted">No new eligible candidates currently available.</p>';
       $('candidateMessage').classList.add('hidden');
     }catch(e){showMessage($('candidateMessage'),e.message||'Could not load candidates.');}
     finally{$('refreshCandidateButton').disabled=false;$('refreshCandidateButton').textContent=candidateRefreshLabel;}
