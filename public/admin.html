@@ -119,7 +119,7 @@
       <div id="individualMessage" class="notice hidden" role="status"></div>
       <div class="stats" style="margin:14px 0"><div class="stat"><span>Suggested pairs</span><strong id="individualSuggestionsCount">0</strong></div><div class="stat"><span>Approved, awaiting introduction</span><strong id="individualApprovedCount">0</strong></div><div class="stat"><span>Completed individual pairs</span><strong id="individualConnectedCount">0</strong></div><div class="stat"><span>Service completed (5+)</span><strong id="individualCompleteCount">0</strong></div></div>
       <h3>Matchmaking queue — oldest confirmed member first</h3>
-      <p class="muted">Members are queued by registration date, oldest first, after payment confirmation. Review their eligible candidates ranked by compatibility. Moving on does not remove anyone from future reviews. Scores of 70% or more are labelled highly compatible; lower scores remain eligible.</p>
+      <p class="muted">Members with available matches are queued by payment confirmation date, oldest first; completed introductions create a seven-day cooldown. Review their eligible candidates ranked by compatibility. Moving on does not remove anyone from future reviews. Scores of 70% or more are labelled highly compatible; lower scores remain eligible.</p>
       <div class="row"><div><label for="candidateMemberSelect">Current member (oldest first)</label><select id="candidateMemberSelect"><option value="">Loading queue…</option></select></div><div><button class="secondary" id="refreshCandidateButton" type="button">Refresh potential friends</button></div></div><div class="row" style="align-items:center;justify-content:space-between;margin:12px 0 18px"><div><strong id="queuePosition">Queue loading…</strong><p class="small muted" id="queueMemberInfo" style="margin:3px 0">Only confirmed, active memberships are included.</p></div><div class="actions"><button class="secondary" id="queuePrevious" type="button">← Previous member</button><button id="queueNext" type="button">Next member →</button></div></div>
       <div id="candidateMessage" class="notice hidden" role="status"></div>
       <div id="candidateResults"></div>
@@ -235,7 +235,7 @@
     const data = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(data.error || `Request failed (${response.status})`);
     // Successful writes refresh every section, not just the one being edited.
-    const readOnlyActions = new Set(['operations_overview','individual_overview','member_candidates','group_overview','preview_matches','preview_additions']);
+    const readOnlyActions = new Set(['operations_overview','individual_overview','member_candidates','ready_matchmaking_queue','group_overview','preview_matches','preview_additions']);
     if (method === 'PATCH' || (method === 'POST' && payload?.action && !readOnlyActions.has(payload.action))) {
       queueDashboardRefresh();
     }
@@ -264,9 +264,10 @@
       refreshEntireDashboard();
     }, 1000);
   }
-  dashboardRefreshTimer = setInterval(refreshEntireDashboard, 60000);
+  // Avoid rebuilding candidate cards while an admin is reviewing details.
+  dashboardRefreshTimer = null;
   document.addEventListener('visibilitychange', () => {
-    if (!document.hidden) queueDashboardRefresh();
+    // Manual refresh avoids closing review panels unexpectedly.
   });
 
   function value(obj, key) {
@@ -393,10 +394,10 @@
   function updateQueueControls(){
     const id=$('candidateMemberSelect').value;
     const i=memberQueue.findIndex(x=>String(x.id)===id);
-    $('queuePosition').textContent=i>=0?`Member ${i+1} of ${memberQueue.length} awaiting matching`:'No active confirmed members in queue';
+    $('queuePosition').textContent=i>=0?`Member ${i+1} of ${memberQueue.length} awaiting matching`:'No members with available matches outside cooldown';
     const m=i>=0?members.find(x=>String(x.id)===id):null;
     const date=m?.created_at?new Date(m.created_at):null;
-    $('queueMemberInfo').textContent=i>=0?`${memberQueue[i].name} · ${memberQueue[i].count||0} introductions · Joined ${date && !isNaN(date)?date.toLocaleDateString('en-KE'):'date unavailable'}`:'Members without matches remain eligible for future review.';
+    $('queueMemberInfo').textContent=i>=0?`${memberQueue[i].name} · ${memberQueue[i].count||0} introductions · ${memberQueue[i].available||0} available matches · Confirmed ${memberQueue[i].confirmed_at?new Date(memberQueue[i].confirmed_at).toLocaleDateString('en-KE'):'date unavailable'}`:'Members without matches remain eligible for future review.';
     $('queuePrevious').disabled=i<=0;
     $('queueNext').disabled=i<0||i>=memberQueue.length-1;
   }
@@ -412,6 +413,8 @@
   $('queueNext').addEventListener('click',()=>moveQueue(1));
   async function loadIndividual() {
     $('refreshIndividualButton').disabled=true;
+    const refreshLabel=$('refreshIndividualButton').textContent;
+    $('refreshIndividualButton').textContent='Refreshing…';
     try {
       individualData=await api('POST',{action:'individual_overview'});
       const {suggestions=[],existing=[],progress=[]}=individualData;
@@ -422,15 +425,9 @@
       $('individualProgressBody').innerHTML=progress.map(x=>`<tr><td><strong>${safe(x.name)}</strong><br><small>${safe(x.phone||'')}</small></td><td>${safe(x.count)} unique people / 5 minimum (15 maximum)</td><td><span class="badge ${x.complete?'confirmed':''}">${x.expired?'Membership expired':x.complete?'Completed':x.active?'Actively matching':'15 reached'}</span><br><small>Entitlement until ${safe(x.expires_at?new Date(x.expires_at).toLocaleDateString('en-KE'):'Unknown')}</small></td><td>${x.complete&&!x.expired&&x.count<15?`<button data-individual="reopen" data-id="${safe(x.id)}">Reopen on request</button>`:''}</td></tr>`).join('')||'<tr><td colspan="4">No confirmed members.</td></tr>';
       const memberSelect=$('candidateMemberSelect');
       const previous=memberSelect.value;
-      // Keep the queue ordered by original signup date, among confirmed active members.
-      // If payment confirmation timestamps are added later, use them here instead.
-      const confirmed = new Map(members.filter(m=>String(m.payment_status||'').toLowerCase()==='confirmed').map(m=>[String(m.id),m]));
-      memberQueue=progress.filter(x=>confirmed.has(String(x.id)) && !x.expired && x.active && Number(x.count||0)<15)
-        .sort((a,b)=>{
-          const am=confirmed.get(String(a.id)),bm=confirmed.get(String(b.id));
-          const at=Date.parse(am?.created_at||''),bt=Date.parse(bm?.created_at||'');
-          return (Number.isFinite(at)?at:Infinity)-(Number.isFinite(bt)?bt:Infinity) || String(a.id).localeCompare(String(b.id));
-        });
+      // Server-side ready queue: available candidates, no seven-day cooldown, oldest confirmed first.
+      const queueResult=await api('POST',{action:'ready_matchmaking_queue'});
+      memberQueue=queueResult.queue||[];
       memberSelect.innerHTML='<option value="">Select a member</option>'+memberQueue.map(x=>`<option value="${safe(x.id)}">${safe(x.name)} (${safe(x.count)} introductions)</option>`).join('');
       memberSelect.value=memberQueue.some(x=>String(x.id)===previous)?previous:(memberQueue[0]?.id||'');
       updateQueueControls();
@@ -439,7 +436,7 @@
       $('individualExistingBody').innerHTML=existing.map(x=>`<tr><td>${pairContact(x.name_a,x.phone_a)}${pairContact(x.name_b,x.phone_b)}</td><td><span class="badge ${x.status==='connected'?'confirmed':''}">${safe(x.status)}</span>${x.connected_at?`<br><small>${safe(new Date(x.connected_at).toLocaleDateString('en-KE'))}</small>`:''}</td><td>${x.status==='approved'?`<div class="actions"><button class="secondary" data-individual="copy-a" data-a="${safe(x.member_a)}" data-b="${safe(x.member_b)}">Copy message for ${safe(x.name_a)}</button><button class="secondary" data-individual="copy-b" data-a="${safe(x.member_a)}" data-b="${safe(x.member_b)}">Copy message for ${safe(x.name_b)}</button><button data-individual="connected" data-a="${safe(x.member_a)}" data-b="${safe(x.member_b)}">Mark actually introduced</button></div>`:''}</td></tr>`).join('')||'<tr><td colspan="3">No introductions recorded.</td></tr>';
       $('individualMessage').classList.add('hidden');
     } catch(e) {showMessage($('individualMessage'),e.message||'Could not load individual matches.');}
-    finally {$('refreshIndividualButton').disabled=false;}
+    finally {$('refreshIndividualButton').disabled=false;$('refreshIndividualButton').textContent=refreshLabel;}
   }
   $('individualPanel').addEventListener('click',async e=>{
     const b=e.target.closest('button[data-individual]');if(!b)return;
@@ -468,15 +465,18 @@
     const memberId=$('candidateMemberSelect').value;
     if(!memberId){$('candidateResults').innerHTML='';return;}
     $('refreshCandidateButton').disabled=true;
+    const candidateRefreshLabel=$('refreshCandidateButton').textContent;
+    $('refreshCandidateButton').textContent='Refreshing…';
     try {
       const result=await api('POST',{action:'member_candidates',member_id:memberId});
+      const openDetails=new Set([...$('candidateResults').querySelectorAll('details[open]')].map(d=>d.dataset.candidate));
       $('candidateResults').innerHTML=`<h3>${safe(result.member.name)} — ${result.total} eligible potential friends</h3>`+
         (result.candidates||[]).map((x,i)=>`<div class="group-card"><div class="topline"><div><strong>${i+1}. ${safe(x.name_b)}</strong> · ${safe(x.age_b)} years · ${safe(x.area_b||'')} · ${safe(x.distance_km)} km</div><div><strong style="color:${x.score>=70?'#285237':'#575c54'}">${safe(x.score)}%</strong> <span class="badge ${x.score>=70?'confirmed':''}">${x.score>=70?'Highly compatible':'Eligible'}</span></div></div>
-        <details style="margin-top:10px"><summary style="cursor:pointer;font-weight:bold">View shared traits and differences</summary><div class="row" style="align-items:start"><div><h4>What they share</h4><ul>${(x.strengths||[]).map(v=>`<li>${safe(v)}</li>`).join('')||'<li>No scored similarities identified</li>'}</ul></div><div><h4>Where they differ</h4><ul>${(x.differences||[]).map(v=>`<li>${safe(v)}</li>`).join('')||'<li>No recorded differences</li>'}</ul></div></div></details>
+        <details data-candidate="${safe(x.member_b)}" ${openDetails.has(String(x.member_b))?'open':''} style="margin-top:10px"><summary style="cursor:pointer;font-weight:bold">View shared traits, differences and score</summary><div class="row" style="align-items:start"><div><h4>What they share</h4><ul>${(x.strengths||[]).map(v=>`<li>${safe(v)}</li>`).join('')||'<li>No scored similarities identified</li>'}</ul></div><div><h4>Where they differ</h4><ul>${(x.differences||[]).map(v=>`<li>${safe(v)}</li>`).join('')||'<li>No recorded differences</li>'}</ul></div></div><h4>Compatibility score breakdown</h4><table style="width:100%"><thead><tr><th>Category</th><th>Points</th><th>${safe(x.name_a)}</th><th>${safe(x.name_b)}</th></tr></thead><tbody>${(x.score_breakdown||[]).map(r=>`<tr><td>${safe(r.category)}</td><td>${safe(r.earned)} / ${safe(r.maximum)}</td><td>${safe(r.answer_a)}</td><td>${safe(r.answer_b)}</td></tr>`).join('')}</tbody></table></details>
         <div class="actions" style="margin-top:12px"><button data-individual="approve" data-a="${safe(x.member_a)}" data-b="${safe(x.member_b)}">Approve pair</button></div></div>`).join('') || '<p class="muted">No new eligible candidates currently available.</p>';
       $('candidateMessage').classList.add('hidden');
     }catch(e){showMessage($('candidateMessage'),e.message||'Could not load candidates.');}
-    finally{$('refreshCandidateButton').disabled=false;}
+    finally{$('refreshCandidateButton').disabled=false;$('refreshCandidateButton').textContent=candidateRefreshLabel;}
   }
   $('refreshCandidateButton').addEventListener('click',loadMemberCandidates);
   $('candidateMemberSelect').addEventListener('change',()=>{updateQueueControls();loadMemberCandidates();});
