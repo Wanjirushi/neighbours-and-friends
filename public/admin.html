@@ -29,13 +29,16 @@
     .admin-nav button:focus-visible{outline:3px solid var(--terracotta);outline-offset:2px}
     .dashboard-tab-panel.hidden{display:none!important}
     @media(max-width:640px){.admin-nav .nav-buttons{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.admin-nav button{font-size:12px;padding:9px 6px}}
+  .privacy-toggle{font-size:13px;padding:8px 12px;white-space:nowrap}
+  .privacy-title{font-family:Georgia,"Times New Roman",serif}
   table tbody tr[hidden]{display:none!important}
+  .admin-nav{margin-bottom:12px}.admin-nav .nav-buttons{display:flex;gap:7px;flex-wrap:wrap}.admin-nav button{font-weight:600}.priority-payment{background:#e3efe9!important;color:#205441!important}.priority-match{background:#e8e9f7!important;color:#383c73!important}.priority-comms{background:#e2eef8!important;color:#245779!important}.priority-alert{background:#fff0df!important;color:#865021!important}.nav-count:not(:empty){display:inline-block;background:#fff;border-radius:12px;padding:1px 6px;margin-left:3px;font-size:11px}.admin-more{margin:8px 0}.admin-more summary{cursor:pointer;font-size:13px;color:#555}.admin-more .nav-buttons{margin-top:9px}.daily-alerts{display:flex;gap:12px;align-items:center;flex-wrap:wrap;background:#fff;border:1px solid #e2ded5;border-radius:10px;padding:13px 16px;margin:14px 0}.daily-alerts button{padding:6px 9px;font-size:12px}.daily-alerts .warn{background:#fff0df;color:#70430e}.daily-alerts .danger{background:#ffe9e7;color:#912b22}.daily-alerts .ok{background:#e4f1e8;color:#28543c}.comms-table{width:100%;border-collapse:collapse}.comms-table td,.comms-table th{padding:8px;border-bottom:1px solid #e8e3dc;text-align:left}.comms-note{margin:7px 0;padding:9px;background:#f8f6f2;border-radius:7px}
 </style>
 </head>
 <body>
 <main>
-  <p><a href="/">← Back to Neighbour Friend Finder</a></p>
-  <div class="topline"><div><h1>Neighbour Friend Finder</h1><p class="muted">Member administration</p></div><span class="badge">Private admin area</span></div>
+  <p><a id="adminHomeLink" href="/">← Back to Neighbour Friend Finder</a></p>
+  <div class="topline"><div><h1 id="adminBrandTitle" class="privacy-title">Neighbour Friend Finder</h1><p class="muted">Member administration</p></div><div class="actions"><button type="button" class="secondary privacy-toggle" id="privacyToggle" aria-pressed="false" aria-label="Hide business name">◉ Hide name</button><span class="badge">Private admin area</span></div></div>
 
   <section class="panel" id="loginPanel">
     <h2>Admin sign in</h2>
@@ -50,21 +53,25 @@
 
   <section id="dashboard" class="hidden">
     <nav class="admin-nav" aria-label="Admin dashboard sections">
-      <div class="nav-buttons" role="tablist" aria-label="Admin sections">
-        <button type="button" role="tab" id="tab-overview" aria-controls="overviewPanel" aria-selected="true" data-tab="overviewPanel">Overview</button>
+      <div class="nav-buttons" role="tablist" aria-label="Daily operations">
+        <button type="button" role="tab" id="tab-members" aria-controls="membersPanel" aria-selected="true" data-tab="membersPanel" class="priority-payment">1 · Payments <span id="navPaymentsCount" class="nav-count"></span></button>
+        <button type="button" role="tab" id="tab-individual" aria-controls="individualPanel" aria-selected="false" data-tab="individualPanel" class="priority-match">2 · Matchmaking <span id="navMatchCount" class="nav-count"></span></button>
+        <button type="button" role="tab" id="tab-comms" aria-controls="communicationsPanel" aria-selected="false" data-tab="communicationsPanel" class="priority-comms">3 · Communications <span id="navCommsCount" class="nav-count"></span></button>
+        <button type="button" role="tab" id="tab-events" aria-controls="eventsPanel" aria-selected="false" data-tab="eventsPanel">4 · Events &amp; Groups <span id="navEventsCount" class="nav-count"></span></button>
+        <button type="button" role="tab" id="tab-tasks" aria-controls="tasksPanel" aria-selected="false" data-tab="tasksPanel" class="priority-alert">Action centre <span id="navAlertsCount" class="nav-count"></span></button>
+        <button type="button" role="tab" id="tab-overview" aria-controls="overviewPanel" aria-selected="false" data-tab="overviewPanel">Overview</button>
+      </div>
+      <details class="admin-more"><summary>More sections</summary><div class="nav-buttons" role="tablist" aria-label="Additional admin sections">
         <button type="button" role="tab" id="tab-areas" aria-controls="areasPanel" aria-selected="false" data-tab="areasPanel">Neighbourhoods</button>
-        <button type="button" role="tab" id="tab-events" aria-controls="eventsPanel" aria-selected="false" data-tab="eventsPanel">Events & invitations</button>
-        <button type="button" role="tab" id="tab-tasks" aria-controls="tasksPanel" aria-selected="false" data-tab="tasksPanel">Action centre</button>
-        <button type="button" role="tab" id="tab-members" aria-controls="membersPanel" aria-selected="false" data-tab="membersPanel">Members</button>
-        <button type="button" role="tab" id="tab-individual" aria-controls="individualPanel" aria-selected="false" data-tab="individualPanel">Individual introductions</button>
-        <button type="button" role="tab" id="tab-updates" aria-controls="operationsPanel" aria-selected="false" data-tab="operationsPanel">Matchmaking & updates</button>
+        <button type="button" role="tab" id="tab-updates" aria-controls="operationsPanel" aria-selected="false" data-tab="operationsPanel">Matching opportunities</button>
         <button type="button" role="tab" id="tab-waiting" aria-controls="waitingPanel" aria-selected="false" data-tab="waitingPanel">Waiting list</button>
         <button type="button" role="tab" id="tab-groups" aria-controls="groupManagementPanel" aria-selected="false" data-tab="groupManagementPanel">Friendship groups</button>
         <button type="button" role="tab" id="tab-additions" aria-controls="additionsPanel" aria-selected="false" data-tab="additionsPanel">Group additions</button>
         <button type="button" role="tab" id="tab-matching" aria-controls="matchingPanel" aria-selected="false" data-tab="matchingPanel">New group matching</button>
-      </div>
+      </div></details>
     </nav>
-    <div class="panel dashboard-tab-panel" id="overviewPanel" role="tabpanel" aria-labelledby="tab-overview">
+    <div class="daily-alerts" id="dailyAlerts" aria-live="polite"><strong>Daily priorities</strong><span id="dailyAlertsBody">Loading live counts…</span></div>
+    <div class="panel dashboard-tab-panel hidden" id="overviewPanel" role="tabpanel" aria-labelledby="tab-overview">
       <div class="topline"><h2>Registration overview</h2><div class="actions"><button class="secondary" id="refreshButton">Refresh</button><button class="secondary" id="logoutButton">Log out</button></div></div>
       <div class="stats">
         <div class="stat"><span>Total members</span><strong id="totalCount">0</strong></div>
@@ -100,11 +107,11 @@
       <h3>Automatic priorities</h3><p class="small muted">Calculated from current paid members, introductions and upcoming events. These are recommendations, not messages sent to members.</p><div id="automaticPriorities">Loading priorities…</div><h3>Tasks</h3><div id="taskList">No tasks loaded.</div>
       <h3>Weekly update reviews</h3><p class="small muted">Review each draft before messaging. Skipping or snoozing a review does not send a message.</p><div id="weeklyReviewList">Loading...</div>
     </div>
-    <div class="panel dashboard-tab-panel hidden" id="membersPanel" role="tabpanel" aria-labelledby="tab-members">
-      <h2>Members</h2>
+    <div class="panel dashboard-tab-panel" id="membersPanel" role="tabpanel" aria-labelledby="tab-members">
+      <h2>1 · Payment approvals</h2><p class="muted">Verify M-PESA payments first. Confirmed members then become eligible for matching.</p>
       <div class="row">
         <div><label for="searchInput">Search</label><input id="searchInput" placeholder="Name, phone, email, area or M-PESA code"></div>
-        <div><label for="statusFilter">Payment status</label><select id="statusFilter"><option value="all">All statuses</option><option value="pending">Pending</option><option value="confirmed">Confirmed</option><option value="rejected">Rejected</option></select></div>
+        <div><label for="statusFilter">Payment status</label><select id="statusFilter"><option value="all">All statuses</option><option value="pending" selected>Pending</option><option value="confirmed">Confirmed</option><option value="rejected">Rejected</option></select></div>
       </div>
       <p class="small muted">Check each M-PESA code against your official payment records before confirming a payment. These buttons only update the recorded status; they do not verify payment with Safaricom.</p>
       <div class="table-wrap">
@@ -114,19 +121,30 @@
         </table>
       </div>
     </div>
+    <div class="panel dashboard-tab-panel hidden" id="communicationsPanel" role="tabpanel" aria-labelledby="tab-comms">
+      <div class="topline"><div><h2>3 · Communications</h2><p class="muted">One place for introduction messages, weekly updates, expanded-radius requests and event invitations. A queued message is not a sent message.</p></div><button type="button" class="secondary" id="refreshCommsButton">Refresh communications</button></div>
+      <div id="commsError" class="notice hidden" role="status"></div>
+      <div class="stats"><div class="stat"><span>Weekly updates due</span><strong id="commsDue">—</strong></div><div class="stat"><span>Overdue (7+ days)</span><strong id="commsOverdue">—</strong></div><div class="stat"><span>Failed / uncertain jobs</span><strong id="commsFailed">—</strong></div><div class="stat"><span>Open messaging alerts</span><strong id="commsAlerts">—</strong></div></div>
+      <h3>Introduction messages &amp; delivery issues</h3><div id="commsJobs">Loading…</div>
+      <h3>Weekly progress updates</h3><p class="small muted">Members due for a message appear here. Sending or preparing a message does not mark it successful; only recorded send confirmation does.</p><div id="commsWeekly">Loading…</div>
+      <div class="actions"><button type="button" class="secondary" id="commsQueueWeekly">Prepare eligible weekly updates</button><button type="button" class="secondary" data-open-panel="operationsPanel">Review 5–9 km opportunities</button></div>
+      <h3>Extended-radius requests</h3><div id="commsRadius">Loading…</div>
+      <h3>Event invitations</h3><div id="commsEvents">Loading…</div>
+      <p class="small muted">Automated scheduling and live delivery remain disabled until messaging templates and safeguards are verified. No messages are sent by viewing this screen.</p>
+    </div>
     <div class="panel dashboard-tab-panel hidden" id="individualPanel" role="tabpanel" aria-labelledby="tab-individual">
-      <div class="topline"><div><h2>Individual introductions</h2><p class="muted">Compatible pairs within 5 km. Approve first, then mark connected only after making the actual introduction. Group members remain eligible.</p></div><button class="secondary" id="refreshIndividualButton">Refresh pairs</button></div>
+      <div class="topline"><div><h2>2 · Matchmaking</h2><p class="muted">Ready to introduce → Waiting for a match → Introduction history. An approval queues messages; introduction is complete only after both send confirmations.</p></div><button class="secondary" id="refreshIndividualButton">Refresh pairs</button></div>
       <div id="individualMessage" class="notice hidden" role="status"></div>
       <section style="margin:16px 0;padding:16px;border:1px solid #ddd;border-radius:10px"><h3>WhatsApp introductions &amp; waiting updates</h3><p class="small">Messages are queued after your approval. Sending is disabled unless enabled in Supabase. Check status and alerts here.</p><div class="actions"><button type="button" id="refreshMessagingStatus" class="secondary">Refresh messaging status</button><button type="button" id="queueWaitingUpdates" class="secondary">Prepare weekly waiting updates</button></div><div id="messagingStatusMessage" class="notice hidden" role="status"></div><div id="messagingStatusList" style="margin-top:12px">Not loaded yet.</div></section>
       <div class="stats" style="margin:14px 0"><div class="stat"><span>Suggested pairs</span><strong id="individualSuggestionsCount">0</strong></div><div class="stat"><span>Approved, awaiting introduction</span><strong id="individualApprovedCount">0</strong></div><div class="stat"><span>Completed individual pairs</span><strong id="individualConnectedCount">0</strong></div><div class="stat"><span>Service completed (5+)</span><strong id="individualCompleteCount">0</strong></div></div>
-      <h3>Matchmaking queue — oldest confirmed member first</h3>
+      <h3>Ready to introduce — oldest confirmed member first</h3>
       <p class="muted">Members with available matches are queued by payment confirmation date, oldest first; completed introductions create a seven-day cooldown. Review their eligible candidates ranked by compatibility. Moving on does not remove anyone from future reviews. Scores of 70% or more are labelled highly compatible; lower scores remain eligible.</p>
       <div class="row"><div><label for="candidateMemberSelect">Current member (oldest first)</label><select id="candidateMemberSelect"><option value="">Loading queue…</option></select></div><div><button class="secondary" id="refreshCandidateButton" type="button">Refresh potential friends</button></div></div><div class="row" style="align-items:center;justify-content:space-between;margin:12px 0 18px"><div><strong id="queuePosition">Queue loading…</strong><p class="small muted" id="queueMemberInfo" style="margin:3px 0">Only confirmed, active memberships are included.</p></div><div class="actions"><button class="secondary" id="queuePrevious" type="button">← Previous member</button><button id="queueNext" type="button">Next member →</button></div></div>
       <div id="candidateMessage" class="notice hidden" role="status"></div>
       <div id="candidateResults"></div>
-      <h3>Member introduction progress</h3><div class="row" style="margin:10px 0 12px;align-items:center"><div><label for="filter-individualProgressBody">Search member introduction progress</label><input id="filter-individualProgressBody" type="search" placeholder="Search name, phone or status"></div><div class="small muted" id="count-individualProgressBody" aria-live="polite"></div></div><div class="table-wrap"><table><thead><tr><th>Member</th><th>Unique introductions</th><th>Status</th><th>Action</th></tr></thead><tbody id="individualProgressBody"><tr><td colspan="4">Sign in to load progress.</td></tr></tbody></table></div><div class="row" style="align-items:center;justify-content:flex-end;margin:12px 0 26px"><button type="button" class="secondary" id="prev-individualProgressBody">← Previous</button><span class="small" id="page-individualProgressBody"></span><button type="button" class="secondary" id="next-individualProgressBody">Next →</button></div>
+      <h3>Waiting for a match &amp; member progress</h3><div class="row" style="margin:10px 0 12px;align-items:center"><div><label for="filter-individualProgressBody">Search member introduction progress</label><input id="filter-individualProgressBody" type="search" placeholder="Search name, phone or status"></div><div class="small muted" id="count-individualProgressBody" aria-live="polite"></div></div><div class="table-wrap"><table><thead><tr><th>Member</th><th>Unique introductions</th><th>Status</th><th>Action</th></tr></thead><tbody id="individualProgressBody"><tr><td colspan="4">Sign in to load progress.</td></tr></tbody></table></div><div class="row" style="align-items:center;justify-content:flex-end;margin:12px 0 26px"><button type="button" class="secondary" id="prev-individualProgressBody">← Previous</button><span class="small" id="page-individualProgressBody"></span><button type="button" class="secondary" id="next-individualProgressBody">Next →</button></div>
       <h3>Suggested individual pairs</h3><div class="row" style="margin:10px 0 12px;align-items:center"><div><label for="filter-individualSuggestionsBody">Search suggested individual pairs</label><input id="filter-individualSuggestionsBody" type="search" placeholder="Search name, phone or status"></div><div class="small muted" id="count-individualSuggestionsBody" aria-live="polite"></div></div><div class="table-wrap"><table><thead><tr><th>People</th><th>Compatibility</th><th>Shared strengths / differences</th><th>Action</th></tr></thead><tbody id="individualSuggestionsBody"><tr><td colspan="4">Sign in to load suggestions.</td></tr></tbody></table></div><div class="row" style="align-items:center;justify-content:flex-end;margin:12px 0 26px"><button type="button" class="secondary" id="prev-individualSuggestionsBody">← Previous</button><span class="small" id="page-individualSuggestionsBody"></span><button type="button" class="secondary" id="next-individualSuggestionsBody">Next →</button></div>
-      <h3>Approved and completed introductions</h3><div class="row" style="margin:10px 0 12px;align-items:center"><div><label for="filter-individualExistingBody">Search approved and completed introductions</label><input id="filter-individualExistingBody" type="search" placeholder="Search name, phone or status"></div><div class="small muted" id="count-individualExistingBody" aria-live="polite"></div></div><div class="table-wrap"><table><thead><tr><th>People</th><th>Status</th><th>Action</th></tr></thead><tbody id="individualExistingBody"><tr><td colspan="3">Sign in to load introductions.</td></tr></tbody></table></div><div class="row" style="align-items:center;justify-content:flex-end;margin:12px 0 26px"><button type="button" class="secondary" id="prev-individualExistingBody">← Previous</button><span class="small" id="page-individualExistingBody"></span><button type="button" class="secondary" id="next-individualExistingBody">Next →</button></div>
+      <h3>Historical approvals and completed introductions</h3><p class="small muted">Older test approvals do not prove that WhatsApp messages were sent. Do not mark test pairs introduced unless you actually introduced them.</p><div class="row" style="margin:10px 0 12px;align-items:center"><div><label for="filter-individualExistingBody">Search approved and completed introductions</label><input id="filter-individualExistingBody" type="search" placeholder="Search name, phone or status"></div><div class="small muted" id="count-individualExistingBody" aria-live="polite"></div></div><div class="table-wrap"><table><thead><tr><th>People</th><th>Status</th><th>Action</th></tr></thead><tbody id="individualExistingBody"><tr><td colspan="3">Sign in to load introductions.</td></tr></tbody></table></div><div class="row" style="align-items:center;justify-content:flex-end;margin:12px 0 26px"><button type="button" class="secondary" id="prev-individualExistingBody">← Previous</button><span class="small" id="page-individualExistingBody"></span><button type="button" class="secondary" id="next-individualExistingBody">Next →</button></div>
     </div>
     <div class="panel dashboard-tab-panel hidden" id="operationsPanel" role="tabpanel" aria-labelledby="tab-updates">
       <div class="topline"><div><h2>Matchmaking opportunities & member updates</h2><p class="muted">GPS-based 0–5 km matching, optional 6–9 km opportunities for review, and initial plus weekly follow-up. Every waiting member appears once.</p></div><button class="secondary" id="refreshOperationsButton">Refresh opportunities</button></div>
@@ -207,8 +225,10 @@
       tab.tabIndex = selected ? 0 : -1;
       $(tab.dataset.tab).classList.toggle('hidden', !selected);
     }
+    document.querySelector('.admin-more')?.removeAttribute('open');
     window.scrollTo({top:0,behavior:'instant'});
   }
+  document.querySelectorAll('[data-open-panel]').forEach(b=>b.addEventListener('click',()=>showDashboardTab(b.dataset.openPanel)));
   document.querySelector('.admin-nav').addEventListener('click', event => {
     const tab = event.target.closest('button[data-tab]');
     if (tab) showDashboardTab(tab.dataset.tab);
@@ -446,6 +466,7 @@
       const alerts=(data.alerts||[]).map(a=>`<li><strong>${safe(a.severity)}: ${safe(a.kind)}</strong> — ${safe(a.created_at)}</li>`).join('');
       const jobs=(data.jobs||[]).map(j=>`<tr><td>${safe(j.kind)}</td><td>${safe(j.status)}</td><td>${safe(j.created_at)}</td><td>${j.status==='pending'?`<button data-process-job="${safe(j.id)}">Process queued message</button>`:''}</td></tr>`).join('');
       $('messagingStatusList').innerHTML=`<h4>Introductions needing attention (${(data.alerts||[]).length})</h4><ul>${alerts||'<li>No active alerts</li>'}</ul><h4>Recent message jobs</h4><div class="table-wrap"><table><thead><tr><th>Type</th><th>Status</th><th>Created</th><th>Action</th></tr></thead><tbody>${jobs||'<tr><td colspan="4">No jobs yet</td></tr>'}</tbody></table></div>`;
+      latestMessaging=data;updateDailyStatus();
       showMessage($('messagingStatusMessage'),'Updated at '+new Date().toLocaleTimeString('en-KE'),true);
     }catch(e){showMessage($('messagingStatusMessage'),e.message||'Could not load messaging status');}
     finally{button.disabled=false;button.textContent='Refresh messaging status';}
@@ -579,11 +600,14 @@
       members = Array.isArray(data.members) ? data.members : [];
       $('dashboardMessage').classList.add('hidden');
       render();
+      updateDailyStatus();
       await loadGroups();
       await loadOperations();
       await loadIndividual();
       await loadAreas();
       await loadWorkspace();
+      await loadMessagingStatus();
+      updateDailyStatus();
     } catch (err) {
       showMessage($('dashboardMessage'),err.message);
       if (/unauthori[sz]ed|password/i.test(err.message)) logout();
@@ -818,7 +842,7 @@
   function updateAreaSelection(){const labels=selectedEventAreas();const chosen=nbffAreas.filter(a=>labels.includes(a.label));$('eventAreaSummary').textContent=`${labels.length} neighbourhoods · ${chosen.reduce((n,a)=>n+a.paid,0)} paid members (before WhatsApp consent filtering).`;}
   $('eventAreaChoices').addEventListener('change',updateAreaSelection);
   async function loadWorkspace(){
-    try{nbffWorkspace=await api('POST',{action:'admin_workspace'});renderEvents();renderTasks();renderWeeklyReviews();renderAutomaticPriorities();}
+    try{nbffWorkspace=await api('POST',{action:'admin_workspace'});renderEvents();renderTasks();renderWeeklyReviews();renderAutomaticPriorities();updateDailyStatus();}
     catch(e){showMessage($('eventsMessage'),e.message);showMessage($('tasksMessage'),e.message);}
   }
   function renderEvents(){
@@ -943,6 +967,83 @@
     new MutationObserver(()=>{page=0;updateTable();}).observe(tbody,{childList:true});
     updateTable();
   }
+
+  // Operational summary: derived from existing server-backed member, update, event and job records.
+  let latestMessaging=null;
+  function dateMs(value){const n=Date.parse(value||'');return Number.isFinite(n)?n:NaN;}
+  function eligibleWeekly(m){return initialDue(m)||updateDue(m);}
+  function overdueWeekly(m){
+    if(!eligibleWeekly(m))return false;
+    const dueAt=initialDue(m)?dateMs(m.confirmed_at||m.payment_confirmed_at||m.created_at):dateMs(m.next_update_due);
+    return Number.isFinite(dueAt)&&Date.now()-dueAt>=7*86400000;
+  }
+  function eventPlanningAlerts(){
+    const now=Date.now(),events=nbffWorkspace.events||[],out=[];
+    for(const a of nbffAreas.filter(x=>x.paid>0)){
+      const areaMembers=members.filter(m=>m.payment_status==='confirmed'&&String(m.neighbourhood||m.area||m.county||'').trim().toLowerCase()===a.key);
+      const dates=areaMembers.map(m=>dateMs(m.payment_confirmed_at||m.confirmed_at||m.created_at)).filter(Number.isFinite);
+      if(!dates.length)continue;
+      const history=events.filter(ev=>(ev.areas||[]).some(x=>x.area_key===a.key || String(x.area_name||'').toLowerCase()===String(a.label).toLowerCase()));
+      const past=history.map(ev=>dateMs(ev.starts_at)).filter(t=>Number.isFinite(t)&&t<=now);
+      const anchor=past.length?Math.max(...past):Math.min(...dates);
+      const future=history.some(ev=>dateMs(ev.starts_at)>now);
+      const elapsed=Math.floor((now-anchor)/86400000);
+      if(elapsed>=21)out.push({name:a.label,days:elapsed,level:elapsed>=30?'overdue':'planning',future});
+    }
+    return out.sort((a,b)=>b.days-a.days);
+  }
+  function updateDailyStatus(){
+    const pending=members.filter(m=>String(m.payment_status||'').toLowerCase()==='pending').length;
+    const ready=Array.isArray(memberQueue)?memberQueue.length:0;
+    const due=operationMembers.filter(eligibleWeekly),overdue=operationMembers.filter(overdueWeekly);
+    const jobs=latestMessaging?.jobs||[],alerts=latestMessaging?.alerts||[];
+    const problemJobs=jobs.filter(j=>['failed','unknown','sending'].includes(j.status));
+    const events=eventPlanningAlerts();
+    const failed=problemJobs.length+alerts.length;
+    const counts={navPaymentsCount:pending,navMatchCount:ready,navCommsCount:due.length+failed,navEventsCount:events.length,navAlertsCount:overdue.length+failed+events.length};
+    for(const [id,count] of Object.entries(counts))if($(id))$(id).textContent=count?String(count):'';
+    const items=[
+      {label:`${pending} payment(s) to verify`,panel:'membersPanel',severity:pending?'warn':'ok'},
+      {label:`${ready} member(s) ready to match`,panel:'individualPanel',severity:'ok'},
+      {label:`${overdue.length} overdue weekly update(s)`,panel:'communicationsPanel',severity:overdue.length?'danger':'ok'},
+      {label:`${failed} message issue(s)`,panel:'communicationsPanel',severity:failed?'danger':'ok'},
+      {label:`${events.length} neighbourhood event reminder(s)`,panel:'eventsPanel',severity:events.length?'warn':'ok'}
+    ];
+    $('dailyAlertsBody').innerHTML=items.map(i=>`<button type="button" class="${i.severity}" data-daily-panel="${i.panel}">${safe(i.label)}</button>`).join('');
+    $('commsDue').textContent=due.length;$('commsOverdue').textContent=overdue.length;
+    $('commsFailed').textContent=problemJobs.length;$('commsAlerts').textContent=alerts.length;
+    $('commsWeekly').innerHTML=due.length?`<div class="table-wrap"><table class="comms-table"><thead><tr><th>Member</th><th>Status</th><th>Next action</th></tr></thead><tbody>${due.slice(0,100).map(m=>`<tr><td>${safe(m.first_name||'Member')} · ${safe(m.neighbourhood||m.area||'')}</td><td>${overdueWeekly(m)?'<strong>Overdue</strong>':'Due'}</td><td>Review and queue update</td></tr>`).join('')}</tbody></table></div>${due.length>100?`<p>${due.length-100} more due; see Matching opportunities.</p>`:''}`:'<p class="muted">No member updates due based on the latest loaded records.</p>';
+    $('commsJobs').innerHTML=alerts.length||problemJobs.length?`<div class="comms-note"><strong>${alerts.length} open alert(s), ${problemJobs.length} recent problem job(s)</strong><p>Review each message in the messaging status section before retrying. Unknown sends must not be retried automatically.</p><button type="button" class="secondary" data-comms-target="individualPanel">Open messaging status</button></div>`:'<p class="muted">No failed or uncertain jobs in the latest messaging response.</p>';
+    const radius=operationMembers.filter(m=>(m.almost_nearby_pairs||[]).length+(m.almost_nearby_groups||[]).length>0);
+    $('commsRadius').innerHTML=`<p>${radius.length} member(s) have potential 5–9 km options requiring consent.</p>`;
+    const ev=events.filter(x=>x.days>=21);
+    const eventInvites=(nbffWorkspace.events||[]).flatMap(e=>(e.invitations||[]).map(i=>({...i,event_title:e.title||'Event'})));
+    const pendingInvites=eventInvites.filter(i=>['pending','queued','failed'].includes(String(i.status||'').toLowerCase()));
+    $('commsEvents').innerHTML=`<p>${pendingInvites.length} pending, queued or failed event invitation record(s). Verify their status before sending.</p>`+(ev.length?ev.map(x=>`<div class="comms-note"><strong>${safe(x.name)} · Day ${x.days} ${x.level==='overdue'?'— overdue':'— planning due'}</strong><p>${x.future?'An event is scheduled; verify it takes place within the 30-day cycle.':'No future event found in this neighbourhood.'}</p></div>`).join(''):'<p class="muted">No neighbourhoods have reached the day-21 planning reminder based on recorded events and member dates.</p>');
+  }
+  $('dailyAlerts').addEventListener('click',e=>{const b=e.target.closest('[data-daily-panel]');if(b)showDashboardTab(b.dataset.dailyPanel);});
+  $('communicationsPanel').addEventListener('click',e=>{const b=e.target.closest('[data-comms-target]');if(b)showDashboardTab(b.dataset.commsTarget);});
+  $('refreshCommsButton').addEventListener('click',async()=>{const b=$('refreshCommsButton');b.disabled=true;b.textContent='Refreshing…';try{await Promise.all([loadOperations(),loadMessagingStatus(),loadWorkspace()]);updateDailyStatus();showMessage($('commsError'),'Updated at '+new Date().toLocaleTimeString('en-KE'),true);}catch(e){showMessage($('commsError'),e.message||'Refresh failed');}finally{b.disabled=false;b.textContent='Refresh communications';}});
+  $('commsQueueWeekly').addEventListener('click',()=> $('queueWaitingUpdates').click());
+  document.querySelector('.admin-nav').addEventListener('click',e=>{const b=e.target.closest('[data-tab]');if(b?.dataset.tab==='communicationsPanel')updateDailyStatus();});
+  // Discreet public-space view. Remember the choice on this device only.
+  const privacyKey='nff_admin_hide_business_name';
+  const privacyButton=$('privacyToggle');
+  function applyPrivacyMode(hidden){
+    $('adminBrandTitle').textContent=hidden?'Admin Dashboard':'Neighbour Friend Finder';
+    $('adminHomeLink').textContent=hidden?'← Back to website':'← Back to Neighbour Friend Finder';
+    document.title=hidden?'Admin Dashboard':'Neighbour Friend Finder | Admin';
+    privacyButton.textContent=hidden?'◉ Show name':'◉ Hide name';
+    privacyButton.setAttribute('aria-pressed',String(hidden));
+    privacyButton.setAttribute('aria-label',hidden?'Show business name':'Hide business name');
+    try{localStorage.setItem(privacyKey,hidden?'1':'0');}catch(_e){}
+  }
+  let privacyHidden=false;
+  try{privacyHidden=localStorage.getItem(privacyKey)==='1';}catch(_e){}
+  applyPrivacyMode(privacyHidden);
+  privacyButton.addEventListener('click',()=>{privacyHidden=!privacyHidden;applyPrivacyMode(privacyHidden);});
+  // Always open on the highest-priority daily task.
+  showDashboardTab('membersPanel');
 })();
 </script>
 </body>
