@@ -197,31 +197,6 @@ footer{padding:36px 24px;text-align:center;color:var(--muted)}.footer-brand{colo
 .payment-time-row select{min-width:0}
 .form-message.is-error{color:#a13f2b;font-weight:700;padding:12px;background:#fff2ed;border-radius:7px}
 @media(max-width:520px){#locationMap{height:300px}}
-
-/* Membership journey: registration/payment to FAQ */
-.membership-journey{padding:72px 5%;background:#fffdf8;color:#28372f}
-.membership-journey .journey-inner{max-width:1050px;margin:auto;text-align:center}
-.membership-journey .journey-kicker{font-size:12px;text-transform:uppercase;letter-spacing:.16em;font-weight:700;color:#a56750}
-.membership-journey h2{font-family:Georgia,"Times New Roman",serif;font-size:clamp(32px,5vw,49px);line-height:1.12;margin:12px 0 12px;color:#244638}
-.membership-journey .journey-lead{font-size:17px;line-height:1.6;color:#656c63;max-width:690px;margin:0 auto 30px}
-.membership-journey .journey-price{display:inline-flex;align-items:center;gap:13px;border:1px solid #cddfd2;border-radius:999px;padding:12px 22px;margin-bottom:32px;background:#f3f8f3;font-size:15px}
-.membership-journey .journey-price strong{font-size:20px;color:#245d48}
-.membership-journey .journey-label{text-align:left;font-weight:700;font-size:15px;margin:0 0 14px;color:#305744}
-.membership-journey .journey-weeks{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
-.membership-journey .journey-week{border:1px solid #d9e5da;border-radius:17px;background:#f5faf5;padding:24px 12px 22px;min-height:168px}
-.membership-journey .journey-number{display:grid;place-items:center;width:42px;height:42px;border-radius:50%;background:#d9eadd;color:#285b44;font-size:21px;font-weight:700;margin:0 auto 15px}
-.membership-journey .journey-week strong{display:block;font-size:17px;margin-bottom:8px}
-.membership-journey .journey-week span{font-size:13px;color:#6a756b;line-height:1.45}
-.membership-journey .journey-break{margin:28px auto;padding:23px 20px;max-width:650px;border-radius:18px;background:#f9f1e9}
-.membership-journey .journey-break strong{font-family:Georgia,"Times New Roman",serif;font-size:24px;color:#694c3e}
-.membership-journey .journey-break p{font-size:15px;line-height:1.6;color:#71675f;margin:9px 0 0}
-.membership-journey .journey-batches{display:grid;grid-template-columns:1fr 1fr;gap:15px;text-align:left}
-.membership-journey .journey-batch{border:1px solid #d9e5da;border-radius:18px;padding:25px;background:white}
-.membership-journey .journey-batch small{font-weight:700;color:#a56750;letter-spacing:.08em;text-transform:uppercase}
-.membership-journey .journey-batch h3{font-family:Georgia,"Times New Roman",serif;color:#285b44;font-size:25px;margin:10px 0}
-.membership-journey .journey-batch p{color:#677067;font-size:15px;line-height:1.6;margin:0}
-.membership-journey .journey-footnote{font-size:13px;color:#7c827a;margin:23px auto 0}
-@media(max-width:720px){.membership-journey{padding:48px 20px}.membership-journey .journey-weeks{grid-template-columns:repeat(2,minmax(0,1fr))}.membership-journey .journey-week:last-child{grid-column:1/-1}.membership-journey .journey-week{min-height:140px;padding:18px 10px}.membership-journey .journey-batches{grid-template-columns:1fr}.membership-journey .journey-price{flex-direction:column;gap:2px;border-radius:18px}.membership-journey .journey-break strong{font-size:21px}}
 </style>
 <link href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" rel="stylesheet"/>
 <style>
@@ -364,22 +339,8 @@ fbq('track', 'PageView');
 <label class="choice"><input name="childrenAges" type="checkbox" value="Adult children"/> Adult children</label>
 </div>
 <p class="field-hint">This helps us match parents with others at a similar family stage.</p>
-<label for="hangoutStyle" style="margin-top:20px">What sounds most like your ideal hangout?</label>
-<select id="hangoutStyle" name="hangoutStyle" required="">
-<option value="">Choose what feels most like you</option>
-<option value="One-on-one or a coffee for two">A coffee for two or one-on-one time</option>
-<option value="Small group">A small group where everyone gets to talk</option>
-<option value="The more the merrier">The more the merrier</option>
-<option value="Depends on the day">It depends on the day</option>
-</select>
-<label for="conversationStyle" style="margin-top:20px">What kind of connection do you enjoy most?</label>
-<select id="conversationStyle" name="conversationStyle" required="">
-<option value="">Choose your style</option>
-<option value="Deep talks">Deep talks and meaningful conversations</option>
-<option value="Light banter">Light banter, jokes and playful conversation</option>
-<option value="Doing things with little talking">Doing something together without needing to talk much</option>
-<option value="A mix of all three">A mix of all three</option>
-</select>
+<label for="hangoutStyle" style="margin-top:20px">What sounds most like your ideal hangout?</label><select id="hangoutStyle" name="hangoutStyle" required><option value="">Choose your style</option><option value="One-on-one or a coffee for two">One-on-one or a coffee for two</option><option value="Small group">Small group</option><option value="The more the merrier">The more the merrier</option><option value="Depends on the day">Depends on the day</option></select>
+<label for="conversationStyle" style="margin-top:20px">Conversation style</label><select id="conversationStyle" name="conversationStyle" required><option value="">Choose your style</option><option value="Deep and personal">Deep and personal</option><option value="Light and fun">Light and fun</option><option value="A mix">A mix</option><option value="Doing things together, little talking">Doing things together, little talking</option></select>
 <label for="alcoholStyle" style="margin-top:20px">Which best describes your relationship with alcohol?</label>
 <select id="alcoholStyle" name="alcoholStyle" required="">
 <option value="">Choose an option</option>
@@ -397,6 +358,15 @@ fbq('track', 'PageView');
 </select>
 <p class="field-hint">These answers help us find people whose lifestyle preferences are compatible with yours.</p>
 </div>
+
+<!-- New friendship compatibility questions -->
+<div class="step"><h3>How you like your friendships to work</h3><p class="muted">These answers help us match your expectations, not just your location.</p><label for="meetingFrequency" style="margin-top:20px">How often do you want to see your friend?</label><select id="meetingFrequency" name="meetingFrequency" required><option value="">Choose an answer</option><option value="Every few days">Every few days</option><option value="Weekly">Weekly</option><option value="Every two weeks">Every two weeks</option><option value="Monthly">Monthly</option></select>
+<label for="socialEnergy" style="margin-top:20px">Social energy</label><select id="socialEnergy" name="socialEnergy" required><option value="">Choose an answer</option><option value="I prefer quiet one-on-one time">I prefer quiet one-on-one time</option><option value="A mix">A mix</option><option value="I’m energised by being in social groups">I’m energised by being in social groups</option></select>
+<label for="planningStyle" style="margin-top:20px">Planning style</label><select id="planningStyle" name="planningStyle" required><option value="">Choose an answer</option><option value="I usually plan">I usually plan</option><option value="I like taking turns">I like taking turns</option><option value="I prefer the other person plans">I prefer the other person plans</option><option value="I like deciding on the day">I like deciding on the day</option></select>
+<label for="contactStyle" style="margin-top:20px">How do you like to stay in touch between meetups?</label><select id="contactStyle" name="contactStyle" required><option value="">Choose an answer</option><option value="Mostly texts and voice notes">Mostly texts and voice notes</option><option value="Texts, with the occasional call">Texts, with the occasional call</option><option value="Regular calls">Regular calls</option><option value="I don’t really keep in touch between meetups, I just make plans">I don’t really keep in touch between meetups, I just make plans</option></select>
+<label for="opennessStyle" style="margin-top:20px">With a new friend, when do you usually start sharing personal things like family or struggles?</label><select id="opennessStyle" name="opennessStyle" required><option value="">Choose an answer</option><option value="Within the first few meetups">Within the first few meetups</option><option value="After a few months">After a few months</option><option value="Only once I know them very well">Only once I know them very well</option></select>
+<label for="cancellationTolerance" style="margin-top:20px">If a friend cancels or runs late, how do you feel?</label><select id="cancellationTolerance" name="cancellationTolerance" required><option value="">Choose an answer</option><option value="Totally fine">Totally fine</option><option value="Okay once in a while">Okay once in a while</option><option value="It really bothers me">It really bothers me</option></select>
+<label style="margin-top:20px">What matters most in a friend? Choose exactly two.</label><div class="choices"><label class="choice"><input type="checkbox" name="friendPriorities" value="Reliability"> Reliability</label><label class="choice"><input type="checkbox" name="friendPriorities" value="Honesty"> Honesty</label><label class="choice"><input type="checkbox" name="friendPriorities" value="Fun and humour"> Fun and humour</label><label class="choice"><input type="checkbox" name="friendPriorities" value="Emotional support"> Emotional support</label><label class="choice"><input type="checkbox" name="friendPriorities" value="Shared interests"> Shared interests</label><label class="choice"><input type="checkbox" name="friendPriorities" value="Ambition and drive"> Ambition and drive</label></div><p class="field-hint">Choose exactly two.</p><label style="margin-top:20px">Which of these are a big part of your life? Tick any.</label><div class="choices"><label class="choice"><input type="checkbox" name="coreValues" value="Faith or religion"> Faith or religion</label><label class="choice"><input type="checkbox" name="coreValues" value="A healthy, active lifestyle"> A healthy, active lifestyle</label><label class="choice"><input type="checkbox" name="coreValues" value="Family-centred life"> Family-centred life</label><label class="choice"><input type="checkbox" name="coreValues" value="None of these"> None of these</label></div></div>
 <div class="step"><h3>Complete your joining request</h3>
 <div class="fee-panel"><div class="eyebrow">Membership valid for 1 year</div><div class="fee-amount">KSh 2,800</div><div class="fee-label">Individual introductions to up to 15 highly compatible members near you during your membership year.</div><p class="muted">We match you individually with compatible neighbours within a 5 km radius. Where applicable, we also form WhatsApp friendship groups of highly compatible people in the same area.</p><p class="muted">As a member, you will receive monthly invitations to hangouts open to everyone in the greater area. This helps you meet people who could be compatible but were slightly outside your individual matching radius, for example. Hangouts include free or inexpensive activities like picnics and group walks.</p><div class="group-note closing-invitation" style="margin-top:22px"><strong>Is this how you meet your new friend group? Your best friend? The people at your next birthdays? The friends that become family?</strong><p>Join the club and find out.</p></div></div>
 <div class="payment-detail"><strong>M-PESA Till number:</strong> 1305656</div><div class="payment-detail"><strong>Till name:</strong> Family Forever</div><div class="payment-detail membership-amount"><strong>Amount: KSh 2,800</strong><p>1-year membership and up to 15 highly compatible neighbour introductions, plus compatible friend groups where applicable.</p></div>
@@ -420,28 +390,6 @@ fbq('track', 'PageView');
 <p aria-live="polite" class="small muted form-message" id="formMessage"></p>
 </form>
 </div></section>
-<section class="membership-journey" id="membership-journey" aria-labelledby="membership-journey-title">
- <div class="journey-inner">
-  <div class="journey-kicker">Your friendship journey</div>
-  <h2 id="membership-journey-title">What your membership covers</h2>
-  <p class="journey-lead">We aim to introduce you to one highly compatible potential friend each week within a 5 km radius of your selected location. We consider personality, interests, age, lifestyle and shared preferences so each introduction has real friendship potential.</p>
-  <div class="journey-price"><strong>KSh 2,800</strong><span>One-year membership · Up to 15 friendship introductions</span></div>
-  <p class="journey-label">Your first five weekly introductions</p>
-  <div class="journey-weeks">
-   <div class="journey-week"><div class="journey-number">1</div><strong>Week 1</strong><span>Your first highly compatible match</span></div>
-   <div class="journey-week"><div class="journey-number">2</div><strong>Week 2</strong><span>Another highly compatible friend</span></div>
-   <div class="journey-week"><div class="journey-number">3</div><strong>Week 3</strong><span>A new compatible connection</span></div>
-   <div class="journey-week"><div class="journey-number">4</div><strong>Week 4</strong><span>Meet someone who fits your lifestyle</span></div>
-   <div class="journey-week"><div class="journey-number">5</div><strong>Week 5</strong><span>Your fifth compatible introduction</span></div>
-  </div>
-  <div class="journey-break"><strong>Good friendships take time 💚</strong><p>After your first five introductions, take a friendship break.</p><strong style="display:block;margin-top:12px;font-size:19px">Then, get to know your new friends ♡</strong><p>Enjoy coffee dates, walks, conversations and time to see which connections grow. When you're ready to meet more people, simply ask us to continue.</p></div>
-  <div class="journey-batches">
-   <div class="journey-batch"><small>When you're ready</small><h3>Introductions 6–10</h3><p>Request your next five compatible potential friends nearby, introduced gradually so you have time for each connection.</p></div>
-   <div class="journey-batch"><small>Keep growing your circle</small><h3>Introductions 11–15</h3><p>Want to meet even more neighbours? Request your final five compatible introductions within your membership year.</p></div>
-  </div>
-  <p class="journey-footnote">We prioritise highly compatible matches within 5 km. One introduction per week is our goal, subject to suitable members being available; we won’t force an unsuitable match.</p>
- </div>
-</section>
 <section class="faq-section" id="faq"><div class="inner faq-inner">
 <div class="eyebrow">A few things you might be wondering</div>
 <h2>Frequently asked questions</h2>
@@ -550,6 +498,13 @@ confirmMapButton.addEventListener('click',()=>{
 });
 
 const form = document.getElementById('joinForm');
+form.addEventListener('change', e => {
+ if(e.target.name === 'coreValues' && e.target.checked){
+  const all=form.querySelectorAll('input[name="coreValues"]');
+  if(e.target.value === 'None of these') all.forEach(x=>{if(x!==e.target)x.checked=false;});
+  else all.forEach(x=>{if(x.value==='None of these')x.checked=false;});
+ }
+});
 const submitBtn = document.getElementById('submitBtn');
 const formMessage = document.getElementById('formMessage');
 
@@ -569,6 +524,8 @@ form.addEventListener('submit', async (event) => {
     }
     return;
   }
+  const selectedPriorities = form.querySelectorAll('input[name="friendPriorities"]:checked');
+  if (selectedPriorities.length !== 2) { formMessage.textContent = "Please choose exactly two friendship priorities."; formMessage.classList.add("is-error"); selectedPriorities[0]?.scrollIntoView({behavior:"smooth",block:"center"}); return; }
   if (!latitudeInput.value || !longitudeInput.value) {
     showLocationMessage('Please use your current location or choose and confirm a point on the map.','error');
     document.getElementById('useCurrentLocation').focus();
@@ -598,6 +555,15 @@ form.addEventListener('submit', async (event) => {
     childrenAges: values.getAll('childrenAges'),
     hangoutStyle: String(values.get('hangoutStyle') || ''),
     conversationStyle: String(values.get('conversationStyle') || ''),
+    meetingFrequency: String(values.get('meetingFrequency') || ''),
+    socialEnergy: String(values.get('socialEnergy') || ''),
+    planningStyle: String(values.get('planningStyle') || ''),
+    contactStyle: String(values.get('contactStyle') || ''),
+    opennessStyle: String(values.get('opennessStyle') || ''),
+    cancellationTolerance: String(values.get('cancellationTolerance') || ''),
+    friendPriorities: values.getAll('friendPriorities'),
+    coreValues: values.getAll('coreValues'),
+
     alcoholStyle: String(values.get('alcoholStyle') || ''),
     cannabisStyle: String(values.get('cannabisStyle') || ''),
     mpesaCode: String(values.get('mpesaCode') || '').trim().toUpperCase(),
