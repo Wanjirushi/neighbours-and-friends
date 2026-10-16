@@ -118,6 +118,11 @@
       <div id="individualMessage" class="notice hidden" role="status"></div>
       <div class="stats" style="margin:14px 0"><div class="stat"><span>Suggested pairs</span><strong id="individualSuggestionsCount">0</strong></div><div class="stat"><span>Approved, awaiting introduction</span><strong id="individualApprovedCount">0</strong></div><div class="stat"><span>Completed individual pairs</span><strong id="individualConnectedCount">0</strong></div><div class="stat"><span>Service completed (5+)</span><strong id="individualCompleteCount">0</strong></div></div>
       <h3>Member introduction progress</h3><div class="table-wrap"><table><thead><tr><th>Member</th><th>Unique introductions</th><th>Status</th><th>Action</th></tr></thead><tbody id="individualProgressBody"><tr><td colspan="4">Sign in to load progress.</td></tr></tbody></table></div>
+      <h3>Review all eligible friends for one member</h3>
+      <p class="muted">Choose a member to see every currently eligible, unreviewed candidate, sorted by compatibility. Scores of 70% or more are labelled highly compatible; lower scores remain available for review.</p>
+      <div class="row"><div><label for="candidateMemberSelect">Member</label><select id="candidateMemberSelect"><option value="">Select a member</option></select></div><div><button class="secondary" id="refreshCandidateButton" type="button">View potential friends</button></div></div>
+      <div id="candidateMessage" class="notice hidden" role="status"></div>
+      <div id="candidateResults"></div>
       <h3>Suggested individual pairs</h3><div class="table-wrap"><table><thead><tr><th>People</th><th>Compatibility</th><th>Shared strengths / differences</th><th>Action</th></tr></thead><tbody id="individualSuggestionsBody"><tr><td colspan="4">Sign in to load suggestions.</td></tr></tbody></table></div>
       <h3>Approved and completed introductions</h3><div class="table-wrap"><table><thead><tr><th>People</th><th>Status</th><th>Action</th></tr></thead><tbody id="individualExistingBody"><tr><td colspan="3">Sign in to load introductions.</td></tr></tbody></table></div>
     </div>
@@ -229,7 +234,7 @@
     const data = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(data.error || `Request failed (${response.status})`);
     // Successful writes refresh every section, not just the one being edited.
-    const readOnlyActions = new Set(['operations_overview','individual_overview','group_overview','preview_matches','preview_additions']);
+    const readOnlyActions = new Set(['operations_overview','individual_overview','member_candidates','group_overview','preview_matches','preview_additions']);
     if (method === 'PATCH' || (method === 'POST' && payload?.action && !readOnlyActions.has(payload.action))) {
       queueDashboardRefresh();
     }
@@ -393,6 +398,10 @@
       $('individualConnectedCount').textContent=existing.filter(x=>x.status==='connected').length;
       $('individualCompleteCount').textContent=progress.filter(x=>x.complete).length;
       $('individualProgressBody').innerHTML=progress.map(x=>`<tr><td><strong>${safe(x.name)}</strong><br><small>${safe(x.phone||'')}</small></td><td>${safe(x.count)} unique people / 5 minimum (15 maximum)</td><td><span class="badge ${x.complete?'confirmed':''}">${x.expired?'Membership expired':x.complete?'Completed':x.active?'Actively matching':'15 reached'}</span><br><small>Entitlement until ${safe(x.expires_at?new Date(x.expires_at).toLocaleDateString('en-KE'):'Unknown')}</small></td><td>${x.complete&&!x.expired&&x.count<15?`<button data-individual="reopen" data-id="${safe(x.id)}">Reopen on request</button>`:''}</td></tr>`).join('')||'<tr><td colspan="4">No confirmed members.</td></tr>';
+      const memberSelect=$('candidateMemberSelect');
+      const previous=memberSelect.value;
+      memberSelect.innerHTML='<option value="">Select a member</option>'+progress.slice().sort((a,b)=>a.name.localeCompare(b.name)).map(x=>`<option value="${safe(x.id)}">${safe(x.name)} (${safe(x.count)} introductions)</option>`).join('');
+      memberSelect.value=previous;
       $('individualSuggestionsBody').innerHTML=suggestions.map(x=>`<tr><td><strong>${safe(x.name_a)}</strong> (${safe(x.age_a)}) — <strong>${safe(x.name_b)}</strong> (${safe(x.age_b)})<br><small>${safe(x.area_a||'')} / ${safe(x.area_b||'')}</small><div class="small">${pairContact(x.name_a,x.phone_a)}${pairContact(x.name_b,x.phone_b)}</div></td><td>${safe(x.score)}% · ${safe(x.distance_km)} km</td><td><small>Strengths: ${safe((x.strengths||[]).join(', ')||'None noted')}<br>Differences: ${safe((x.differences||[]).join(', ')||'None noted')}</small></td><td><button data-individual="approve" data-a="${safe(x.member_a)}" data-b="${safe(x.member_b)}">Approve pair</button></td></tr>`).join('')||'<tr><td colspan="4">No new eligible pairs.</td></tr>';
       $('individualExistingBody').innerHTML=existing.map(x=>`<tr><td>${pairContact(x.name_a,x.phone_a)}${pairContact(x.name_b,x.phone_b)}</td><td><span class="badge ${x.status==='connected'?'confirmed':''}">${safe(x.status)}</span>${x.connected_at?`<br><small>${safe(new Date(x.connected_at).toLocaleDateString('en-KE'))}</small>`:''}</td><td>${x.status==='approved'?`<div class="actions"><button class="secondary" data-individual="copy-a" data-a="${safe(x.member_a)}" data-b="${safe(x.member_b)}">Copy message for ${safe(x.name_a)}</button><button class="secondary" data-individual="copy-b" data-a="${safe(x.member_a)}" data-b="${safe(x.member_b)}">Copy message for ${safe(x.name_b)}</button><button data-individual="connected" data-a="${safe(x.member_a)}" data-b="${safe(x.member_b)}">Mark actually introduced</button></div>`:''}</td></tr>`).join('')||'<tr><td colspan="3">No introductions recorded.</td></tr>';
       $('individualMessage').classList.add('hidden');
@@ -418,10 +427,26 @@
     b.disabled=true;
     try {
       await api('POST',op==='reopen'?{action:'reopen_matching',member_id:b.dataset.id}:{action:op==='approve'?'approve_individual':'set_individual_connected',member_a:b.dataset.a,member_b:b.dataset.b});
-      await loadIndividual();await loadOperations();
+      await loadIndividual();await loadOperations();if($('candidateMemberSelect').value)await loadMemberCandidates();
       showMessage($('individualMessage'),'Saved. Introduction progress and update eligibility refreshed.',true);
     }catch(err){showMessage($('individualMessage'),err.message||'Could not save.');b.disabled=false;}
   });
+  async function loadMemberCandidates(){
+    const memberId=$('candidateMemberSelect').value;
+    if(!memberId){$('candidateResults').innerHTML='';return;}
+    $('refreshCandidateButton').disabled=true;
+    try {
+      const result=await api('POST',{action:'member_candidates',member_id:memberId});
+      $('candidateResults').innerHTML=`<h3>${safe(result.member.name)} — ${result.total} eligible potential friends</h3>`+
+        (result.candidates||[]).map((x,i)=>`<div class="group-card"><div class="topline"><div><strong>${i+1}. ${safe(x.name_b)}</strong> · ${safe(x.age_b)} years · ${safe(x.area_b||'')} · ${safe(x.distance_km)} km</div><div><strong style="color:${x.score>=70?'#285237':'#575c54'}">${safe(x.score)}%</strong> <span class="badge ${x.score>=70?'confirmed':''}">${x.score>=70?'Highly compatible':'Eligible'}</span></div></div>
+        <details style="margin-top:10px"><summary style="cursor:pointer;font-weight:bold">View shared traits and differences</summary><div class="row" style="align-items:start"><div><h4>What they share</h4><ul>${(x.strengths||[]).map(v=>`<li>${safe(v)}</li>`).join('')||'<li>No scored similarities identified</li>'}</ul></div><div><h4>Where they differ</h4><ul>${(x.differences||[]).map(v=>`<li>${safe(v)}</li>`).join('')||'<li>No recorded differences</li>'}</ul></div></div></details>
+        <div class="actions" style="margin-top:12px"><button data-individual="approve" data-a="${safe(x.member_a)}" data-b="${safe(x.member_b)}">Approve pair</button></div></div>`).join('') || '<p class="muted">No new eligible candidates currently available.</p>';
+      $('candidateMessage').classList.add('hidden');
+    }catch(e){showMessage($('candidateMessage'),e.message||'Could not load candidates.');}
+    finally{$('refreshCandidateButton').disabled=false;}
+  }
+  $('refreshCandidateButton').addEventListener('click',loadMemberCandidates);
+  $('candidateMemberSelect').addEventListener('change',loadMemberCandidates);
   $('refreshIndividualButton').addEventListener('click',loadIndividual);
 
   function renderWaitingMembers() {
