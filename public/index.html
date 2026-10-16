@@ -197,6 +197,31 @@ footer{padding:36px 24px;text-align:center;color:var(--muted)}.footer-brand{colo
 .payment-time-row select{min-width:0}
 .form-message.is-error{color:#a13f2b;font-weight:700;padding:12px;background:#fff2ed;border-radius:7px}
 @media(max-width:520px){#locationMap{height:300px}}
+
+/* Membership journey: registration/payment to FAQ */
+.membership-journey{padding:72px 5%;background:#fffdf8;color:#28372f}
+.membership-journey .journey-inner{max-width:1050px;margin:auto;text-align:center}
+.membership-journey .journey-kicker{font-size:12px;text-transform:uppercase;letter-spacing:.16em;font-weight:700;color:#a56750}
+.membership-journey h2{font-family:Georgia,"Times New Roman",serif;font-size:clamp(32px,5vw,49px);line-height:1.12;margin:12px 0 12px;color:#244638}
+.membership-journey .journey-lead{font-size:17px;line-height:1.6;color:#656c63;max-width:690px;margin:0 auto 30px}
+.membership-journey .journey-price{display:inline-flex;align-items:center;gap:13px;border:1px solid #cddfd2;border-radius:999px;padding:12px 22px;margin-bottom:32px;background:#f3f8f3;font-size:15px}
+.membership-journey .journey-price strong{font-size:20px;color:#245d48}
+.membership-journey .journey-label{text-align:left;font-weight:700;font-size:15px;margin:0 0 14px;color:#305744}
+.membership-journey .journey-weeks{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+.membership-journey .journey-week{border:1px solid #d9e5da;border-radius:17px;background:#f5faf5;padding:24px 12px 22px;min-height:168px}
+.membership-journey .journey-number{display:grid;place-items:center;width:42px;height:42px;border-radius:50%;background:#d9eadd;color:#285b44;font-size:21px;font-weight:700;margin:0 auto 15px}
+.membership-journey .journey-week strong{display:block;font-size:17px;margin-bottom:8px}
+.membership-journey .journey-week span{font-size:13px;color:#6a756b;line-height:1.45}
+.membership-journey .journey-break{margin:28px auto;padding:23px 20px;max-width:650px;border-radius:18px;background:#f9f1e9}
+.membership-journey .journey-break strong{font-family:Georgia,"Times New Roman",serif;font-size:24px;color:#694c3e}
+.membership-journey .journey-break p{font-size:15px;line-height:1.6;color:#71675f;margin:9px 0 0}
+.membership-journey .journey-batches{display:grid;grid-template-columns:1fr 1fr;gap:15px;text-align:left}
+.membership-journey .journey-batch{border:1px solid #d9e5da;border-radius:18px;padding:25px;background:white}
+.membership-journey .journey-batch small{font-weight:700;color:#a56750;letter-spacing:.08em;text-transform:uppercase}
+.membership-journey .journey-batch h3{font-family:Georgia,"Times New Roman",serif;color:#285b44;font-size:25px;margin:10px 0}
+.membership-journey .journey-batch p{color:#677067;font-size:15px;line-height:1.6;margin:0}
+.membership-journey .journey-footnote{font-size:13px;color:#7c827a;margin:23px auto 0}
+@media(max-width:720px){.membership-journey{padding:48px 20px}.membership-journey .journey-weeks{grid-template-columns:repeat(2,minmax(0,1fr))}.membership-journey .journey-week:last-child{grid-column:1/-1}.membership-journey .journey-week{min-height:140px;padding:18px 10px}.membership-journey .journey-batches{grid-template-columns:1fr}.membership-journey .journey-price{flex-direction:column;gap:2px;border-radius:18px}.membership-journey .journey-break strong{font-size:21px}}
 </style>
 <link href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" rel="stylesheet"/>
 <style>
@@ -395,6 +420,28 @@ fbq('track', 'PageView');
 <p aria-live="polite" class="small muted form-message" id="formMessage"></p>
 </form>
 </div></section>
+<section class="membership-journey" id="membership-journey" aria-labelledby="membership-journey-title">
+ <div class="journey-inner">
+  <div class="journey-kicker">Your friendship journey</div>
+  <h2 id="membership-journey-title">What your membership covers</h2>
+  <p class="journey-lead">Good friendships take time 💚 We introduce you to potential friends thoughtfully, giving you space to get to know each other along the way.</p>
+  <div class="journey-price"><strong>KSh 2,800</strong><span>One-year membership · Up to 15 friendship introductions</span></div>
+  <p class="journey-label">Your first five introductions</p>
+  <div class="journey-weeks">
+   <div class="journey-week"><div class="journey-number">1</div><strong>Week 1</strong><span>Your first potential friend</span></div>
+   <div class="journey-week"><div class="journey-number">2</div><strong>Week 2</strong><span>Your second introduction</span></div>
+   <div class="journey-week"><div class="journey-number">3</div><strong>Week 3</strong><span>Another new connection</span></div>
+   <div class="journey-week"><div class="journey-number">4</div><strong>Week 4</strong><span>Keep building your circle</span></div>
+   <div class="journey-week"><div class="journey-number">5</div><strong>Week 5</strong><span>Your fifth introduction</span></div>
+  </div>
+  <div class="journey-break"><strong>Then, take a friendship break ♡</strong><p>Enjoy coffee dates, walks, conversations and time to see which connections grow. When you're ready to meet more people, simply ask us to continue.</p></div>
+  <div class="journey-batches">
+   <div class="journey-batch"><small>When you're ready</small><h3>Introductions 6–10</h3><p>Request your next batch of five potential friends, introduced gradually so you have time for each connection.</p></div>
+   <div class="journey-batch"><small>Keep growing your circle</small><h3>Introductions 11–15</h3><p>Want to meet even more neighbours? Request your final batch of five within your membership year.</p></div>
+  </div>
+  <p class="journey-footnote">We aim for one introduction per week when suitable eligible matches are available.</p>
+ </div>
+</section>
 <section class="faq-section" id="faq"><div class="inner faq-inner">
 <div class="eyebrow">A few things you might be wondering</div>
 <h2>Frequently asked questions</h2>
