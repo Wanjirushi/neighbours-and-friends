@@ -29,7 +29,8 @@
     .admin-nav button:focus-visible{outline:3px solid var(--terracotta);outline-offset:2px}
     .dashboard-tab-panel.hidden{display:none!important}
     @media(max-width:640px){.admin-nav .nav-buttons{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.admin-nav button{font-size:12px;padding:9px 6px}}
-  </style>
+  table tbody tr[hidden]{display:none!important}
+</style>
 </head>
 <body>
 <main>
@@ -117,14 +118,14 @@
       <div class="topline"><div><h2>Individual introductions</h2><p class="muted">Compatible pairs within 5 km. Approve first, then mark connected only after making the actual introduction. Group members remain eligible.</p></div><button class="secondary" id="refreshIndividualButton">Refresh pairs</button></div>
       <div id="individualMessage" class="notice hidden" role="status"></div>
       <div class="stats" style="margin:14px 0"><div class="stat"><span>Suggested pairs</span><strong id="individualSuggestionsCount">0</strong></div><div class="stat"><span>Approved, awaiting introduction</span><strong id="individualApprovedCount">0</strong></div><div class="stat"><span>Completed individual pairs</span><strong id="individualConnectedCount">0</strong></div><div class="stat"><span>Service completed (5+)</span><strong id="individualCompleteCount">0</strong></div></div>
-      <h3>Member introduction progress</h3><div class="table-wrap"><table><thead><tr><th>Member</th><th>Unique introductions</th><th>Status</th><th>Action</th></tr></thead><tbody id="individualProgressBody"><tr><td colspan="4">Sign in to load progress.</td></tr></tbody></table></div>
-      <h3>Review all eligible friends for one member</h3>
-      <p class="muted">Choose a member to see every currently eligible, unreviewed candidate, sorted by compatibility. Scores of 70% or more are labelled highly compatible; lower scores remain available for review.</p>
-      <div class="row"><div><label for="candidateMemberSelect">Member</label><select id="candidateMemberSelect"><option value="">Select a member</option></select></div><div><button class="secondary" id="refreshCandidateButton" type="button">View potential friends</button></div></div>
+      <h3>Matchmaking queue — oldest confirmed member first</h3>
+      <p class="muted">Members are queued by registration date, oldest first, after payment confirmation. Review their eligible candidates ranked by compatibility. Moving on does not remove anyone from future reviews. Scores of 70% or more are labelled highly compatible; lower scores remain eligible.</p>
+      <div class="row"><div><label for="candidateMemberSelect">Current member (oldest first)</label><select id="candidateMemberSelect"><option value="">Loading queue…</option></select></div><div><button class="secondary" id="refreshCandidateButton" type="button">Refresh potential friends</button></div></div><div class="row" style="align-items:center;justify-content:space-between;margin:12px 0 18px"><div><strong id="queuePosition">Queue loading…</strong><p class="small muted" id="queueMemberInfo" style="margin:3px 0">Only confirmed, active memberships are included.</p></div><div class="actions"><button class="secondary" id="queuePrevious" type="button">← Previous member</button><button id="queueNext" type="button">Next member →</button></div></div>
       <div id="candidateMessage" class="notice hidden" role="status"></div>
       <div id="candidateResults"></div>
-      <h3>Suggested individual pairs</h3><div class="table-wrap"><table><thead><tr><th>People</th><th>Compatibility</th><th>Shared strengths / differences</th><th>Action</th></tr></thead><tbody id="individualSuggestionsBody"><tr><td colspan="4">Sign in to load suggestions.</td></tr></tbody></table></div>
-      <h3>Approved and completed introductions</h3><div class="table-wrap"><table><thead><tr><th>People</th><th>Status</th><th>Action</th></tr></thead><tbody id="individualExistingBody"><tr><td colspan="3">Sign in to load introductions.</td></tr></tbody></table></div>
+      <h3>Member introduction progress</h3><div class="row" style="margin:10px 0 12px;align-items:center"><div><label for="filter-individualProgressBody">Search member introduction progress</label><input id="filter-individualProgressBody" type="search" placeholder="Search name, phone or status"></div><div class="small muted" id="count-individualProgressBody" aria-live="polite"></div></div><div class="table-wrap"><table><thead><tr><th>Member</th><th>Unique introductions</th><th>Status</th><th>Action</th></tr></thead><tbody id="individualProgressBody"><tr><td colspan="4">Sign in to load progress.</td></tr></tbody></table></div><div class="row" style="align-items:center;justify-content:flex-end;margin:12px 0 26px"><button type="button" class="secondary" id="prev-individualProgressBody">← Previous</button><span class="small" id="page-individualProgressBody"></span><button type="button" class="secondary" id="next-individualProgressBody">Next →</button></div>
+      <h3>Suggested individual pairs</h3><div class="row" style="margin:10px 0 12px;align-items:center"><div><label for="filter-individualSuggestionsBody">Search suggested individual pairs</label><input id="filter-individualSuggestionsBody" type="search" placeholder="Search name, phone or status"></div><div class="small muted" id="count-individualSuggestionsBody" aria-live="polite"></div></div><div class="table-wrap"><table><thead><tr><th>People</th><th>Compatibility</th><th>Shared strengths / differences</th><th>Action</th></tr></thead><tbody id="individualSuggestionsBody"><tr><td colspan="4">Sign in to load suggestions.</td></tr></tbody></table></div><div class="row" style="align-items:center;justify-content:flex-end;margin:12px 0 26px"><button type="button" class="secondary" id="prev-individualSuggestionsBody">← Previous</button><span class="small" id="page-individualSuggestionsBody"></span><button type="button" class="secondary" id="next-individualSuggestionsBody">Next →</button></div>
+      <h3>Approved and completed introductions</h3><div class="row" style="margin:10px 0 12px;align-items:center"><div><label for="filter-individualExistingBody">Search approved and completed introductions</label><input id="filter-individualExistingBody" type="search" placeholder="Search name, phone or status"></div><div class="small muted" id="count-individualExistingBody" aria-live="polite"></div></div><div class="table-wrap"><table><thead><tr><th>People</th><th>Status</th><th>Action</th></tr></thead><tbody id="individualExistingBody"><tr><td colspan="3">Sign in to load introductions.</td></tr></tbody></table></div><div class="row" style="align-items:center;justify-content:flex-end;margin:12px 0 26px"><button type="button" class="secondary" id="prev-individualExistingBody">← Previous</button><span class="small" id="page-individualExistingBody"></span><button type="button" class="secondary" id="next-individualExistingBody">Next →</button></div>
     </div>
     <div class="panel dashboard-tab-panel hidden" id="operationsPanel" role="tabpanel" aria-labelledby="tab-updates">
       <div class="topline"><div><h2>Matchmaking opportunities & member updates</h2><p class="muted">GPS-based 0–5 km matching, optional 6–9 km opportunities for review, and initial plus weekly follow-up. Every waiting member appears once.</p></div><button class="secondary" id="refreshOperationsButton">Refresh opportunities</button></div>
@@ -388,6 +389,27 @@
     catch {prompt('Copy this consent request:',text);}
   }
   let individualData={suggestions:[],existing:[],progress:[]};
+  let memberQueue=[];
+  function updateQueueControls(){
+    const id=$('candidateMemberSelect').value;
+    const i=memberQueue.findIndex(x=>String(x.id)===id);
+    $('queuePosition').textContent=i>=0?`Member ${i+1} of ${memberQueue.length} awaiting matching`:'No active confirmed members in queue';
+    const m=i>=0?members.find(x=>String(x.id)===id):null;
+    const date=m?.created_at?new Date(m.created_at):null;
+    $('queueMemberInfo').textContent=i>=0?`${memberQueue[i].name} · ${memberQueue[i].count||0} introductions · Joined ${date && !isNaN(date)?date.toLocaleDateString('en-KE'):'date unavailable'}`:'Members without matches remain eligible for future review.';
+    $('queuePrevious').disabled=i<=0;
+    $('queueNext').disabled=i<0||i>=memberQueue.length-1;
+  }
+  function moveQueue(delta){
+    const i=memberQueue.findIndex(x=>String(x.id)===$('candidateMemberSelect').value);
+    const target=memberQueue[i+delta];
+    if(!target)return;
+    $('candidateMemberSelect').value=String(target.id);
+    updateQueueControls();
+    loadMemberCandidates();
+  }
+  $('queuePrevious').addEventListener('click',()=>moveQueue(-1));
+  $('queueNext').addEventListener('click',()=>moveQueue(1));
   async function loadIndividual() {
     $('refreshIndividualButton').disabled=true;
     try {
@@ -400,8 +422,19 @@
       $('individualProgressBody').innerHTML=progress.map(x=>`<tr><td><strong>${safe(x.name)}</strong><br><small>${safe(x.phone||'')}</small></td><td>${safe(x.count)} unique people / 5 minimum (15 maximum)</td><td><span class="badge ${x.complete?'confirmed':''}">${x.expired?'Membership expired':x.complete?'Completed':x.active?'Actively matching':'15 reached'}</span><br><small>Entitlement until ${safe(x.expires_at?new Date(x.expires_at).toLocaleDateString('en-KE'):'Unknown')}</small></td><td>${x.complete&&!x.expired&&x.count<15?`<button data-individual="reopen" data-id="${safe(x.id)}">Reopen on request</button>`:''}</td></tr>`).join('')||'<tr><td colspan="4">No confirmed members.</td></tr>';
       const memberSelect=$('candidateMemberSelect');
       const previous=memberSelect.value;
-      memberSelect.innerHTML='<option value="">Select a member</option>'+progress.slice().sort((a,b)=>a.name.localeCompare(b.name)).map(x=>`<option value="${safe(x.id)}">${safe(x.name)} (${safe(x.count)} introductions)</option>`).join('');
-      memberSelect.value=previous;
+      // Keep the queue ordered by original signup date, among confirmed active members.
+      // If payment confirmation timestamps are added later, use them here instead.
+      const confirmed = new Map(members.filter(m=>String(m.payment_status||'').toLowerCase()==='confirmed').map(m=>[String(m.id),m]));
+      memberQueue=progress.filter(x=>confirmed.has(String(x.id)) && !x.expired && x.active && Number(x.count||0)<15)
+        .sort((a,b)=>{
+          const am=confirmed.get(String(a.id)),bm=confirmed.get(String(b.id));
+          const at=Date.parse(am?.created_at||''),bt=Date.parse(bm?.created_at||'');
+          return (Number.isFinite(at)?at:Infinity)-(Number.isFinite(bt)?bt:Infinity) || String(a.id).localeCompare(String(b.id));
+        });
+      memberSelect.innerHTML='<option value="">Select a member</option>'+memberQueue.map(x=>`<option value="${safe(x.id)}">${safe(x.name)} (${safe(x.count)} introductions)</option>`).join('');
+      memberSelect.value=memberQueue.some(x=>String(x.id)===previous)?previous:(memberQueue[0]?.id||'');
+      updateQueueControls();
+      if(memberSelect.value) await loadMemberCandidates();
       $('individualSuggestionsBody').innerHTML=suggestions.map(x=>`<tr><td><strong>${safe(x.name_a)}</strong> (${safe(x.age_a)}) — <strong>${safe(x.name_b)}</strong> (${safe(x.age_b)})<br><small>${safe(x.area_a||'')} / ${safe(x.area_b||'')}</small><div class="small">${pairContact(x.name_a,x.phone_a)}${pairContact(x.name_b,x.phone_b)}</div></td><td>${safe(x.score)}% · ${safe(x.distance_km)} km</td><td><small>Strengths: ${safe((x.strengths||[]).join(', ')||'None noted')}<br>Differences: ${safe((x.differences||[]).join(', ')||'None noted')}</small></td><td><button data-individual="approve" data-a="${safe(x.member_a)}" data-b="${safe(x.member_b)}">Approve pair</button></td></tr>`).join('')||'<tr><td colspan="4">No new eligible pairs.</td></tr>';
       $('individualExistingBody').innerHTML=existing.map(x=>`<tr><td>${pairContact(x.name_a,x.phone_a)}${pairContact(x.name_b,x.phone_b)}</td><td><span class="badge ${x.status==='connected'?'confirmed':''}">${safe(x.status)}</span>${x.connected_at?`<br><small>${safe(new Date(x.connected_at).toLocaleDateString('en-KE'))}</small>`:''}</td><td>${x.status==='approved'?`<div class="actions"><button class="secondary" data-individual="copy-a" data-a="${safe(x.member_a)}" data-b="${safe(x.member_b)}">Copy message for ${safe(x.name_a)}</button><button class="secondary" data-individual="copy-b" data-a="${safe(x.member_a)}" data-b="${safe(x.member_b)}">Copy message for ${safe(x.name_b)}</button><button data-individual="connected" data-a="${safe(x.member_a)}" data-b="${safe(x.member_b)}">Mark actually introduced</button></div>`:''}</td></tr>`).join('')||'<tr><td colspan="3">No introductions recorded.</td></tr>';
       $('individualMessage').classList.add('hidden');
@@ -446,7 +479,7 @@
     finally{$('refreshCandidateButton').disabled=false;}
   }
   $('refreshCandidateButton').addEventListener('click',loadMemberCandidates);
-  $('candidateMemberSelect').addEventListener('change',loadMemberCandidates);
+  $('candidateMemberSelect').addEventListener('change',()=>{updateQueueControls();loadMemberCandidates();});
   $('refreshIndividualButton').addEventListener('click',loadIndividual);
 
   function renderWaitingMembers() {
@@ -859,6 +892,33 @@
   document.getElementById('refreshButton').addEventListener('click',async()=>{await loadAreas();await loadWorkspace();});
   document.querySelector('.admin-nav').addEventListener('click',async e=>{const t=e.target.closest('button[data-tab]');if(!t||!adminPassword)return;if(t.dataset.tab==='areasPanel')await loadAreas();if(t.dataset.tab==='eventsPanel'){await loadAreas();await loadWorkspace();}if(t.dataset.tab==='tasksPanel'){await loadAreas();await loadOperations();await loadWorkspace();}});
 
+
+  // Client-side pagination: keep large member tables manageable without changing API or matching logic.
+  for (const id of ['individualProgressBody','individualSuggestionsBody','individualExistingBody']) {
+    const tbody=$(id), input=$('filter-'+id), previous=$('prev-'+id), next=$('next-'+id);
+    const counter=$('count-'+id), pageLabel=$('page-'+id);
+    let page=0;
+    const pageSize=20;
+    function updateTable() {
+      const rows=Array.from(tbody.children);
+      const term=input.value.trim().toLowerCase();
+      const matches=rows.filter(row=>row.textContent.toLowerCase().includes(term));
+      const totalPages=Math.max(1,Math.ceil(matches.length/pageSize));
+      page=Math.min(page,totalPages-1);
+      const start=page*pageSize;
+      const visible=new Set(matches.slice(start,start+pageSize));
+      rows.forEach(row=>{row.hidden=!visible.has(row);});
+      counter.textContent=matches.length+' matching rows';
+      pageLabel.textContent='Page '+(page+1)+' of '+totalPages;
+      previous.disabled=page===0;
+      next.disabled=page>=totalPages-1;
+    }
+    input.addEventListener('input',()=>{page=0;updateTable();});
+    previous.addEventListener('click',()=>{if(page>0){page--;updateTable();}});
+    next.addEventListener('click',()=>{page++;updateTable();});
+    new MutationObserver(()=>{page=0;updateTable();}).observe(tbody,{childList:true});
+    updateTable();
+  }
 })();
 </script>
 </body>
