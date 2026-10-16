@@ -104,7 +104,7 @@
       <div class="topline"><div><h2>Action centre</h2><p class="muted">Manual tasks, recurring reminders and member-specific weekly update decisions.</p></div><button class="secondary" id="refreshTasksButton">Refresh</button></div>
       <div id="tasksMessage" class="notice hidden" role="status"></div>
       <form id="taskForm"><div class="row"><div><label for="taskTitle">New task</label><input id="taskTitle" required placeholder="Review Lavington matches"></div><div><label for="taskArea">Neighbourhood (optional)</label><select id="taskArea"><option value="">All neighbourhoods / general</option></select></div><div><label for="taskRecurrence">Repeat</label><select id="taskRecurrence"><option value="none">Once</option><option value="weekly">Weekly</option><option value="monthly">Monthly</option></select></div><div><label for="taskDue">Due date (optional)</label><input type="date" id="taskDue"></div></div><button type="submit">Add task</button></form>
-      <h3>Automatic priorities</h3><p class="small muted">Calculated from current paid members, introductions and upcoming events. These are recommendations, not messages sent to members.</p><div id="automaticPriorities">Loading priorities…</div><h3>Tasks</h3><div id="taskList">No tasks loaded.</div>
+      <h3>Neighbourhood action centre</h3><p class="small muted">Each area shows three separate workstreams: eligible individual matches, member communications, and event planning. Group membership is optional and is not an overdue task. These are live administrative indicators, not messages sent.</p><div id="automaticPriorities">Loading priorities…</div><h3>Tasks</h3><div id="taskList">No tasks loaded.</div>
       <h3>Weekly update reviews</h3><p class="small muted">Review each draft before messaging. Skipping or snoozing a review does not send a message.</p><div id="weeklyReviewList">Loading...</div>
     </div>
     <div class="panel dashboard-tab-panel" id="membersPanel" role="tabpanel" aria-labelledby="tab-members">
@@ -126,7 +126,7 @@
       <div id="commsError" class="notice hidden" role="status"></div>
       <div class="stats"><div class="stat"><span>Weekly updates due</span><strong id="commsDue">—</strong></div><div class="stat"><span>Overdue (7+ days)</span><strong id="commsOverdue">—</strong></div><div class="stat"><span>Failed / uncertain jobs</span><strong id="commsFailed">—</strong></div><div class="stat"><span>Open messaging alerts</span><strong id="commsAlerts">—</strong></div></div>
       <h3>Introduction messages &amp; delivery issues</h3><div id="commsJobs">Loading…</div>
-      <h3>Weekly progress updates</h3><p class="small muted">Members due for a message appear here. Sending or preparing a message does not mark it successful; only recorded send confirmation does.</p><div id="commsWeekly">Loading…</div><div id="commsWeeklyFeedback" class="notice hidden" role="status"></div>
+      <h3>Weekly progress updates</h3><p class="small muted">Members due for a message appear here. Sending or preparing a message does not mark it successful; only recorded send confirmation does.</p><label for="commsWeeklySearch">Filter weekly updates by neighbourhood or member</label><input id="commsWeeklySearch" type="search" placeholder="Search neighbourhood or member" style="max-width:430px;margin:8px 0 14px"><div id="commsWeekly">Loading…</div><div id="commsWeeklyFeedback" class="notice hidden" role="status"></div>
       <div class="actions"><button type="button" class="secondary" id="commsQueueWeekly">Prepare eligible weekly updates</button><button type="button" class="secondary" data-open-panel="operationsPanel">Review 5–9 km opportunities</button></div>
       <h3>Extended-radius requests</h3><div id="commsRadius">Loading…</div>
       <h3>Event invitations</h3><div id="commsEvents">Loading…</div>
@@ -835,7 +835,7 @@
       const checked=new Set([...document.querySelectorAll('#eventAreaChoices input:checked')].map(x=>x.value));
       $('eventAreaChoices').innerHTML=nbffAreas.filter(a=>a.paid>0).map(a=>`<label><input type="checkbox" value="${safe(a.label)}" ${checked.has(a.label)?'checked':''}><span><strong>${safe(a.label)}</strong><br><small>${safe(areaSummary(a))}</small></span></label>`).join('')||'<p>No paid members in neighbourhoods yet.</p>';
       $('taskArea').innerHTML='<option value="">All neighbourhoods / general</option>'+nbffAreas.map(a=>`<option value="${safe(a.key)}">${safe(a.label)} (${a.paid} paid)</option>`).join('');
-      updateAreaSelection();renderAutomaticPriorities();
+      updateAreaSelection();renderAutomaticPriorities();refreshNeighbourhoodMatchCounts();
     }catch(e){$('areasBody').innerHTML=`<tr><td colspan="11">${safe(e.message)}</td></tr>`;}
   }
   function selectedEventAreas(){return [...document.querySelectorAll('#eventAreaChoices input:checked')].map(x=>x.value);}
@@ -885,33 +885,100 @@
       await loadWorkspace();
     }catch(err){showMessage($('eventsMessage'),err.message);}finally{b.disabled=false;}
   });
+  // Neighbourhood operations: distinguish actual candidate availability from introduction history.
+  // Candidate counts come from the server's hard-rule-filtered ready queue, not guessed from group membership.
+  let neighbourhoodQueueLoaded=false, neighbourhoodQueueError='';
+  let neighbourhoodReadyQueue=[];
+  async function refreshNeighbourhoodMatchCounts(){
+    try{
+      const result=await api('POST',{action:'ready_matchmaking_queue'});
+      neighbourhoodReadyQueue=Array.isArray(result.queue)?result.queue:[];
+      neighbourhoodQueueLoaded=true;neighbourhoodQueueError='';
+    }catch(err){neighbourhoodQueueLoaded=false;neighbourhoodQueueError=err.message||'Unable to check matches';}
+    renderAutomaticPriorities();
+  }
+  function areaKeyFor(m){return String(m.neighbourhood||m.area||m.county||'').trim().toLowerCase();}
+  function eventAreaHistory(a){return (nbffWorkspace.events||[]).filter(ev=>(ev.areas||[]).some(x=>x.area_key===a.key));}
+  function eventDeadlineFor(a,now){
+    const history=eventAreaHistory(a);
+    const future=history.filter(ev=>dateMs(ev.starts_at)>now).sort((x,y)=>dateMs(x.starts_at)-dateMs(y.starts_at));
+    const completed=history.map(ev=>dateMs(ev.starts_at)).filter(t=>Number.isFinite(t)&&t<=now);
+    const areaMembers=members.filter(m=>m.payment_status==='confirmed'&&areaKeyFor(m)===a.key);
+    const dates=areaMembers.map(m=>dateMs(m.payment_confirmed_at||m.confirmed_at||m.created_at)).filter(Number.isFinite);
+    const anchor=completed.length?Math.max(...completed):(dates.length?Math.min(...dates):NaN);
+    if(!Number.isFinite(anchor))return {text:'Event deadline not available',level:'unknown'};
+    const days=Math.floor((now-anchor)/86400000);
+    if(future.length)return {text:`Next event scheduled: ${new Date(future[0].starts_at).toLocaleDateString('en-KE')}`,level:'scheduled'};
+    if(days>=30)return {text:`Overdue: ${days} days since ${completed.length?'last recorded event':'first confirmed registration'} — plan an event`,level:'overdue'};
+    if(days>=21)return {text:`Planning due: day ${days} of 30 — organise an event`,level:'planning'};
+    return {text:`Next planning reminder in ${21-days} day(s)`,level:'ok'};
+  }
   function renderAutomaticPriorities(){
-    const now=Date.now(), upcoming=(nbffWorkspace.events||[]).filter(e=>Date.parse(e.starts_at)>=now);
-    const paid=members.filter(m=>m.payment_status==='confirmed');
-    const byArea=a=>paid.filter(m=>String(m.neighbourhood||m.area||m.county||'Unknown').trim().toLowerCase()===a.key);
+    const target=$('automaticPriorities');if(!target)return;
+    const now=Date.now(), paid=members.filter(m=>m.payment_status==='confirmed');
+    const readyIds=new Set(neighbourhoodReadyQueue.map(x=>x.id));
+    const progress=new Map((individualData?.progress||[]).map(x=>[x.id,x]));
     const cards=[];
     for(const a of nbffAreas.filter(x=>x.paid>0)){
-      const areaEvents=upcoming.filter(ev=>(ev.areas||[]).some(x=>x.area_key===a.key));
-      const affected=byArea(a);
-      const waiting=affected.filter(m=>!m.group_id);
-      const older=waiting.filter(m=>m.created_at && now-Date.parse(m.created_at)>=7*86400000);
-      const urgent=older.filter(m=>now-Date.parse(m.created_at)>=14*86400000);
-      const noMatches=a.zero||0;
-      const reasons=[];
-      if(!areaEvents.length)reasons.push('No upcoming neighbourhood event scheduled');
-      if(noMatches)reasons.push(`${noMatches} paid member(s) have zero introductions`);
-      if(older.length)reasons.push(`${older.length} ungrouped member(s) registered 7+ days ago (${urgent.length} at 14+ days)`);
-      if(a.invalid_gps)reasons.push(`${a.invalid_gps} member(s) need GPS review`);
-      if(reasons.length)cards.push({a,priority:urgent.length?0:noMatches?1:2,text:reasons.join(' · ')});
+      const areaMembers=paid.filter(m=>areaKeyFor(m)===a.key);
+      const ready=areaMembers.filter(m=>readyIds.has(m.id));
+      const due=operationMembers.filter(m=>areaKeyFor(m)===a.key && eligibleWeekly(m));
+      const overdue=due.filter(overdueWeekly);
+      const introduced=areaMembers.filter(m=>(progress.get(m.id)?.count||0)>0).length;
+      const cooling=areaMembers.filter(m=>{
+        const p=progress.get(m.id);return p?.cooldown_until && dateMs(p.cooldown_until)>now;
+      }).length;
+      const event=eventDeadlineFor(a,now);
+      const problems=[];
+      if(overdue.length)problems.push(`${overdue.length} weekly update(s) overdue`);
+      if(event.level==='overdue'||event.level==='planning')problems.push('Event action required');
+      if(a.invalid_gps)problems.push(`${a.invalid_gps} GPS record(s) to review`);
+      cards.push({a,ready,due,overdue,introduced,cooling,event,problems});
     }
-    cards.sort((x,y)=>x.priority-y.priority||y.a.paid-x.a.paid);
-    const almost=operationMembers.filter(m=>(m.almost_nearby_pairs||[]).length+(m.almost_nearby_groups||[]).length>0 && (m.introduction_count||0)===0);
-    const due=operationMembers.filter(m=>initialDue(m)||updateDue(m));
-    const overview=`<p class="small"><strong>${due.length}</strong> member updates due · <strong>${almost.length}</strong> zero-introduction members with 5–9 km possibilities · <strong>${cards.length}</strong> neighbourhoods requiring attention</p>`;
-    const reviewLinks=almost.slice(0,8).map(m=>{const a=nbffAreas.find(a=>a.key===String(m.neighbourhood||m.area||m.county||'Unknown').trim().toLowerCase());return `<div class="event-card"><strong>Review 5–9 km possibility: ${safe(m.first_name||'Member')}</strong><p class="small muted">${safe(m.neighbourhood||m.area||'Unknown area')} · ${a?safe(areaSummary(a)):'No area statistics available'} · consent required before any distance exception</p><button class="secondary" type="button" data-go-panel="operationsPanel">Review matching opportunities</button></div>`;}).join('');
-    $('automaticPriorities').innerHTML=overview+cards.map(({a,text})=>`<div class="event-card"><strong>${safe(a.label)}</strong><p class="small muted">${safe(areaSummary(a))}</p><p>${safe(text)}</p><div class="actions"><button class="secondary" type="button" data-go-panel="areasPanel">Neighbourhood details</button><button class="secondary" type="button" data-go-panel="eventsPanel">Plan an event</button></div></div>`).join('')+reviewLinks+(!cards.length&&!almost.length?'<p class="muted">No automatic neighbourhood alerts right now.</p>':'');
+    cards.sort((x,y)=>y.overdue.length-x.overdue.length || (y.event.level==='overdue')-(x.event.level==='overdue') || y.ready.length-x.ready.length || y.a.paid-x.a.paid);
+    const totalReady=cards.reduce((n,c)=>n+c.ready.length,0);
+    const totalDue=cards.reduce((n,c)=>n+c.due.length,0);
+    const totalOverdue=cards.reduce((n,c)=>n+c.overdue.length,0);
+    const eventAlerts=cards.filter(c=>['planning','overdue'].includes(c.event.level)).length;
+    const matchNote=neighbourhoodQueueLoaded?'':`<p class="small" role="status" style="color:#a15a14">Eligible match counts unavailable${neighbourhoodQueueError?': '+safe(neighbourhoodQueueError):' until the matching queue loads'}. Counts are not assumed to be zero.</p>`;
+    const summary=`<p class="small"><strong>${cards.length}</strong> neighbourhoods · <strong>${neighbourhoodQueueLoaded?totalReady:'—'}</strong> members ready to match · <strong>${totalDue}</strong> updates due (<strong>${totalOverdue}</strong> overdue) · <strong>${eventAlerts}</strong> event reminders</p>${matchNote}`;
+    target.innerHTML=summary+cards.map(c=>{
+      const {a,ready,due,overdue,introduced,cooling,event,problems}=c;
+      const waiting=neighbourhoodQueueLoaded?Math.max(0,a.paid-ready.length-cooling):null;
+      return `<section class="event-card" data-area-card="${safe(a.key)}" style="margin:12px 0">
+        <h3 style="margin:0 0 10px">${safe(a.label)} <span class="small muted">· ${a.paid} confirmed members</span></h3>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px">
+          <div><strong>1 · Individual matchmaking</strong><p class="small">${neighbourhoodQueueLoaded?`<strong>${ready.length}</strong> ready to review · <strong>${waiting}</strong> not currently ready${cooling?' · '+cooling+' in cooldown':''}`:'Eligibility: not yet verified'}<br>${introduced} members have recorded introductions (not necessarily delivered)</p><button class="secondary" type="button" data-area-action="match" data-area="${safe(a.key)}" ${!neighbourhoodQueueLoaded||!ready.length?'disabled':''}>${ready.length?'Review eligible matches':'No matches to review'}</button></div>
+          <div><strong>2 · Member communications</strong><p class="small"><strong>${due.length}</strong> weekly updates due · <strong>${overdue.length}</strong> overdue</p><button class="secondary" type="button" data-area-action="comms" data-area="${safe(a.key)}">Review updates</button></div>
+          <div><strong>3 · Neighbourhood events</strong><p class="small">${safe(event.text)}</p><button class="secondary" type="button" data-area-action="event" data-area="${safe(a.key)}">Plan / review event</button></div>
+        </div>
+        ${problems.length?`<p class="small" style="margin:12px 0 0;color:#a15a14"><strong>Needs attention:</strong> ${safe(problems.join(' · '))}</p>`:''}
+        ${a.invalid_gps?`<button type="button" class="secondary" data-area-action="gps" data-area="${safe(a.key)}">Review GPS records</button>`:''}
+      </section>`;
+    }).join('')+(cards.length?'':'<p class="muted">No confirmed members in neighbourhoods yet.</p>');
   }
-  $('automaticPriorities').addEventListener('click',e=>{const b=e.target.closest('button[data-go-panel]');if(b)showDashboardTab(b.dataset.goPanel);});
+  $('automaticPriorities').addEventListener('click',async e=>{
+    const b=e.target.closest('button[data-area-action]');if(!b||b.disabled)return;
+    const area=b.dataset.area,action=b.dataset.areaAction;
+    if(action==='match'){
+      showDashboardTab('individualPanel');
+      if(!memberQueue.length)await loadIndividual();
+      const match=neighbourhoodReadyQueue.find(x=>{
+        const m=members.find(m=>m.id===x.id);return m&&areaKeyFor(m)===area;
+      });
+      if(match&&$('candidateMemberSelect')){
+        $('candidateMemberSelect').value=match.id;
+        $('candidateMemberSelect').dispatchEvent(new Event('change'));
+      }
+    }else if(action==='comms'){
+      showDashboardTab('communicationsPanel');
+      const input=$('commsWeeklySearch');if(input){input.value=area;input.dispatchEvent(new Event('input'));}
+    }else if(action==='event'){
+      showDashboardTab('eventsPanel');
+      const cb=[...document.querySelectorAll('#eventAreaChoices input')].find(x=>x.value.toLowerCase()===area);
+      if(cb){cb.checked=true;updateAreaSelection();}
+    }else if(action==='gps')showDashboardTab('areasPanel');
+  });
   function renderTasks(){
     $('taskList').innerHTML=(nbffWorkspace.tasks||[]).map(t=>{
       const a=nbffAreas.find(a=>a.key===t.area_key);
@@ -1019,7 +1086,9 @@
     $('dailyAlertsBody').innerHTML=items.map(i=>`<button type="button" class="${i.severity}" data-daily-panel="${i.panel}">${safe(i.label)}</button>`).join('');
     $('commsDue').textContent=due.length;$('commsOverdue').textContent=overdue.length;
     $('commsFailed').textContent=problemJobs.length;$('commsAlerts').textContent=alerts.length;
-    $('commsWeekly').innerHTML=due.length?`<div class="table-wrap"><table class="comms-table"><thead><tr><th>Member</th><th>Status</th><th>Next action</th></tr></thead><tbody>${due.slice(0,100).map(m=>`<tr><td>${safe(m.first_name||'Member')} · ${safe(m.neighbourhood||m.area||'')}</td><td>${overdueWeekly(m)?'<strong>Overdue</strong>':'Due'}</td><td><button type="button" class="secondary" data-comms-queue-member="${safe(m.id)}">Review &amp; queue</button></td></tr>`).join('')}</tbody></table></div>${due.length>100?`<p>${due.length-100} more due; see Matching opportunities.</p>`:''}`:'<p class="muted">No member updates due based on the latest loaded records.</p>';
+    const weeklySearch=($('commsWeeklySearch')?.value||'').trim().toLowerCase();
+    const visibleDue=weeklySearch?due.filter(m=>`${m.first_name||''} ${m.neighbourhood||m.area||''}`.toLowerCase().includes(weeklySearch)):due;
+    $('commsWeekly').innerHTML=visibleDue.length?`<div class="table-wrap"><table class="comms-table"><thead><tr><th>Member</th><th>Status</th><th>Next action</th></tr></thead><tbody>${visibleDue.slice(0,100).map(m=>`<tr><td>${safe(m.first_name||'Member')} · ${safe(m.neighbourhood||m.area||'')}</td><td>${overdueWeekly(m)?'<strong>Overdue</strong>':'Due'}</td><td><button type="button" class="secondary" data-comms-queue-member="${safe(m.id)}">Review &amp; queue</button></td></tr>`).join('')}</tbody></table></div>${visibleDue.length>100?`<p>${visibleDue.length-100} more due; see Matching opportunities.</p>`:''}`:'<p class="muted">No member updates due based on the latest loaded records.</p>';
     $('commsJobs').innerHTML=alerts.length||problemJobs.length?`<div class="comms-note"><strong>${alerts.length} open alert(s), ${problemJobs.length} recent problem job(s)</strong><p>Review each message in the messaging status section before retrying. Unknown sends must not be retried automatically.</p><button type="button" class="secondary" data-comms-target="individualPanel">Open messaging status</button></div>`:'<p class="muted">No failed or uncertain jobs in the latest messaging response.</p>';
     const radius=operationMembers.filter(m=>(m.almost_nearby_pairs||[]).length+(m.almost_nearby_groups||[]).length>0);
     $('commsRadius').innerHTML=`<p>${radius.length} member(s) have potential 5–9 km options requiring consent.</p>`;
@@ -1047,6 +1116,7 @@
   });
   $('refreshCommsButton').addEventListener('click',async()=>{const b=$('refreshCommsButton');b.disabled=true;b.textContent='Refreshing…';try{await Promise.all([loadOperations(),loadMessagingStatus(),loadWorkspace()]);updateDailyStatus();showMessage($('commsError'),'Updated at '+new Date().toLocaleTimeString('en-KE'),true);}catch(e){showMessage($('commsError'),e.message||'Refresh failed');}finally{b.disabled=false;b.textContent='Refresh communications';}});
   $('commsQueueWeekly').addEventListener('click',()=> $('queueWaitingUpdates').click());
+  $('commsWeeklySearch').addEventListener('input',updateDailyStatus);
   document.querySelector('.admin-nav').addEventListener('click',e=>{const b=e.target.closest('[data-tab]');if(b?.dataset.tab==='communicationsPanel')updateDailyStatus();});
   // Discreet public-space view. Remember the choice on this device only.
   const privacyKey='nff_admin_hide_business_name';
