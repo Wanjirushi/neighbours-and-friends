@@ -530,27 +530,69 @@ form.addEventListener('change', e => {
 });
 const submitBtn = document.getElementById('submitBtn');
 const formMessage = document.getElementById('formMessage');
+// Disable native submit interception so our own validation always explains errors.
+form.noValidate = true;
+const validationStyle = document.createElement('style');
+validationStyle.textContent = `
+  #joinForm .field-validation-error{color:#a83228;font-size:13px;font-weight:650;margin:6px 0 12px;line-height:1.4}
+  #joinForm .needs-attention{outline:2px solid #b94335!important;outline-offset:3px;border-radius:4px}
+  #joinForm .validation-summary{background:#fff1ed;border:1px solid #cf7b69;color:#852b22;padding:13px 16px;border-radius:8px;margin:16px 0;font-weight:600}
+`;
+document.head.appendChild(validationStyle);
+function clearFormValidation(){
+  form.querySelectorAll('.field-validation-error').forEach(el=>el.remove());
+  form.querySelectorAll('.needs-attention').forEach(el=>el.classList.remove('needs-attention'));
+  form.querySelectorAll('.validation-summary').forEach(el=>el.remove());
+}
+function validationLabel(field){
+  const group=field.closest('.step');
+  if(field.type==='radio'||field.type==='checkbox'){
+    const choice=field.closest('.choices');
+    if(choice){ const heading=choice.previousElementSibling; if(heading && /^(H[1-6]|P|LABEL)$/.test(heading.tagName))return heading.textContent.trim(); }
+  }
+  const label=field.id ? form.querySelector('label[for="'+CSS.escape(field.id)+'"]') : null;
+  if(label)return label.textContent.trim();
+  if(field.labels?.length)return field.labels[0].textContent.trim();
+  return field.getAttribute('aria-label')||group?.querySelector('h3')?.textContent.trim()||field.name||'this question';
+}
+function flagField(field,message){
+  clearFormValidation();
+  const label=validationLabel(field);
+  const target=(field.type==='radio'||field.type==='checkbox')?(field.closest('.choices')||field.closest('label')||field):field;
+  target.classList.add('needs-attention');
+  const note=document.createElement('p');note.className='field-validation-error';note.setAttribute('role','alert');
+  note.textContent=message||'Please answer this question before joining.';
+  target.insertAdjacentElement('afterend',note);
+  const summary=document.createElement('div');summary.className='validation-summary';summary.setAttribute('role','alert');
+  summary.textContent='Please complete: '+label+'. Your answers have been saved on this page.';
+  const actions=form.querySelector('.form-actions');actions.parentNode.insertBefore(summary,actions);
+  formMessage.textContent='Please complete: '+label+'.';formMessage.classList.add('is-error');
+  target.scrollIntoView({behavior:'smooth',block:'center'});
+  try{field.focus({preventScroll:true});}catch(e){}
+}
+form.addEventListener('input',()=>{form.querySelectorAll('.validation-summary').forEach(el=>el.remove());});
+form.addEventListener('change',()=>{form.querySelectorAll('.validation-summary').forEach(el=>el.remove());});
 
 form.addEventListener('submit', async (event) => {
   event.preventDefault();
 
   formMessage.classList.remove('is-error');
+  clearFormValidation();
   if (!form.checkValidity()) {
     const invalid = form.querySelector(':invalid');
-    if (invalid) {
-      invalid.scrollIntoView({behavior:'smooth',block:'center'});
-      invalid.focus({preventScroll:true});
-      invalid.reportValidity();
-      const label = invalid.labels && invalid.labels[0] ? invalid.labels[0].textContent.trim() : (invalid.getAttribute('aria-label') || invalid.name || 'a required field');
-      formMessage.textContent = 'Please complete: ' + label + '. Then click Join the Club again.';
-      formMessage.classList.add('is-error');
+    if(invalid){
+      let message='Please answer this question before joining.';
+      if(invalid.validity?.typeMismatch)message='Please enter a valid value.';
+      else if(invalid.validity?.patternMismatch)message=invalid.title||'Please check the required format.';
+      else if(invalid.validity?.rangeUnderflow||invalid.validity?.rangeOverflow)message='Please check the allowed range.';
+      flagField(invalid,message);
     }
     return;
   }
   const selectedPriorities = form.querySelectorAll('input[name="friendPriorities"]:checked');
-  if (selectedPriorities.length !== 2) { formMessage.textContent = "Please choose exactly two friendship priorities."; formMessage.classList.add("is-error"); form.querySelector('input[name="friendPriorities"]')?.scrollIntoView({behavior:"smooth",block:"center"}); return; }
+  if (selectedPriorities.length !== 2) { flagField(form.querySelector('input[name="friendPriorities"]'),"Please choose exactly two friendship priorities."); return; }
   const selectedValues = [...form.querySelectorAll('input[name="coreValues"]:checked')];
-  if (selectedValues.length < 1 || selectedValues.length > 3 || (selectedValues.some(x => x.value === 'None of these') && selectedValues.length !== 1)) { formMessage.textContent = "Please choose up to three life priorities, or None of these on its own."; formMessage.classList.add("is-error"); form.querySelector('input[name="coreValues"]')?.scrollIntoView({behavior:"smooth",block:"center"}); return; }
+  if (selectedValues.length < 1 || selectedValues.length > 3 || (selectedValues.some(x => x.value === 'None of these') && selectedValues.length !== 1)) { flagField(form.querySelector('input[name="coreValues"]'),"Please choose up to three life priorities, or None of these on its own."); return; }
   if (!latitudeInput.value || !longitudeInput.value) {
     showLocationMessage('Please use your current location or choose and confirm a point on the map.','error');
     document.getElementById('useCurrentLocation').focus();
