@@ -34,7 +34,9 @@
   table tbody tr[hidden]{display:none!important}
   .admin-nav{margin-bottom:12px}.admin-nav .nav-buttons{display:flex;gap:7px;flex-wrap:wrap}.admin-nav button{font-weight:600}.priority-payment{background:#e3efe9!important;color:#205441!important}.priority-match{background:#e8e9f7!important;color:#383c73!important}.priority-comms{background:#e2eef8!important;color:#245779!important}.priority-alert{background:#fff0df!important;color:#865021!important}.nav-count:not(:empty){display:inline-block;background:#fff;border-radius:12px;padding:1px 6px;margin-left:3px;font-size:11px}.admin-more{margin:8px 0}.admin-more summary{cursor:pointer;font-size:13px;color:#555}.admin-more .nav-buttons{margin-top:9px}.daily-alerts{display:flex;gap:12px;align-items:center;flex-wrap:wrap;background:#fff;border:1px solid #e2ded5;border-radius:10px;padding:13px 16px;margin:14px 0}.daily-alerts button{padding:6px 9px;font-size:12px}.daily-alerts .warn{background:#fff0df;color:#70430e}.daily-alerts .danger{background:#ffe9e7;color:#912b22}.daily-alerts .ok{background:#e4f1e8;color:#28543c}.comms-table{width:100%;border-collapse:collapse}.comms-table td,.comms-table th{padding:8px;border-bottom:1px solid #e8e3dc;text-align:left}.comms-note{margin:7px 0;padding:9px;background:#f8f6f2;border-radius:7px}
 </style>
-</head>
+<style>
+.nbff-growth{margin:18px 0 26px}.growth-bars{display:grid;gap:9px;max-height:440px;overflow:auto}.growth-bar-line{display:grid;grid-template-columns:minmax(100px,180px) 1fr 45px;gap:12px;align-items:center;font-size:13px}.growth-bar-track{background:#e7ebe4;border-radius:20px;overflow:hidden;height:13px}.growth-bar-fill{background:linear-gradient(90deg,#315b48,#83a58a);height:100%;border-radius:20px}.growth-map{min-height:290px;border-radius:16px;background:radial-gradient(ellipse at 60% 40%,#dce8d9,#edf2e9 70%);border:1px solid #d3ddce;overflow:hidden}.growth-map svg{width:100%;height:auto;display:block}.growth-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:14px 0}.growth-card{background:#f5f8f1;border:1px solid #d9e2d3;border-radius:13px;padding:16px}.growth-card strong{color:#294d39}.growth-dots{display:flex;gap:6px;margin-top:12px}.growth-dot{height:12px;flex:1;background:#d9e2d3;border-radius:20px}.growth-dot.on{background:#397957}
+</style></head>
 <body>
 <main>
   <p><a id="adminHomeLink" href="/">← Back to Neighbour Friend Finder</a></p>
@@ -85,7 +87,15 @@
     <div class="panel dashboard-tab-panel hidden" id="areasPanel" role="tabpanel" aria-labelledby="tab-areas">
       <div class="topline"><h2>Neighbourhood intelligence</h2><button class="secondary" id="refreshAreasButton">Refresh neighbourhoods</button></div>
       <p class="muted">Paid members and their unique introductions. Area labels are based on saved neighbourhood data; GPS coordinates remain the source for distance matching.</p>
-      <div class="table-wrap"><table><thead><tr><th>Neighbourhood</th><th>Paid / registered</th><th>0 matches</th><th>1 match</th><th>2–4</th><th>5/15</th><th>6–9</th><th>10/15</th><th>11–14</th><th>15/15</th><th>Paused</th></tr></thead><tbody id="areasBody"><tr><td colspan="11">Sign in to load neighbourhoods.</td></tr></tbody></table></div>
+      <div class="nbff-growth">
+  <div class="stats"><div class="stat"><span>Neighbourhoods with confirmed members</span><strong id="growthAreas">—</strong></div><div class="stat"><span>Confirmed members</span><strong id="growthMembers">—</strong></div><div class="stat"><span>Members introduced (unique)</span><strong id="growthIntroduced">—</strong></div></div>
+  <h3>Members by neighbourhood</h3><div id="growthBars" class="growth-bars" aria-live="polite"></div>
+  <h3>Community coverage map</h3><p class="small muted">Approximate neighbourhood centres, shown only when at least three confirmed members have usable locations. Never individual members' pins.</p>
+  <div id="growthMap" class="growth-map" aria-label="Approximate neighbourhood coverage map"></div>
+  <h3>Introductions by neighbourhood</h3><p class="small muted">Private counts include only members with at least one completed introduction. Public graphics show verified milestones, without exact counts.</p>
+  <div id="growthIntroductions" class="growth-cards"></div>
+  <button type="button" id="exportGrowthGraphic" class="secondary">Download introduction tracker (PNG)</button> <button type="button" id="exportCoverageGraphic" class="secondary">Download coverage map (PNG)</button><p class="small muted" id="growthShareNote">The social graphic excludes test-only areas and areas with fewer than three introduced members.</p>
+</div><div class="table-wrap"><table><thead><tr><th>Neighbourhood</th><th>Paid / registered</th><th>0 matches</th><th>1 match</th><th>2–4</th><th>5/15</th><th>6–9</th><th>10/15</th><th>11–14</th><th>15/15</th><th>Paused</th></tr></thead><tbody id="areasBody"><tr><td colspan="11">Sign in to load neighbourhoods.</td></tr></tbody></table></div>
     </div>
     <div class="panel dashboard-tab-panel hidden" id="eventsPanel" role="tabpanel" aria-labelledby="tab-events">
       <div class="topline"><div><h2>Multi-neighbourhood events</h2><p class="muted">Schedule multiple independent cluster events on the same day. Each has its own location, invitation queue and RSVPs.</p></div><button class="secondary" id="refreshWorkspaceButton">Refresh</button></div>
@@ -124,8 +134,8 @@
     <div class="panel dashboard-tab-panel hidden" id="communicationsPanel" role="tabpanel" aria-labelledby="tab-comms">
       <div class="topline"><div><h2>3 · Communications</h2><p class="muted">One place for introduction messages, weekly updates, expanded-radius requests and event invitations. A queued message is not a sent message.</p></div><button type="button" class="secondary" id="refreshCommsButton">Refresh communications</button></div>
       <div id="commsError" class="notice hidden" role="status"></div>
-      <div class="stats"><div class="stat"><span>Weekly updates due</span><strong id="commsDue">—</strong></div><div class="stat"><span>Overdue (7+ days)</span><strong id="commsOverdue">—</strong></div><div class="stat"><span>Failed / uncertain jobs</span><strong id="commsFailed">—</strong></div><div class="stat"><span>Open messaging alerts</span><strong id="commsAlerts">—</strong></div></div>
-      <h3>Introduction messages &amp; delivery issues</h3><div id="commsJobs">Loading…</div>
+      <div class="stats"><div class="stat"><span>Queued messages (not sent)</span><strong id="commsQueued">—</strong></div><div class="stat"><span>Weekly updates due</span><strong id="commsDue">—</strong></div><div class="stat"><span>Overdue (7+ days)</span><strong id="commsOverdue">—</strong></div><div class="stat"><span>Failed / uncertain jobs</span><strong id="commsFailed">—</strong></div><div class="stat"><span>Open messaging alerts</span><strong id="commsAlerts">—</strong></div></div>
+      <h3>Message queue &amp; delivery issues</h3><p class="small muted">Pending means prepared, not sent. Only a confirmed delivery counts as sent.</p><div id="commsJobs">Loading…</div>
       <h3>Weekly progress updates</h3><p class="small muted">Members due for a message appear here. Sending or preparing a message does not mark it successful; only recorded send confirmation does.</p><label for="commsWeeklySearch">Filter weekly updates by neighbourhood or member</label><input id="commsWeeklySearch" type="search" placeholder="Search neighbourhood or member" style="max-width:430px;margin:8px 0 14px"><div id="commsWeekly">Loading…</div><div id="commsWeeklyFeedback" class="notice hidden" role="status"></div>
       <div class="actions"><button type="button" class="secondary" id="commsQueueWeekly">Prepare eligible weekly updates</button><button type="button" class="secondary" data-open-panel="operationsPanel">Review 5–9 km opportunities</button></div>
       <h3>Extended-radius requests</h3><div id="commsRadius">Loading…</div>
@@ -250,7 +260,7 @@
   async function api(method='GET', payload=null) {
     const response = await fetch(API_URL, {
       method,
-      headers: {'Content-Type':'application/json','x-admin-password':adminPassword},
+      headers: {'Content-Type':'application/json',...(adminPassword.startsWith('nff1.') ? {'x-admin-session':adminPassword} : {'x-admin-password':adminPassword})},
       body: payload ? JSON.stringify(payload) : undefined
     });
     const data = await response.json().catch(() => ({}));
@@ -443,7 +453,7 @@
       $('individualApprovedCount').textContent=existing.filter(x=>x.status==='approved').length;
       $('individualConnectedCount').textContent=existing.filter(x=>x.status==='connected').length;
       $('individualCompleteCount').textContent=progress.filter(x=>x.complete).length;
-      $('individualProgressBody').innerHTML=progress.map(x=>`<tr><td><strong>${safe(x.name)}</strong><br><small>${safe(x.phone||'')}</small></td><td>${safe(x.count)} unique people / 5 minimum (15 maximum)</td><td><span class="badge ${x.complete?'confirmed':''}">${x.expired?'Membership expired':x.complete?'Completed':x.active?'Actively matching':'15 reached'}</span><br><small>Entitlement until ${safe(x.expires_at?new Date(x.expires_at).toLocaleDateString('en-KE'):'Unknown')}</small></td><td>${x.complete&&!x.expired&&x.count<15?`<button data-individual="reopen" data-id="${safe(x.id)}">Reopen on request</button>`:''}</td></tr>`).join('')||'<tr><td colspan="4">No confirmed members.</td></tr>';
+      $('individualProgressBody').innerHTML=[...progress].sort((a,b)=>(a.count===0?0:1)-(b.count===0?0:1)||Date.parse(a.confirmed_at||'9999')-Date.parse(b.confirmed_at||'9999')).map(x=>`<tr><td><strong>${safe(x.name)}</strong><br><small>${safe(x.phone||'')}</small></td><td>${safe(x.count)} unique people / 5 minimum (15 maximum)<br><small>${x.count===0&&x.confirmed_at?Math.max(0,Math.floor((Date.now()-Date.parse(x.confirmed_at))/86400000))+' days waiting':'—'}</small></td><td><span class="badge ${x.complete?'confirmed':''}">${x.expired?'Membership expired':x.complete?'Completed':x.active?'Actively matching':'15 reached'}</span><br><small>Entitlement until ${safe(x.expires_at?new Date(x.expires_at).toLocaleDateString('en-KE'):'Unknown')}</small></td><td>${x.complete&&!x.expired&&x.count<15?`<button data-individual="reopen" data-id="${safe(x.id)}">Reopen on request</button>`:''}</td></tr>`).join('')||'<tr><td colspan="4">No confirmed members.</td></tr>';
       const memberSelect=$('candidateMemberSelect');
       const previous=memberSelect.value;
       // Server-side ready queue: available candidates, no seven-day cooldown, oldest confirmed first.
@@ -770,6 +780,7 @@
   function logout() {
     showDashboardTab('overviewPanel');
     adminPassword = '';
+    localStorage.removeItem('nff_admin_session_v1');
     members = [];
     $('dashboard').classList.add('hidden');
     $('loginPanel').classList.remove('hidden');
@@ -784,6 +795,7 @@
     try {
       const data = await api('GET');
       members = Array.isArray(data.members) ? data.members : [];
+      if(data.session_token){adminPassword=data.session_token;localStorage.setItem('nff_admin_session_v1',data.session_token);}
       $('loginPanel').classList.add('hidden');
       $('dashboard').classList.remove('hidden');
       $('loginMessage').classList.add('hidden');
@@ -796,6 +808,18 @@
       adminPassword = '';
     } finally { $('loginButton').disabled = false; }
   });
+  // Restore only a signed, expiring session token; never persist the admin password.
+  (async()=>{
+    const token=localStorage.getItem('nff_admin_session_v1');
+    if(!token || !token.startsWith('nff1.'))return;
+    adminPassword=token;
+    try{
+      const data=await api('GET');
+      members=Array.isArray(data.members)?data.members:[];
+      $('loginPanel').classList.add('hidden');$('dashboard').classList.remove('hidden');
+      render();await loadGroups();await loadOperations();await loadIndividual();await loadAreas();await loadWorkspace();
+    }catch(e){adminPassword='';localStorage.removeItem('nff_admin_session_v1');}
+  })();
   $('refreshButton').addEventListener('click',loadMembers);
   $('refreshWaitingButton').addEventListener('click',loadMembers);
   $('waitingSearch').addEventListener('input',renderWaitingMembers);
@@ -835,9 +859,42 @@
       const checked=new Set([...document.querySelectorAll('#eventAreaChoices input:checked')].map(x=>x.value));
       $('eventAreaChoices').innerHTML=nbffAreas.filter(a=>a.paid>0).map(a=>`<label><input type="checkbox" value="${safe(a.label)}" ${checked.has(a.label)?'checked':''}><span><strong>${safe(a.label)}</strong><br><small>${safe(areaSummary(a))}</small></span></label>`).join('')||'<p>No paid members in neighbourhoods yet.</p>';
       $('taskArea').innerHTML='<option value="">All neighbourhoods / general</option>'+nbffAreas.map(a=>`<option value="${safe(a.key)}">${safe(a.label)} (${a.paid} paid)</option>`).join('');
-      updateAreaSelection();renderAutomaticPriorities();refreshNeighbourhoodMatchCounts();
+      updateAreaSelection();renderAutomaticPriorities();refreshNeighbourhoodMatchCounts();renderGrowth();
     }catch(e){$('areasBody').innerHTML=`<tr><td colspan="11">${safe(e.message)}</td></tr>`;}
   }
+
+  function renderGrowth(){
+    const paid=nbffAreas.filter(a=>a.paid>0);
+    $('growthAreas').textContent=paid.length;
+    $('growthMembers').textContent=paid.reduce((n,a)=>n+a.paid,0);
+    $('growthIntroduced').textContent=paid.reduce((n,a)=>n+(a.introduced_members||0),0);
+    const max=Math.max(1,...paid.map(a=>a.paid));
+    $('growthBars').innerHTML=paid.map(a=>`<div class="growth-bar-line"><strong>${safe(a.label)}</strong><div class="growth-bar-track"><div class="growth-bar-fill" style="width:${100*a.paid/max}%"></div></div><strong>${a.paid}</strong></div>`).join('')||'No confirmed members yet.';
+    const mapped=paid.filter(a=>Number.isFinite(a.latitude)&&Number.isFinite(a.longitude));
+    if(mapped.length){const xs=mapped.map(a=>a.longitude),ys=mapped.map(a=>a.latitude);let x0=Math.min(...xs)-.04,x1=Math.max(...xs)+.04,y0=Math.min(...ys)-.04,y1=Math.max(...ys)+.04;
+      if(x1-x0<.1){x0-=.05;x1+=.05;}if(y1-y0<.1){y0-=.05;y1+=.05;}
+      $('growthMap').innerHTML=`<svg viewBox="0 0 780 340" role="img" aria-label="Approximate neighbourhood coverage points"><path d="M0 80 Q160 20 330 130 T780 80 M0 230 Q220 170 410 270 T780 200" fill="none" stroke="#c3d3bf" stroke-width="2"/>${mapped.map(a=>{const x=40+(a.longitude-x0)/(x1-x0)*700,y=30+(y1-a.latitude)/(y1-y0)*280;return `<circle cx="${x}" cy="${y}" r="${8+Math.min(13,Math.sqrt(a.paid)*2)}" fill="#2d7451" opacity=".85"/><text x="${x+16}" y="${y-12}" font-size="12" font-weight="600" fill="#294735">${safe(a.label)}</text>`;}).join('')}</svg>`;
+    }else $('growthMap').textContent='Coverage markers appear when at least three confirmed members share an area with valid locations.';
+    const levels=[1,5,10,25,50];
+    $('growthIntroductions').innerHTML=paid.map(a=>{const count=a.introduced_members||0;return `<div class="growth-card"><strong>${safe(a.label)}</strong><div class="small muted">${count} members introduced · ${a.paid} confirmed members</div><div class="growth-dots">${levels.map(v=>`<span class="growth-dot ${count>=v?'on':''}" title="${v}+ introduced members"></span>`).join('')}</div><small>Milestones: 1 · 5 · 10 · 25 · 50</small></div>`;}).join('')||'No neighbourhood data yet.';
+  }
+  $('exportCoverageGraphic').addEventListener('click',()=>{
+    const areas=nbffAreas.filter(a=>a.public_paid>=3&&Number.isFinite(a.latitude)&&Number.isFinite(a.longitude)&&!/test/i.test(a.label));
+    if(!areas.length){alert('No privacy-safe coverage locations to share yet. At least three real members per neighbourhood are required.');return;}
+    const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'}[c]));
+    let minX=Math.min(...areas.map(a=>a.longitude))-.035,maxX=Math.max(...areas.map(a=>a.longitude))+.035,minY=Math.min(...areas.map(a=>a.latitude))-.035,maxY=Math.max(...areas.map(a=>a.latitude))+.035;
+    const points=areas.map(a=>{const x=100+880*(a.longitude-minX)/(maxX-minX),y=440+660*(maxY-a.latitude)/(maxY-minY);return `<circle cx="${x}" cy="${y}" r="22" fill="#367957" stroke="#f2f6ea" stroke-width="9"/><text x="${x+31}" y="${y-15}" fill="#1c4935" font-size="26" font-weight="700">${esc(a.label)}</text>`;}).join('');
+    const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1350" viewBox="0 0 1080 1350"><rect width="1080" height="1350" fill="#f4f7ed"/><path d="M-50 630 Q300 390 1130 550 M-40 900 Q600 690 1130 990 M200 390 Q390 790 650 1210" stroke="#d8e5d5" stroke-width="34" fill="none"/><text x="95" y="140" font-size="30" letter-spacing="5" fill="#367957">NEIGHBOUR FRIEND FINDER</text><text x="95" y="245" font-size="73" font-weight="750" fill="#1e4632">Your neighbourhood.</text><text x="95" y="330" font-size="73" font-weight="750" fill="#1e4632">Your people.</text><text x="95" y="382" font-size="25" fill="#54715d">Approximate community coverage · Not individual locations</text>${points}<text x="95" y="1280" font-size="26" fill="#367957">Where neighbours become friends.</text></svg>`;
+    const img=new Image();img.onload=()=>{const c=document.createElement('canvas');c.width=1080;c.height=1350;c.getContext('2d').drawImage(img,0,0);c.toBlob(blob=>{if(!blob)return;const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download='nff-community-coverage.png';a.click();setTimeout(()=>URL.revokeObjectURL(u),3000);},'image/png');};img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
+  });
+  $('exportGrowthGraphic').addEventListener('click',()=>{
+    const eligible=nbffAreas.filter(a=>a.public_introduced_members>=3&&a.public_paid>=3&&!/test/i.test(a.label)).sort((a,b)=>b.public_introduced_members-a.public_introduced_members).slice(0,5);
+    if(!eligible.length){alert('No privacy-safe, verified neighbourhood introductions to share yet. Test profiles are excluded.');return;}
+    const escapeSvg=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'}[c]));
+    const row=eligible.map((a,i)=>{const y=520+i*175;const milestones=[1,5,10,25,50];return `<text x="105" y="${y}" font-size="37" font-weight="700" fill="#204936">${escapeSvg(a.label)}</text><text x="105" y="${y+44}" font-size="23" fill="#5d7965">Introductions are happening here</text>${milestones.map((v,j)=>`<rect x="${105+j*170}" y="${y+65}" width="148" height="21" rx="11" fill="${a.public_introduced_members>=v?'#3d8761':'#d9e4d8'}"/>`).join('')}`}).join('');
+    const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1350" viewBox="0 0 1080 1350"><rect width="1080" height="1350" fill="#f5f7ed"/><circle cx="900" cy="100" r="240" fill="#dce9d9"/><circle cx="100" cy="1250" r="260" fill="#e4eee0"/><text x="105" y="140" font-size="30" letter-spacing="5" fill="#397957">NEIGHBOUR FRIEND FINDER</text><text x="105" y="245" font-size="76" font-weight="750" fill="#1f4533">Connections are</text><text x="105" y="332" font-size="76" font-weight="750" fill="#1f4533">growing nearby.</text><text x="105" y="403" font-size="29" fill="#52715c">Verified introductions across our neighbourhoods</text>${row}<text x="105" y="1285" font-size="26" fill="#3b6b50">Where neighbours become friends.</text></svg>`;
+    const img=new Image();img.onload=()=>{const c=document.createElement('canvas');c.width=1080;c.height=1350;const ctx=c.getContext('2d');ctx.drawImage(img,0,0);c.toBlob(blob=>{if(!blob)return;const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='neighbour-friend-finder-introductions.png';a.click();setTimeout(()=>URL.revokeObjectURL(url),3000);},'image/png');};img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
+  });
   function selectedEventAreas(){return [...document.querySelectorAll('#eventAreaChoices input:checked')].map(x=>x.value);}
   function updateAreaSelection(){const labels=selectedEventAreas();const chosen=nbffAreas.filter(a=>labels.includes(a.label));$('eventAreaSummary').textContent=`${labels.length} neighbourhoods · ${chosen.reduce((n,a)=>n+a.paid,0)} paid members (before WhatsApp consent filtering).`;}
   $('eventAreaChoices').addEventListener('change',updateAreaSelection);
@@ -1072,6 +1129,9 @@
     const due=operationMembers.filter(eligibleWeekly),overdue=operationMembers.filter(overdueWeekly);
     const jobs=latestMessaging?.jobs||[],alerts=latestMessaging?.alerts||[];
     const problemJobs=jobs.filter(j=>['failed','unknown','sending'].includes(j.status));
+    const pendingJobs=jobs.filter(j=>j.status==='pending');
+    const queuedMemberIds=new Set(pendingJobs.filter(j=>j.kind==='weekly_waiting').map(j=>String(j.member_id)));
+    const queuedWeeklyCount=pendingJobs.filter(j=>j.kind==='weekly_waiting').length;
     const events=eventPlanningAlerts();
     const failed=problemJobs.length+alerts.length;
     const counts={navPaymentsCount:pending,navMatchCount:ready,navCommsCount:due.length+failed,navEventsCount:events.length,navAlertsCount:overdue.length+failed+events.length};
@@ -1080,16 +1140,21 @@
       {label:`${pending} payment(s) to verify`,panel:'membersPanel',severity:pending?'warn':'ok'},
       {label:`${ready} member(s) ready to match`,panel:'individualPanel',severity:'ok'},
       {label:`${overdue.length} overdue weekly update(s)`,panel:'communicationsPanel',severity:overdue.length?'danger':'ok'},
+      {label:`${pendingJobs.length} queued message(s), not sent`,panel:'communicationsPanel',severity:'warn'},
       {label:`${failed} message issue(s)`,panel:'communicationsPanel',severity:failed?'danger':'ok'},
       {label:`${events.length} neighbourhood event reminder(s)`,panel:'eventsPanel',severity:events.length?'warn':'ok'}
     ];
     $('dailyAlertsBody').innerHTML=items.map(i=>`<button type="button" class="${i.severity}" data-daily-panel="${i.panel}">${safe(i.label)}</button>`).join('');
+    $('commsQueued').textContent=pendingJobs.length;
     $('commsDue').textContent=due.length;$('commsOverdue').textContent=overdue.length;
     $('commsFailed').textContent=problemJobs.length;$('commsAlerts').textContent=alerts.length;
     const weeklySearch=($('commsWeeklySearch')?.value||'').trim().toLowerCase();
     const visibleDue=weeklySearch?due.filter(m=>`${m.first_name||''} ${m.neighbourhood||m.area||''}`.toLowerCase().includes(weeklySearch)):due;
-    $('commsWeekly').innerHTML=visibleDue.length?`<div class="table-wrap"><table class="comms-table"><thead><tr><th>Member</th><th>Status</th><th>Next action</th></tr></thead><tbody>${visibleDue.slice(0,100).map(m=>`<tr><td>${safe(m.first_name||'Member')} · ${safe(m.neighbourhood||m.area||'')}</td><td>${overdueWeekly(m)?'<strong>Overdue</strong>':'Due'}</td><td><button type="button" class="secondary" data-comms-queue-member="${safe(m.id)}">Review &amp; queue</button></td></tr>`).join('')}</tbody></table></div>${visibleDue.length>100?`<p>${visibleDue.length-100} more due; see Matching opportunities.</p>`:''}`:'<p class="muted">No member updates due based on the latest loaded records.</p>';
-    $('commsJobs').innerHTML=alerts.length||problemJobs.length?`<div class="comms-note"><strong>${alerts.length} open alert(s), ${problemJobs.length} recent problem job(s)</strong><p>Review each message in the messaging status section before retrying. Unknown sends must not be retried automatically.</p><button type="button" class="secondary" data-comms-target="individualPanel">Open messaging status</button></div>`:'<p class="muted">No failed or uncertain jobs in the latest messaging response.</p>';
+    $('commsWeekly').innerHTML=visibleDue.length?`<div class="table-wrap"><table class="comms-table"><thead><tr><th>Member</th><th>Status</th><th>Next action</th></tr></thead><tbody>${visibleDue.slice(0,100).map(m=>`<tr><td>${safe(m.first_name||'Member')} · ${safe(m.neighbourhood||m.area||'')}</td><td>${queuedMemberIds.has(String(m.id))?'<strong>Queued · not sent</strong>':overdueWeekly(m)?'<strong>Overdue</strong>':'Due'}</td><td><button type="button" class="secondary" data-comms-queue-member="${safe(m.id)}" ${queuedMemberIds.has(String(m.id))?'disabled':''}>${queuedMemberIds.has(String(m.id))?'Already queued':'Review &amp; queue'}</button></td></tr>`).join('')}</tbody></table></div>${visibleDue.length>100?`<p>${visibleDue.length-100} more due; see Matching opportunities.</p>`:''}`:'<p class="muted">No member updates due based on the latest loaded records.</p>';
+    const pendingPreview=pendingJobs.slice(0,30).map(j=>{const m=members.find(x=>String(x.id)===String(j.member_id));return `<tr><td>${safe(m?.first_name||'Member')} · ${safe(j.kind)}</td><td><span class="badge pending">Pending · not sent</span></td><td>${safe(j.created_at?new Date(j.created_at).toLocaleString('en-KE'):'')}</td></tr>`}).join('');
+    $('commsJobs').innerHTML=`<p><strong>${pendingJobs.length} pending message(s)</strong> (including ${queuedWeeklyCount} weekly updates). These have not been sent. ${pendingJobs.length>30?'Showing the 30 most recent.':''}</p>`+
+      (pendingJobs.length?`<div class="table-wrap"><table class="comms-table"><thead><tr><th>Member / type</th><th>Delivery status</th><th>Queued at</th></tr></thead><tbody>${pendingPreview}</tbody></table></div>`:'<p class="muted">No pending messages in the latest 150 jobs.</p>')+
+      (alerts.length||problemJobs.length?`<div class="comms-note"><strong>${alerts.length} open alert(s), ${problemJobs.length} recent problem job(s)</strong><p>Review failures before retrying. Uncertain sends must not be retried automatically.</p><button type="button" class="secondary" data-comms-target="individualPanel">Open messaging status</button></div>`:'');
     const radius=operationMembers.filter(m=>(m.almost_nearby_pairs||[]).length+(m.almost_nearby_groups||[]).length>0);
     $('commsRadius').innerHTML=`<p>${radius.length} member(s) have potential 5–9 km options requiring consent.</p>`;
     const ev=events.filter(x=>x.days>=21);
@@ -1109,8 +1174,9 @@
     try{
       const result=await api('POST',{action:'queue_weekly_waiting_updates',member_id:m.id});
       if(result.queued===1)showMessage($('commsWeeklyFeedback'),`One pending update prepared for ${m.first_name||'member'}. No WhatsApp message sent.`,true);
-      else showMessage($('commsWeeklyFeedback'),`No update queued for ${m.first_name||'member'}. They may be ineligible, on cooldown, or already have an update queued.`,true);
+      else showMessage($('commsWeeklyFeedback'),`No update queued for ${m.first_name||'member'}. Reason: ${result.reason||'Not eligible under current matching rules'}. No WhatsApp message sent.`);
       await loadMessagingStatus();
+      updateDailyStatus();
     }catch(err){showMessage($('commsWeeklyFeedback'),err.message||'Could not queue update');}
     finally{btn.disabled=false;btn.textContent='Review & queue';}
   });
