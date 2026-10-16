@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta name="robots" content="noindex,follow"/>
+<title>Registration Received | Neighbour Friend Finder</title>
+<style>
+:root{--cream:#f8f4ec;--paper:#fffdf8;--green:#354f40;--green-light:#e5e9df;--terracotta:#bb7055;--ink:#2e332d;--muted:#6e746b;--line:#e5dfd4}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--cream);color:var(--ink);font-family:Arial,Helvetica,sans-serif;line-height:1.65}a{color:inherit}
+header{display:flex;justify-content:space-between;align-items:center;max-width:1200px;margin:auto;padding:18px 5%;gap:20px}.brand-lockup{display:flex;align-items:center;gap:12px;min-width:0}.brand-logo{width:118px;height:118px;object-fit:contain;flex:0 0 auto;background:transparent;border:0;border-radius:0;box-shadow:none}.brand{font-family:Georgia,serif;font-size:clamp(21px,2.4vw,29px);font-weight:bold;line-height:1.1;letter-spacing:-.6px;max-width:300px}.brand-domain{display:block;font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2px;color:var(--muted);margin-top:5px;font-weight:700}.nav-link{color:var(--green);text-decoration:none;font-weight:bold;white-space:nowrap}
+.hero{max-width:1200px;margin:auto;padding:58px 5% 76px;display:grid;grid-template-columns:1.05fr .95fr;align-items:start;gap:clamp(28px,5vw,70px)}.story-copy{max-width:640px}.story-copy h1{font-size:clamp(40px,4.5vw,58px);letter-spacing:-1.6px;margin:18px 0 26px}.story-line{font-family:Georgia,"Times New Roman",serif;font-size:clamp(21px,2.2vw,27px);line-height:1.35;margin:0 0 12px;color:var(--ink)}.story-paragraph{font-size:17px;line-height:1.8;color:var(--muted);margin:22px 0}.memory-lines{border-left:2px solid #d9b7a6;padding:4px 0 4px 20px;margin:25px 0 30px}.memory-lines p{font-family:Georgia,"Times New Roman",serif;font-size:clamp(19px,2vw,23px);line-height:1.45;margin:0 0 15px;color:var(--ink)}.memory-lines p:last-child{margin-bottom:0}.story-emphasis{font-family:Georgia,"Times New Roman",serif;font-size:clamp(26px,3vw,34px);line-height:1.25;color:var(--green);margin:32px 0 24px}.someone-lines{margin:30px 0;padding:4px 0 4px 20px;border-left:2px solid #d9ddd2}.someone-lines p{font-size:17px;line-height:1.75;margin:0 0 17px}.someone-lines p:last-child{margin-bottom:0}.story-ending{font-family:Georgia,"Times New Roman",serif;font-size:clamp(23px,2.5vw,30px);line-height:1.35;color:var(--green);margin:32px 0 24px}.eyebrow{color:var(--terracotta);text-transform:uppercase;letter-spacing:2.3px;font-size:12px;font-weight:800}
+h1,h2,h3{font-family:Georgia,"Times New Roman",serif;line-height:1.14}h1{font-size:clamp(43px,5.4vw,70px);margin:18px 0 22px;letter-spacing:-2px;max-width:700px}h2{font-size:clamp(31px,4vw,45px);margin:14px 0;letter-spacing:-.8px}h3{font-size:23px;margin:10px 0}p{margin-top:0}.hero-copy{font-size:clamp(17px,1.7vw,20px);color:var(--muted);max-width:570px}.tagline{font-weight:700;color:var(--ink);margin:20px 0 26px}
+.button{border:0;border-radius:7px;padding:15px 23px;background:var(--green);color:white;cursor:pointer;font-weight:bold;font-size:16px;display:inline-flex;align-items:center;justify-content:center;gap:10px;text-decoration:none;transition:transform .18s ease,background .18s ease}.button:hover{background:#294133;transform:translateY(-1px)}.button.secondary{background:var(--paper);color:var(--green);border:1px solid #d9ddd2}
+.hero-art{position:relative;min-height:390px;display:flex;align-items:center;justify-content:center;padding:20px}.art-halo{position:absolute;inset:5% 3% 0;background:var(--green-light);border-radius:48% 48% 8px 8px}.illustration{position:relative;z-index:1;width:100%;max-width:470px;height:auto;display:block}.art-caption{position:absolute;z-index:2;left:0;bottom:7%;max-width:240px;background:var(--paper);border:1px solid #ece6dc;box-shadow:0 12px 28px #354f4010;padding:18px 20px;transform:rotate(-2deg)}.art-caption strong{display:block;color:var(--green);font-family:Georgia,serif;font-size:23px;line-height:1.25}.art-caption span{color:var(--muted);font-size:13px;display:block;margin-top:7px}
+section{padding:72px 5%}.inner{max-width:1080px;margin:auto}.center{text-align:center}.muted{color:var(--muted)}.intro{max-width:700px;margin:0 auto 30px}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:34px}.card{background:var(--paper);border-radius:10px;padding:24px;border:1px solid var(--line);text-align:left}.card-top{display:flex;align-items:center;justify-content:space-between;gap:10px}.number{color:var(--terracotta);font-family:Georgia,serif;font-size:29px}.mini-mark{width:42px;height:42px;display:grid;place-items:center;border-radius:50%;background:var(--green-light);color:var(--green);font-size:20px;flex:0 0 auto}.card p{margin-bottom:0}
+.soft-section{background:#eeeee5}.friendship-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:32px}.friendship-card{background:var(--paper);padding:23px;border-radius:10px;border:1px solid #e8e2d8;min-height:180px}.friendship-card .mini-mark{margin-bottom:16px;background:#f2e2d7;color:var(--terracotta)}.group-note{background:var(--green-light);padding:25px 28px;border-radius:10px;margin-top:28px}
+.form-section{background:#f3efe7}.form-wrap{max-width:760px;margin:auto;background:var(--paper);padding:clamp(22px,5vw,46px);border-radius:12px;border:1px solid var(--line);box-shadow:0 14px 44px #354f4008}.form-intro{max-width:580px}label{display:block;font-weight:700;margin:17px 0 7px}input,select,textarea{width:100%;padding:13px;border:1px solid #d6d7ce;border-radius:6px;background:white;color:var(--ink);font:inherit}input:focus,select:focus,textarea:focus{outline:2px solid #9eaf9f;outline-offset:1px}.field-hint{font-size:13px;color:var(--muted);margin:6px 0 0}
+.choices{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:10px}.choice{display:flex;gap:10px;align-items:flex-start;border:1px solid #dedfd6;padding:12px;border-radius:7px;font-weight:normal;margin:0;background:#fffefa;cursor:pointer;transition:border .15s ease,background .15s ease}.choice:has(input:checked){border-color:var(--green);background:#f0f3ed}.choice input{width:auto;margin-top:6px;accent-color:var(--green);flex:0 0 auto}
+.step{display:block}.step.active{display:block;animation:none}.step.active + .step.active{border-top:1px solid var(--line,#e5ded3);margin-top:30px;padding-top:26px}.step-kicker{font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--terracotta);font-weight:700;margin:0 0 8px}.page-intro{margin:0 0 18px;color:var(--muted);font-size:15px;line-height:1.6}@keyframes arrive{from{opacity:.45;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}.progress-label{display:flex;justify-content:space-between;color:var(--muted);font-size:13px;margin-top:22px}.progress{height:5px;background:#e8e6de;border-radius:9px;margin:8px 0 28px;overflow:hidden}.progress-bar{height:100%;width:16.66%;background:var(--terracotta);transition:width .2s}.form-actions{display:flex;justify-content:space-between;gap:10px;margin-top:27px}.form-actions .button{min-width:120px}.small{font-size:13px}.fee-panel{background:var(--green-light);border-radius:10px;padding:22px;margin:20px 0}.fee-amount{font-family:Georgia,serif;color:var(--green);font-size:clamp(34px,6vw,46px);font-weight:bold;line-height:1.2;margin:5px 0}.fee-label{font-weight:bold;margin-bottom:10px}.payment-detail{padding:13px 0;border-bottom:1px solid #d1d8cd}.payment-detail:last-child{border-bottom:0}
+footer{padding:36px 24px;text-align:center;color:var(--muted)}.footer-brand{color:var(--ink);font-family:Georgia,serif;font-weight:bold;font-size:20px}.form-message{margin-top:15px}
+@media(max-width:760px){header{padding:15px 18px;align-items:center;gap:10px}.brand-logo{width:88px;height:88px}.brand-lockup{gap:10px}.brand{max-width:220px;font-size:20px}.nav-link{padding-top:3px;font-size:13px}.hero{grid-template-columns:1fr;padding:35px 22px 50px;gap:12px}.story-copy h1{font-size:clamp(39px,10vw,52px);letter-spacing:-1.2px;margin:16px 0 24px}.story-line{font-size:23px}.story-paragraph{font-size:16px;line-height:1.8;margin:19px 0}.memory-lines{padding-left:16px;margin:24px 0}.memory-lines p{font-size:20px;margin-bottom:13px}.story-emphasis{font-size:29px;margin:28px 0 20px}.someone-lines{padding-left:16px;margin:26px 0}.someone-lines p{font-size:16px;margin-bottom:15px}.story-ending{font-size:25px;margin:28px 0 22px}.hero-art{min-height:300px;margin:0 -6px;padding:10px 12px 24px}.art-halo{inset:5% 5% 0}.illustration{max-width:390px}.art-caption{left:2%;bottom:2%;max-width:205px;padding:14px 16px}.art-caption strong{font-size:21px}section{padding:54px 22px}.cards,.friendship-grid{grid-template-columns:1fr;gap:12px;margin-top:25px}.card,.friendship-card{padding:20px}.friendship-card{min-height:0}.choices{grid-template-columns:1fr}.form-wrap{padding:23px 19px}.group-note{padding:21px}.form-actions .button{min-width:0;flex:1;padding:13px 15px}}
+
+/* More breathable, editorial storytelling on small screens */
+.memory-lines{display:grid;grid-template-columns:1fr 1fr;gap:10px;border:0;padding:0;margin:25px 0 28px}
+.memory-lines p{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:15px 16px;margin:0;font-size:clamp(17px,1.8vw,21px);line-height:1.35}
+.memory-lines p:first-child{background:var(--green-light);border-color:transparent}
+.story-match{font-size:18px;color:var(--ink);max-width:520px}
+.everyday-moments{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:25px 0}
+.moment-card{background:var(--paper);border:1px solid var(--line);border-radius:9px;padding:17px 18px;min-height:125px}
+.moment-card span{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:#f2e2d7;color:var(--terracotta);font-size:19px;margin-bottom:10px}
+.moment-card p{font-size:15px;line-height:1.5;margin:0;color:var(--ink)}
+@media(max-width:760px){
+ .hero{padding-top:28px;padding-bottom:34px;gap:22px}
+ .story-copy h1{margin:10px 0 18px;font-size:clamp(38px,9.5vw,48px);line-height:1.06}
+ .story-line{font-size:21px;line-height:1.4;margin-bottom:14px}
+ .memory-lines{gap:9px;margin:20px 0 23px}
+ .memory-lines p{font-size:17px;padding:13px 12px;line-height:1.35}
+ .story-emphasis{font-size:27px;line-height:1.2;margin:24px 0 15px}
+ .story-paragraph{font-size:16px;line-height:1.6;margin:14px 0}
+ .story-match{font-size:16px}
+ .everyday-moments{gap:9px;margin:20px 0}
+ .moment-card{padding:14px 13px;min-height:0}
+ .moment-card p{font-size:14px;line-height:1.45}
+ .story-ending{font-size:23px;line-height:1.3;margin:24px 0 18px}
+ .tagline{font-size:14px;line-height:1.5;margin:16px 0 22px}
+ .hero-art{min-height:270px;margin-top:4px}
+}
+\n
+.memory-lead{display:block;font-family:inherit;font-size:.72em;line-height:1.2;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);margin-bottom:8px}
+@media(max-width:760px){
+ .memory-lines p{font-size:16px;padding:14px 12px}
+ .memory-lead{font-size:11px;letter-spacing:.08em;margin-bottom:7px}
+}
+
+
+
+/* Editorial story treatment: no cards, no repeated labels */
+.friendship-story{max-width:660px;margin:26px 0 30px}
+.friendship-story p{font-size:clamp(18px,2vw,22px);line-height:1.65;margin:0 0 18px;color:var(--ink)}
+.friendship-story em{font-family:inherit;color:var(--green);font-style:italic}
+.friendship-story .time-passes{margin:26px 0 28px;padding:4px 0 4px 18px;border-left:2px solid var(--terracotta);font-family:inherit;font-size:clamp(22px,2.5vw,29px);line-height:1.35;color:var(--green)}
+@media(max-width:760px){
+ .friendship-story{margin:20px 0 24px}
+ .friendship-story p{font-size:17px;line-height:1.55;margin-bottom:15px}
+ .friendship-story .time-passes{font-size:23px;line-height:1.3;margin:22px 0;padding-left:14px}
+}
+
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
+/* v16: calmer, more natural editorial rhythm */
+.friendship-story{max-width:650px;margin:25px 0 26px}
+.friendship-story p{font-size:clamp(17px,1.75vw,20px);line-height:1.55;margin:0 0 16px;color:var(--ink)}
+.friendship-story .time-passes{border:0;padding:0;margin:23px 0 24px;font-family:Georgia,"Times New Roman",serif;font-size:clamp(25px,3vw,34px);line-height:1.22;letter-spacing:-.5px;color:var(--green);max-width:540px}
+.story-emphasis{max-width:670px;margin:30px 0 14px}
+.story-match{max-width:540px;margin:0 0 24px}
+.everyday-moments{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;margin:24px 0 28px;border-top:1px solid #d9d5ca;border-bottom:1px solid #d9d5ca;padding:17px 0}
+.moment-card{background:transparent;border:0;border-radius:0;padding:7px 14px;min-height:0;border-right:1px solid #d9d5ca}
+.moment-card:first-child{padding-left:0}
+.moment-card:last-child{border-right:0;padding-right:0}
+.moment-card span{width:34px;height:34px;margin-bottom:9px}
+.moment-card p{font-size:14px;line-height:1.45}
+.story-ending{margin:24px 0 18px}
+@media(max-width:760px){
+ .hero{padding:30px 22px 38px;gap:18px}
+ .story-copy h1{font-size:clamp(38px,9.5vw,48px);line-height:1.07;letter-spacing:-1.25px;margin:10px 0 18px}
+ .story-line{font-size:21px;line-height:1.42;margin-bottom:0}
+ .friendship-story{margin:22px 0 27px}
+ .friendship-story p{font-size:17px;line-height:1.55;margin-bottom:15px}
+ .friendship-story .time-passes{font-size:26px;line-height:1.24;margin:23px 0 24px;padding:0;max-width:340px}
+ .story-emphasis{font-size:29px;line-height:1.18;margin:29px 0 13px;max-width:360px}
+ .story-match{font-size:16px;line-height:1.6;margin-bottom:18px}
+ .everyday-moments{grid-template-columns:1fr 1fr;gap:0;margin:20px 0 24px;padding:8px 0}
+ .moment-card{padding:13px 12px;border-right:0;border-bottom:1px solid #d9d5ca}
+ .moment-card:nth-child(odd){padding-left:0;border-right:1px solid #d9d5ca;padding-right:13px}
+ .moment-card:nth-child(even){padding-right:0;padding-left:13px}
+ .moment-card:nth-last-child(-n+2){border-bottom:0}
+ .moment-card p{font-size:14px;line-height:1.5}
+ .story-ending{font-size:23px;line-height:1.32;margin:23px 0 18px}
+ .tagline{font-size:14px;line-height:1.5;margin:17px 0 22px}
+ .hero-art{min-height:260px;margin-top:0;padding:8px 10px 22px}
+}
+
+
+.faq-section{padding:58px 5% 66px;background:#f8f4ec}
+.faq-inner{max-width:820px}
+.faq-inner h2{margin:12px 0 25px}
+.faq-list{border-top:1px solid #d9d5ca}
+.faq-item{border-bottom:1px solid #d9d5ca;padding:18px 0}
+.faq-item summary{cursor:pointer;list-style:none;position:relative;padding-right:32px;font-family:Georgia,"Times New Roman",serif;font-size:22px;line-height:1.35;color:var(--green)}
+.faq-item summary::-webkit-details-marker{display:none}
+.faq-item summary:after{content:"+";position:absolute;right:3px;top:0;font-family:Arial,sans-serif;font-size:24px;color:var(--terracotta)}
+.faq-item[open] summary:after{content:"−"}
+.faq-item p{max-width:680px;margin:14px 30px 2px 0;color:var(--muted);font-size:16px;line-height:1.7}
+@media(max-width:760px){.faq-section{padding:42px 22px 48px}.faq-item summary{font-size:20px}}
+
+
+/* Refined editorial story layout based on the approved visual reference */
+.story-hero{display:block;max-width:850px;padding:28px 5% 0}
+.story-copy{max-width:none}
+.story-copy h1{font-size:clamp(48px,8vw,76px);line-height:1.02;letter-spacing:-2.2px;margin:22px 0 25px;max-width:800px;color:#252824}
+.story-line{font-size:clamp(25px,4vw,34px);line-height:1.36;color:#66685f;max-width:700px;margin:0 0 28px}
+.friendship-story{font-family:Georgia,"Times New Roman",serif;font-size:clamp(19px,2.25vw,25px);line-height:1.48;color:#30342f;display:flow-root}
+.story-opening{max-width:58%;padding-top:4px}
+.story-opening p{margin:0 0 20px}
+.story-opening em{color:var(--green);font-style:italic}
+.cafe-photo{float:right;width:39%;height:395px;object-fit:cover;object-position:center;border-radius:49% 45% 34% 39%;margin:0 0 18px 22px}
+.time-passes{clear:none;color:var(--green);font-size:clamp(25px,3.2vw,34px);line-height:1.28;margin:30px 0 24px;max-width:590px}
+.time-passes:before{content:"";display:block;width:58px;height:3px;background:var(--terracotta);margin:0 0 22px}
+.friendship-story>p:not(.time-passes){margin:20px 0;max-width:790px}
+.story-transition{position:relative;margin:38px calc(-1 * min(5vw,45px)) 0;padding:44px min(5vw,45px) 18px;background:#efefe6}
+.story-transition:before{content:"";position:absolute;left:0;right:0;top:-22px;height:30px;background:#efefe6;clip-path:polygon(0 55%,12% 10%,25% 38%,39% 22%,55% 62%,71% 46%,85% 8%,100% 25%,100% 100%,0 100%)}
+.story-transition h2{font-size:clamp(38px,6.3vw,60px);line-height:1.05;letter-spacing:-1.6px;color:var(--green);max-width:760px;margin:0 0 18px}
+.story-transition h2:after{content:"";display:block;width:230px;height:3px;background:var(--terracotta);margin-top:17px;transform:rotate(-2deg);transform-origin:left}
+.story-match{font-family:Georgia,"Times New Roman",serif;font-size:clamp(19px,2.2vw,24px);line-height:1.4;color:#6a6c64;max-width:760px;margin:0 0 20px}
+.everyday-moments{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin:24px 0 0}
+.moment-card{border:0;border-right:1px solid #d4d1c7;border-radius:0;background:transparent;text-align:center;padding:12px 13px;min-height:0}
+.moment-card:last-child{border-right:0}
+.moment-card span{width:54px;height:54px;font-size:25px;margin:0 auto 10px;background:#f0e2d8}
+.moment-card p{font-family:Georgia,"Times New Roman",serif;font-size:16px;line-height:1.42;color:#343831}
+.story-ending{margin-top:30px}
+.faq-section{background:#f8f4ec}
+@media(max-width:760px){
+ .story-hero{padding:24px 22px 0}
+ .story-copy h1{font-size:clamp(43px,10.2vw,57px);line-height:1.02;letter-spacing:-1.5px;margin:22px 0 24px}
+ .story-line{font-size:clamp(24px,6.1vw,29px);line-height:1.36;margin-bottom:26px}
+ .friendship-story{font-size:20px;line-height:1.5}
+ .story-opening{max-width:61%;padding-top:1px}
+ .story-opening p{margin-bottom:20px}
+ .cafe-photo{width:42%;height:390px;max-height:55vw;min-height:275px;margin:0 0 16px 14px;border-radius:49% 43% 35% 39%;object-position:center}
+ .time-passes{font-size:clamp(26px,6.5vw,33px);line-height:1.3;margin:27px 0 22px;max-width:100%}
+ .time-passes:before{margin-bottom:20px}
+ .friendship-story>p:not(.time-passes){font-size:19px;line-height:1.48;margin:19px 0}
+ .story-transition{margin:34px -22px 0;padding:42px 22px 12px}
+ .story-transition h2{font-size:clamp(38px,9.2vw,48px);line-height:1.05;letter-spacing:-1.1px;margin-bottom:17px}
+ .story-transition h2:after{width:205px;margin-top:15px}
+ .story-match{font-size:19px;line-height:1.45;margin-bottom:18px}
+ .everyday-moments{grid-template-columns:repeat(4,minmax(0,1fr));margin:20px -10px 0}
+ .moment-card{padding:8px 7px;border-right:1px solid #d4d1c7}
+ .moment-card span{width:42px;height:42px;font-size:21px;margin-bottom:9px}
+ .moment-card p{font-size:13px;line-height:1.42}
+ .story-ending{font-size:24px;line-height:1.35;margin:28px 0 20px}
+ .faq-section{padding:42px 22px 48px}
+}
+@media(max-width:390px){.cafe-photo{height:270px;min-height:250px}.story-opening{max-width:59%}.friendship-story{font-size:19px}.moment-card p{font-size:12px}}
+
+
+/* Single-page questionnaire preview: all matching sections visible together */
+#joinForm .step{display:block!important;border-top:1px solid var(--line,#e5ded3);margin-top:28px;padding-top:25px}
+#joinForm .step:first-child{border-top:0;margin-top:0;padding-top:0}
+#joinForm .step-kicker{margin-bottom:8px}
+#joinForm h3{margin-top:0;margin-bottom:18px}
+#joinForm .form-actions #backBtn,#joinForm .form-actions #nextBtn{display:none!important}
+#joinForm .form-actions #submitBtn{display:inline-flex!important}
+@media(max-width:760px){
+ #joinForm .step{margin-top:23px;padding-top:21px}
+}
+\n
+.thank-you-page{max-width:650px;margin:0 auto;padding:8px 0}
+.thank-you-page h2{font-size:clamp(30px,4vw,42px);line-height:1.15;color:var(--green)}
+.thank-you-page .payment-detail{padding:18px 0}
+/* Location choice and interactive map */
+.location-methods{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}.location-method{font:inherit;text-align:left;background:#fffefa;color:var(--ink);border:1px solid #dedfd6;border-radius:8px;padding:14px;cursor:pointer}.location-method:hover,.location-method:focus{border-color:var(--green);background:var(--green-light)}.location-method strong{display:block;color:var(--green)}.location-method span{display:block;font-size:12px;color:var(--muted);margin-top:3px}.location-map-wrap[hidden]{display:none}#locationMap{height:340px;width:100%;border-radius:8px;border:1px solid var(--line);margin-top:12px}.location-status{font-size:13px;color:var(--muted);margin-top:8px}.location-privacy{font-size:13px;color:var(--muted);margin-top:10px}.location-confirm{margin-top:10px}.location-confirm[hidden]{display:none}@media(max-width:520px){.location-methods{grid-template-columns:1fr}#locationMap{height:300px}}
+/* Visible location selection and robust map layout */
+.location-method.is-selected{border:2px solid var(--green);background:#e5e9df;box-shadow:0 0 0 2px #354f4010}
+.location-status{font-size:15px;line-height:1.5;margin:14px 0;padding:12px 14px;border:1px solid #d6d7ce;border-radius:8px;background:#fffefa}
+.location-status.is-success{background:#e5e9df;border:2px solid var(--green);color:#243e30;font-weight:700}
+.location-status.is-error{background:#fff2ed;border:1px solid #b65d44;color:#8a3723;font-weight:700}
+.location-map-wrap{width:100%;min-width:0;overflow:hidden}
+#locationMap{position:relative;overflow:hidden;isolation:isolate;height:340px;width:100%;max-width:100%;z-index:0}
+#locationMap .leaflet-pane,#locationMap .leaflet-tile,#locationMap .leaflet-marker-icon,#locationMap .leaflet-marker-shadow{position:absolute}
+#locationMap .leaflet-container{overflow:hidden}
+.payment-time-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.payment-time-row select{min-width:0}
+.form-message.is-error{color:#a13f2b;font-weight:700;padding:12px;background:#fff2ed;border-radius:7px}
+@media(max-width:520px){#locationMap{height:300px}}
+ .county-select-wrap{display:flex;align-items:stretch;gap:5px}.county-select-wrap input{flex:1;min-width:0}.county-dropdown-trigger{width:44px;flex:0 0 44px;padding:0;background:#e9e4d9;color:#354f40;border:1px solid #cfcfc5;font-size:22px}.county-select-wrap{position:relative}.county-menu{position:absolute;top:100%;left:0;right:0;z-index:1000;max-height:245px;overflow-y:auto;background:white;border:1px solid #cfcfc5;border-radius:6px;box-shadow:0 8px 18px #0002;margin-top:3px}.county-menu[hidden]{display:none}.county-option{display:block;width:100%;padding:10px 12px;text-align:left;background:white;color:#2e332d;border:0;border-radius:0;font-weight:normal}.county-option:hover,.county-option:focus{background:#e7efe8;color:#243e30}.county-empty{padding:12px;color:#6e746b}
+
+.confirmation-shell{min-height:100vh;padding:32px 18px 70px;background:var(--cream)}
+.confirmation-card{max-width:730px;margin:35px auto 0;background:var(--paper);border:1px solid var(--line);border-radius:22px;padding:clamp(24px,5vw,50px);box-shadow:0 12px 36px rgba(30,48,37,.06)}
+.confirmation-header{max-width:1100px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.confirmation-header .brand-lockup{text-decoration:none;color:var(--green)}
+.confirmation-home{color:var(--green);font-weight:650;text-decoration:none}
+.confirmation-card .thank-you-page{max-width:none}
+@media(max-width:520px){.confirmation-header .brand{font-size:16px}.confirmation-card{margin-top:25px}}
+</style>
+</head>
+<body>
+<main class="confirmation-shell">
+<div class="confirmation-header"><a class="brand-lockup" href="/"><img alt="" class="brand-logo" src="/community-mark.png"/><span class="brand">Neighbour Friend Finder</span></a><a class="confirmation-home" href="/">Home</a></div>
+<div class="confirmation-card">
+
+      <div class="thank-you-page" role="status" aria-live="polite">
+        <div style="text-align:center;margin-bottom:24px">
+          <div aria-hidden="true" style="font-size:52px;line-height:1.2;color:#354f40">✓</div>
+          <p class="eyebrow">Registration received</p>
+          <h2 style="margin-top:12px">You’re one step closer to finding your people!</h2>
+          <p class="muted" style="font-size:17px">Thank you for joining Neighbour Friend Finder. We’ve received your registration.</p>
+        </div>
+        <div class="payment-detail">
+          <strong>1. We’ll confirm your payment</strong>
+          <p class="muted" style="margin:8px 0 0">Your registration is pending while we verify your M-PESA payment.</p>
+        </div>
+        <div class="payment-detail">
+          <strong>2. Your profile joins our matchmaking database</strong>
+          <p class="muted" style="margin:8px 0 0">Once we confirm your M-PESA payment, your membership will be activated and we’ll begin looking for highly compatible neighbours within 5 km of you.</p>
+        </div>
+        <div class="payment-detail">
+          <strong>3. We’ll introduce you to compatible neighbour friends</strong>
+          <p class="muted" style="margin:8px 0 0">We’ll introduce you individually to up to 15 highly compatible neighbours during your one-year membership. Where applicable, we may also invite you to a WhatsApp friendship group. You’ll receive updates while we search for your first five introductions.</p>
+        </div>
+        <p class="small muted" style="margin-top:22px;text-align:center">Please don’t submit the form again. Your registration is not marked as paid until we verify your payment.</p>
+      </div>
+</div>
+</main>
+</body>
+</html>
