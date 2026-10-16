@@ -319,6 +319,7 @@ fbq('track', 'PageView');
 <label class="choice"><input name="availability" type="checkbox" value="Weekday mornings"/> Weekday mornings</label><label class="choice"><input name="availability" type="checkbox" value="Weekday evenings"/> Weekday evenings</label><label class="choice"><input name="availability" type="checkbox" value="Weekends"/> Weekends</label><label class="choice"><input name="availability" type="checkbox" value="Flexible"/> Flexible</label>
 </div><p class="field-hint">Choose all that apply.</p>
 </div>
+<div class="step"><h3>Who would you like to meet?</h3><p class="muted">We only suggest opposite-gender friendships when both people are open to them.</p><label for="gender">What is your gender?</label><select id="gender" name="gender" required><option value="">Choose an answer</option><option value="Woman">Woman</option><option value="Man">Man</option></select><label for="oppositeGenderOpen" style="margin-top:20px">Are you open to being introduced to a compatible neighbour friend of the opposite gender?</label><select id="oppositeGenderOpen" name="oppositeGenderOpen" required><option value="">Choose an answer</option><option value="yes">Yes</option><option value="no">No, I prefer friends of the same gender only.</option></select></div>
 <div class="step"><h3>Who are you most likely to click with?</h3>
 <p class="muted">A few details help us match everyday lifestyles and social energy, not just interests. </p>
 <label>Which life stages describe you? Choose all that apply.</label>
@@ -555,6 +556,8 @@ form.addEventListener('submit', async (event) => {
     childrenAges: values.getAll('childrenAges'),
     hangoutStyle: String(values.get('hangoutStyle') || ''),
     conversationStyle: String(values.get('conversationStyle') || ''),
+    gender: String(values.get('gender') || ''),
+    oppositeGenderOpen: String(values.get('oppositeGenderOpen') || ''),
     meetingFrequency: String(values.get('meetingFrequency') || ''),
     socialEnergy: String(values.get('socialEnergy') || ''),
     planningStyle: String(values.get('planningStyle') || ''),
