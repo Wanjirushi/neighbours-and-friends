@@ -129,7 +129,7 @@
     <div class="daily-alerts" id="dailyAlerts" aria-live="polite"><strong>Daily priorities</strong><span id="dailyAlertsBody">Loading live counts…</span></div>
     <div class="panel dashboard-tab-panel hidden" id="analyticsPanel" role="tabpanel" aria-labelledby="tab-analytics">
  <div class="analytics-top"><h2>📊 Website analytics</h2><p>See visitors, sign-ups and real paying members at a glance. Numbers start when tracking is deployed.</p></div>
- <div class="row"><div><label for="analyticsPeriod">Reporting period</label><select id="analyticsPeriod"><option value="7">Last 7 days</option><option value="30" selected>Last 30 days</option></select></div><div><button type="button" id="analyticsRefresh">↻ Refresh analytics</button></div></div>
+ <div class="row"><div><label for="analyticsPeriod">Reporting period</label><select id="analyticsPeriod"><option value="1">1 day</option><option value="7" selected>7 days</option><option value="14">2 weeks</option><option value="30">1 month</option><option value="60">2 months</option><option value="90">3 months</option><option value="180">6 months</option><option value="365">1 year</option><option value="all">All time</option></select></div><div><button type="button" id="analyticsRefresh">↻ Refresh analytics</button></div></div>
  <div id="analyticsError" class="notice hidden" role="status"></div>
  <div class="analytics-cards" style="margin:20px 0"><div class="analytics-card"><span>👥 Unique visitors</span><strong id="anaVisitors">—</strong></div><div class="analytics-card"><span>📝 Registrations</span><strong id="anaRegistrations">—</strong></div><div class="analytics-card"><span>💰 Verified payments</span><strong id="anaPaid">—</strong></div><div class="analytics-card"><span>📈 Visitor → paid</span><strong id="anaConversion">—</strong></div><div class="analytics-card"><span>💵 Verified revenue</span><strong id="anaRevenue">—</strong></div></div>
  <h3>Registration funnel</h3><div id="analyticsFunnel" class="analytics-footnote">Loading tracking data…</div>
@@ -669,17 +669,17 @@
   async function loadAnalytics(){
     const b=$('analyticsRefresh');if(b)b.disabled=true;
     try{
-      const data=await api('POST',{action:'analytics_overview',days:Number($('analyticsPeriod').value)});
+      const data=await api('POST',{action:'analytics_overview',days:$('analyticsPeriod').value});
       const fmt=n=>Number(n||0).toLocaleString('en-KE');
       $('anaVisitors').textContent=data.tracking_ready?fmt(data.unique_visitors):'Not connected';
       $('anaRegistrations').textContent=fmt(data.registrations);
       $('anaPaid').textContent=fmt(data.verified_payments);
-      $('anaConversion').textContent=data.tracking_ready&&data.unique_visitors>0?(100*data.verified_payments/data.unique_visitors).toFixed(1)+'%':'—';
+      $('anaConversion').textContent=data.tracking_ready&&data.unique_visitors>0&&data.verified_payments<=data.unique_visitors&&!data.truncated?(100*data.verified_payments/data.unique_visitors).toFixed(1)+'%':'—';
       $('anaRevenue').textContent='KSh '+fmt(data.verified_payments*2800);
-      $('analyticsFunnel').textContent=data.tracking_ready?`${fmt(data.unique_visitors)} unique visitors → ${fmt(data.registrations)} registrations → ${fmt(data.verified_payments)} verified payments. Registration rate: ${data.unique_visitors>0?(100*data.registrations/data.unique_visitors).toFixed(1)+'%':'—'}.`: 'Visitor tracking database is not installed yet. Deploy the supplied SQL and visitor function; registrations and verified payments are still shown.';
+      $('analyticsFunnel').textContent=data.tracking_ready?`${fmt(data.unique_visitors)} unique visitors → ${fmt(data.registrations)} registrations → ${fmt(data.verified_payments)} verified payments. Registration rate: ${data.unique_visitors>0&&data.registrations<=data.unique_visitors&&!data.truncated?(100*data.registrations/data.unique_visitors).toFixed(1)+'%':'—'}.`: 'Visitor tracking database is not installed yet. Deploy the supplied SQL and visitor function; registrations and verified payments are still shown.';
       const daily=data.daily||[];const max=Math.max(1,...daily.map(x=>x.visitors));
       $('analyticsDays').innerHTML=daily.length?daily.map(x=>`<div class="growth-bar-line"><span>${safe(x.day)}</span><div class="growth-bar-track"><div class="growth-bar-fill" style="width:${Math.max(0,100*x.visitors/max)}%"></div></div><strong>${x.visitors}</strong></div>`).join(''):'<p>No visitor data for this period yet.</p>';
-      $('analyticsError').classList.add('hidden');
+      if(data.truncated)showMessage($('analyticsError'),'Visitor data exceeds the 50,000-row reporting limit; unique visitors and conversion rates may be incomplete.');else $('analyticsError').classList.add('hidden');
     }catch(e){showMessage($('analyticsError'),e.message||'Analytics unavailable');}
     finally{if(b)b.disabled=false;}
   }
