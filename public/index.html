@@ -368,6 +368,7 @@ fbq('track', 'PageView');
 <label for="contactStyle" style="margin-top:20px">How do you like to stay in touch between meetups?</label><select id="contactStyle" name="contactStyle" required><option value="">Choose an answer</option><option value="Text messages">Text messages</option><option value="Phone calls">Phone calls</option><option value="Video calls">Video calls</option><option value="A mix of texting and calls">A mix of texting and calls</option><option value="Mostly in-person, minimal contact between meetups">Mostly in-person, minimal contact between meetups</option></select>
 <label for="opennessStyle" style="margin-top:20px">With a new friend, when do you usually start sharing personal things like family or struggles?</label><select id="opennessStyle" name="opennessStyle" required><option value="">Choose an answer</option><option value="Within the first few meetups">Within the first few meetups</option><option value="After a few months">After a few months</option><option value="Only once I know them very well">Only once I know them very well</option></select>
 <label for="cancellationTolerance" style="margin-top:20px">If a friend cancels or runs late, how do you feel?</label><select id="cancellationTolerance" name="cancellationTolerance" required><option value="">Choose an answer</option><option value="Totally fine">Totally fine</option><option value="Okay once in a while">Okay once in a while</option><option value="It really bothers me">It really bothers me</option></select>
+<div class="friendship-goals-field" style="margin-top:20px"><label>What are you hoping to get out of your new friendships?</label><p class="field-hint" id="friendshipGoalsHint" aria-live="polite">Choose up to 2 (0 of 2 selected).</p><div class="choices"><label class="choice"><input type="checkbox" name="friendshipGoals" value="Build lasting, meaningful friendships"> Build lasting, meaningful friendships</label><label class="choice"><input type="checkbox" name="friendshipGoals" value="Find people to regularly do activities with"> Find people to regularly do activities with</label><label class="choice"><input type="checkbox" name="friendshipGoals" value="Have someone to talk to and confide in"> Have someone to talk to and confide in</label><label class="choice"><input type="checkbox" name="friendshipGoals" value="Expand my social circle"> Expand my social circle</label><label class="choice"><input type="checkbox" name="friendshipGoals" value="Find friends in a similar stage of life"> Find friends in a similar stage of life</label><label class="choice"><input type="checkbox" name="friendshipGoals" value="Meet people who share my interests"> Meet people who share my interests</label></div></div>
 <label style="margin-top:20px">What are the two most important qualities you look for in a friend?</label><div class="choices"><label class="choice"><input type="checkbox" name="friendPriorities" value="Reliability"> Reliability</label><label class="choice"><input type="checkbox" name="friendPriorities" value="Honesty"> Honesty</label><label class="choice"><input type="checkbox" name="friendPriorities" value="Fun and humour"> Fun and humour</label><label class="choice"><input type="checkbox" name="friendPriorities" value="Emotional support"> Emotional support</label><label class="choice"><input type="checkbox" name="friendPriorities" value="Shared interests"> Shared interests</label><label class="choice"><input type="checkbox" name="friendPriorities" value="Ambition and drive"> Ambition and drive</label></div><p class="field-hint" id="friendPrioritiesHint" aria-live="polite">Choose exactly 2 (0 of 2 selected).</p><label style="margin-top:20px">Which of these are a big part of your life?</label><p class="field-hint" id="coreValuesHint" aria-live="polite">Choose up to 3 (0 of 3 selected).</p><div class="choices"><label class="choice"><input type="checkbox" name="coreValues" value="Faith or religion"> Faith or religion</label><label class="choice"><input type="checkbox" name="coreValues" value="A healthy, active lifestyle"> A healthy, active lifestyle</label><label class="choice"><input type="checkbox" name="coreValues" value="Family-centred life"> Family-centred life</label><label class="choice"><input type="checkbox" name="coreValues" value="Career growth and ambition"> Career growth and ambition</label><label class="choice"><input type="checkbox" name="coreValues" value="Dating, marriage or starting a family"> Dating, marriage or starting a family</label><label class="choice"><input type="checkbox" name="coreValues" value="Rest, relaxation and experiences"> Rest, relaxation and experiences</label><label class="choice"><input type="checkbox" name="coreValues" value="None of these"> None of these</label></div></div>
 <div class="step"><h3>Complete your joining request</h3>
 <div class="fee-panel"><div class="eyebrow">Membership valid for 1 year</div><div class="fee-amount">KSh 2,800</div><div class="fee-label">Individual introductions to up to 15 highly compatible members near you during your membership year.</div><p class="muted">We match you individually with compatible neighbours within a 5 km radius. Where applicable, we also form WhatsApp friendship groups of highly compatible people in the same area.</p><p class="muted">As a member, you will receive monthly invitations to hangouts open to everyone in the greater area. This helps you meet people who could be compatible but were slightly outside your individual matching radius, for example. Hangouts include free or inexpensive activities like picnics and group walks.</p><div class="group-note closing-invitation" style="margin-top:22px"><strong>Is this how you meet your new friend group? Your best friend? The people at your next birthdays? The friends that become family?</strong><p>Join the club and find out.</p></div></div>
@@ -508,6 +509,14 @@ function syncFriendPriorities() {
  if (hint) hint.textContent = count === 2 ? '✓ 2 of 2 selected. Deselect one to change your choice.' : `Choose exactly 2 (${count} of 2 selected).`;
 }
 syncFriendPriorities();
+function syncFriendshipGoals(){
+ const boxes=[...form.querySelectorAll('input[name="friendshipGoals"]')];
+ const count=boxes.filter(x=>x.checked).length;
+ boxes.forEach(x=>{x.disabled=count>=2&&!x.checked;});
+ const hint=document.getElementById('friendshipGoalsHint');
+ if(hint)hint.textContent=count===2?'✓ 2 of 2 selected. Deselect one to change.':`Choose up to 2 (${count} of 2 selected).`;
+}
+syncFriendshipGoals();
 function syncCoreValues() {
  const boxes = [...form.querySelectorAll('input[name="coreValues"]')];
  const checked = boxes.filter(x => x.checked);
@@ -519,6 +528,7 @@ function syncCoreValues() {
 syncCoreValues();
 form.addEventListener('change', e => {
  if (e.target.name === 'friendPriorities') syncFriendPriorities();
+ if (e.target.name === 'friendshipGoals') syncFriendshipGoals();
  if(e.target.name === 'coreValues'){
   if(e.target.checked){
    const all=[...form.querySelectorAll('input[name="coreValues"]')];
@@ -589,6 +599,8 @@ form.addEventListener('submit', async (event) => {
     }
     return;
   }
+  const selectedGoals = form.querySelectorAll('input[name="friendshipGoals"]:checked');
+  if (selectedGoals.length < 1 || selectedGoals.length > 2) { flagField(form.querySelector('input[name="friendshipGoals"]'),"Please choose one or two friendship goals."); return; }
   const selectedPriorities = form.querySelectorAll('input[name="friendPriorities"]:checked');
   if (selectedPriorities.length !== 2) { flagField(form.querySelector('input[name="friendPriorities"]'),"Please choose exactly two friendship priorities."); return; }
   const selectedValues = [...form.querySelectorAll('input[name="coreValues"]:checked')];
@@ -630,6 +642,7 @@ form.addEventListener('submit', async (event) => {
     contactStyle: String(values.get('contactStyle') || ''),
     opennessStyle: String(values.get('opennessStyle') || ''),
     cancellationTolerance: String(values.get('cancellationTolerance') || ''),
+    friendshipGoals: values.getAll('friendshipGoals'),
     friendPriorities: values.getAll('friendPriorities'),
     coreValues: values.getAll('coreValues'),
 
