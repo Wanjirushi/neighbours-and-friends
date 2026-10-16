@@ -134,11 +134,11 @@
     <div class="panel dashboard-tab-panel hidden" id="communicationsPanel" role="tabpanel" aria-labelledby="tab-comms">
       <div class="topline"><div><h2>3 · Communications</h2><p class="muted">One place for introduction messages, weekly updates, expanded-radius requests and event invitations. A queued message is not a sent message.</p></div><button type="button" class="secondary" id="refreshCommsButton">Refresh communications</button></div>
       <div id="commsError" class="notice hidden" role="status"></div>
-      <div class="stats"><div class="stat"><span>Queued messages (not sent)</span><strong id="commsQueued">—</strong></div><div class="stat"><span>Weekly updates due</span><strong id="commsDue">—</strong></div><div class="stat"><span>Overdue (7+ days)</span><strong id="commsOverdue">—</strong></div><div class="stat"><span>Failed / uncertain jobs</span><strong id="commsFailed">—</strong></div><div class="stat"><span>Open messaging alerts</span><strong id="commsAlerts">—</strong></div></div>
-      <h3>Message queue &amp; delivery issues</h3><p class="small muted">Pending means prepared, not sent. Only a confirmed delivery counts as sent.</p><div id="commsJobs">Loading…</div>
-      <h3>Weekly progress updates</h3><p class="small muted">Members due for a message appear here. Sending or preparing a message does not mark it successful; only recorded send confirmation does.</p><label for="commsWeeklySearch">Filter weekly updates by neighbourhood or member</label><input id="commsWeeklySearch" type="search" placeholder="Search neighbourhood or member" style="max-width:430px;margin:8px 0 14px"><div id="commsWeekly">Loading…</div><div id="commsWeeklyFeedback" class="notice hidden" role="status"></div>
+      <div class="stats"><div class="stat"><span>Queued messages (not sent)</span><strong id="commsQueued">—</strong></div><div class="stat"><span>Updates shown due*</span><strong id="commsDue">—</strong></div><div class="stat"><span>Overdue (7+ days)</span><strong id="commsOverdue">—</strong></div><div class="stat"><span>Failed / uncertain jobs</span><strong id="commsFailed">—</strong></div><div class="stat"><span>Open messaging alerts</span><strong id="commsAlerts">—</strong></div></div>
+      <h3>Ready to send · WhatsApp queue</h3><p class="small muted">Prepared messages are listed here. Processing is a separate action. A submitted message is not necessarily delivered. Never retry an uncertain send until checked.</p><div id="commsJobs">Loading…</div>
+      <h3>Members needing contact</h3><p class="small muted">Every active member should hear from us at least every seven days. A completed introduction counts as their weekly contact. Once five introductions are completed, updates stop unless matching is reopened on request. Preparing a message does not send it.</p><label for="commsWeeklySearch">Filter weekly updates by neighbourhood or member</label><input id="commsWeeklySearch" type="search" placeholder="Search neighbourhood or member" style="max-width:430px;margin:8px 0 14px"><div id="commsWeekly">Loading…</div><div id="commsWeeklyFeedback" class="notice hidden" role="status"></div>
       <div class="actions"><button type="button" class="secondary" id="commsQueueWeekly">Prepare eligible weekly updates</button><button type="button" class="secondary" data-open-panel="operationsPanel">Review 5–9 km opportunities</button></div>
-      <h3>Extended-radius requests</h3><div id="commsRadius">Loading…</div>
+      <p class="small muted">*Due indicators are advisory; the server checks completed introductions and message history before creating a job.</p><h3>Extended-radius requests</h3><div id="commsRadius">Loading…</div>
       <h3>Event invitations</h3><div id="commsEvents">Loading…</div>
       <p class="small muted">Automated scheduling and live delivery remain disabled until messaging templates and safeguards are verified. No messages are sent by viewing this screen.</p>
     </div>
@@ -163,7 +163,7 @@
         <div class="stat"><span>Actively matching</span><strong id="opWaiting">0</strong></div>
         <div class="stat"><span>Match opportunities</span><strong id="opReady">0</strong></div>
         <div class="stat"><span>Initial updates due</span><strong id="opInitialDue">0</strong></div>
-        <div class="stat"><span>Weekly updates due</span><strong id="opDue">0</strong></div>
+        <div class="stat"><span>Updates shown due*</span><strong id="opDue">0</strong></div>
         <div class="stat"><span>No valid GPS</span><strong id="opGps">0</strong></div>
       </div>
       <p class="small muted">Normal matches remain within 5 km. Almost Nearby (over 5–9 km) is review-only and requires consent from everyone involved before any distance exception. No exceptions can be approved using the normal matching buttons. Match opportunities are not assignments. Nearby-but-incompatible means within 5 km but failing one or more hard rules. No matches are promised.</p>
@@ -1150,10 +1150,10 @@
     $('commsFailed').textContent=problemJobs.length;$('commsAlerts').textContent=alerts.length;
     const weeklySearch=($('commsWeeklySearch')?.value||'').trim().toLowerCase();
     const visibleDue=weeklySearch?due.filter(m=>`${m.first_name||''} ${m.neighbourhood||m.area||''}`.toLowerCase().includes(weeklySearch)):due;
-    $('commsWeekly').innerHTML=visibleDue.length?`<div class="table-wrap"><table class="comms-table"><thead><tr><th>Member</th><th>Status</th><th>Next action</th></tr></thead><tbody>${visibleDue.slice(0,100).map(m=>`<tr><td>${safe(m.first_name||'Member')} · ${safe(m.neighbourhood||m.area||'')}</td><td>${queuedMemberIds.has(String(m.id))?'<strong>Queued · not sent</strong>':overdueWeekly(m)?'<strong>Overdue</strong>':'Due'}</td><td><button type="button" class="secondary" data-comms-queue-member="${safe(m.id)}" ${queuedMemberIds.has(String(m.id))?'disabled':''}>${queuedMemberIds.has(String(m.id))?'Already queued':'Review &amp; queue'}</button></td></tr>`).join('')}</tbody></table></div>${visibleDue.length>100?`<p>${visibleDue.length-100} more due; see Matching opportunities.</p>`:''}`:'<p class="muted">No member updates due based on the latest loaded records.</p>';
-    const pendingPreview=pendingJobs.slice(0,30).map(j=>{const m=members.find(x=>String(x.id)===String(j.member_id));return `<tr><td>${safe(m?.first_name||'Member')} · ${safe(j.kind)}</td><td><span class="badge pending">Pending · not sent</span></td><td>${safe(j.created_at?new Date(j.created_at).toLocaleString('en-KE'):'')}</td></tr>`}).join('');
+    $('commsWeekly').innerHTML=visibleDue.length?`<div class="table-wrap"><table class="comms-table"><thead><tr><th>Member</th><th>Status</th><th>Next action</th></tr></thead><tbody>${visibleDue.slice(0,100).map(m=>`<tr><td>${safe(m.first_name||'Member')} · ${safe(m.neighbourhood||m.area||'')}</td><td>${queuedMemberIds.has(String(m.id))?'<strong>Queued · not sent</strong>':overdueWeekly(m)?'<strong>Overdue</strong>':'Due'}</td><td><button type="button" class="secondary" data-comms-queue-member="${safe(m.id)}" ${queuedMemberIds.has(String(m.id))?'disabled':''}>${queuedMemberIds.has(String(m.id))?'Already queued':'Prepare update'}</button></td></tr>`).join('')}</tbody></table></div>${visibleDue.length>100?`<p>${visibleDue.length-100} more due; see Matching opportunities.</p>`:''}`:'<p class="muted">No member updates due based on the latest loaded records.</p>';
+    const pendingPreview=pendingJobs.slice(0,30).map(j=>{const m=members.find(x=>String(x.id)===String(j.member_id));return `<tr><td>${safe(m?.first_name||'Member')} · ${safe(j.kind)}</td><td><span class="badge pending">Pending · not sent</span></td><td>${safe(j.created_at?new Date(j.created_at).toLocaleString('en-KE'):'')}</td><td><button type="button" data-comms-send-job="${safe(j.id)}">Process message</button></td></tr>`}).join('');
     $('commsJobs').innerHTML=`<p><strong>${pendingJobs.length} pending message(s)</strong> (including ${queuedWeeklyCount} weekly updates). These have not been sent. ${pendingJobs.length>30?'Showing the 30 most recent.':''}</p>`+
-      (pendingJobs.length?`<div class="table-wrap"><table class="comms-table"><thead><tr><th>Member / type</th><th>Delivery status</th><th>Queued at</th></tr></thead><tbody>${pendingPreview}</tbody></table></div>`:'<p class="muted">No pending messages in the latest 150 jobs.</p>')+
+      (pendingJobs.length?`<div class="table-wrap"><table class="comms-table"><thead><tr><th>Member / type</th><th>Delivery status</th><th>Queued at</th><th>Action</th></tr></thead><tbody>${pendingPreview}</tbody></table></div>`:'<p class="muted">No pending messages in the latest 150 jobs. Refresh to check new jobs.</p>')+
       (alerts.length||problemJobs.length?`<div class="comms-note"><strong>${alerts.length} open alert(s), ${problemJobs.length} recent problem job(s)</strong><p>Review failures before retrying. Uncertain sends must not be retried automatically.</p><button type="button" class="secondary" data-comms-target="individualPanel">Open messaging status</button></div>`:'');
     const radius=operationMembers.filter(m=>(m.almost_nearby_pairs||[]).length+(m.almost_nearby_groups||[]).length>0);
     $('commsRadius').innerHTML=`<p>${radius.length} member(s) have potential 5–9 km options requiring consent.</p>`;
@@ -1165,6 +1165,16 @@
   $('dailyAlerts').addEventListener('click',e=>{const b=e.target.closest('[data-daily-panel]');if(b)showDashboardTab(b.dataset.dailyPanel);});
   $('communicationsPanel').addEventListener('click',async e=>{
     const nav=e.target.closest('[data-comms-target]');if(nav){showDashboardTab(nav.dataset.commsTarget);return;}
+    const send=e.target.closest('[data-comms-send-job]');
+    if(send){
+      if(!confirm('Process this ONE WhatsApp message? If live sending is enabled in Supabase, this can send a real message.'))return;
+      send.disabled=true;send.textContent='Processing…';
+      try{const result=await api('POST',{action:'process_message_job',job_id:send.dataset.commsSendJob});
+        showMessage($('commsError'),result.dry_run?'Sending is disabled; no WhatsApp was sent.':'Message processing requested. Refresh to verify its actual status.',true);
+        await loadMessagingStatus();updateDailyStatus();
+      }catch(err){showMessage($('commsError'),err.message||'Processing failed. Check status before retrying.');}
+      finally{send.disabled=false;send.textContent='Process message';}return;
+    }
     const btn=e.target.closest('[data-comms-queue-member]');if(!btn)return;
     const m=operationMembers.find(x=>String(x.id)===btn.dataset.commsQueueMember);
     if(!m){showMessage($('commsWeeklyFeedback'),'Member not found. Refresh communications.');return;}
@@ -1178,7 +1188,7 @@
       await loadMessagingStatus();
       updateDailyStatus();
     }catch(err){showMessage($('commsWeeklyFeedback'),err.message||'Could not queue update');}
-    finally{btn.disabled=false;btn.textContent='Review & queue';}
+    finally{btn.disabled=false;btn.textContent='Prepare update';}
   });
   $('refreshCommsButton').addEventListener('click',async()=>{const b=$('refreshCommsButton');b.disabled=true;b.textContent='Refreshing…';try{await Promise.all([loadOperations(),loadMessagingStatus(),loadWorkspace()]);updateDailyStatus();showMessage($('commsError'),'Updated at '+new Date().toLocaleTimeString('en-KE'),true);}catch(e){showMessage($('commsError'),e.message||'Refresh failed');}finally{b.disabled=false;b.textContent='Refresh communications';}});
   $('commsQueueWeekly').addEventListener('click',()=> $('queueWaitingUpdates').click());
