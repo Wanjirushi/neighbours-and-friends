@@ -57,7 +57,7 @@
         <button type="button" role="tab" id="tab-members" aria-controls="membersPanel" aria-selected="true" data-tab="membersPanel" class="priority-payment">1 · Payments <span id="navPaymentsCount" class="nav-count"></span></button>
         <button type="button" role="tab" id="tab-individual" aria-controls="individualPanel" aria-selected="false" data-tab="individualPanel" class="priority-match">2 · Matchmaking <span id="navMatchCount" class="nav-count"></span></button>
         <button type="button" role="tab" id="tab-comms" aria-controls="communicationsPanel" aria-selected="false" data-tab="communicationsPanel" class="priority-comms">3 · Communications <span id="navCommsCount" class="nav-count"></span></button>
-        <button type="button" role="tab" id="tab-events" aria-controls="eventsPanel" aria-selected="false" data-tab="eventsPanel">4 · Events &amp; Groups <span id="navEventsCount" class="nav-count"></span></button>
+        <button type="button" role="tab" id="tab-events" aria-controls="eventsPanel" aria-selected="false" data-tab="eventsPanel">4 · Events <span id="navEventsCount" class="nav-count"></span></button>
         <button type="button" role="tab" id="tab-tasks" aria-controls="tasksPanel" aria-selected="false" data-tab="tasksPanel" class="priority-alert">Action centre <span id="navAlertsCount" class="nav-count"></span></button>
         <button type="button" role="tab" id="tab-overview" aria-controls="overviewPanel" aria-selected="false" data-tab="overviewPanel">Overview</button>
       </div>
@@ -65,9 +65,9 @@
         <button type="button" role="tab" id="tab-areas" aria-controls="areasPanel" aria-selected="false" data-tab="areasPanel">Neighbourhoods</button>
         <button type="button" role="tab" id="tab-updates" aria-controls="operationsPanel" aria-selected="false" data-tab="operationsPanel">Matching opportunities</button>
         <button type="button" role="tab" id="tab-waiting" aria-controls="waitingPanel" aria-selected="false" data-tab="waitingPanel">Waiting list</button>
-        <button type="button" role="tab" id="tab-groups" aria-controls="groupManagementPanel" aria-selected="false" data-tab="groupManagementPanel">Friendship groups</button>
-        <button type="button" role="tab" id="tab-additions" aria-controls="additionsPanel" aria-selected="false" data-tab="additionsPanel">Group additions</button>
-        <button type="button" role="tab" id="tab-matching" aria-controls="matchingPanel" aria-selected="false" data-tab="matchingPanel">New group matching</button>
+        <button type="button" role="tab" id="tab-groups" aria-controls="groupManagementPanel" aria-selected="false" data-tab="groupManagementPanel">Matchmaking · Friendship groups</button>
+        <button type="button" role="tab" id="tab-additions" aria-controls="additionsPanel" aria-selected="false" data-tab="additionsPanel">Matchmaking · Group additions</button>
+        <button type="button" role="tab" id="tab-matching" aria-controls="matchingPanel" aria-selected="false" data-tab="matchingPanel">Matchmaking · New groups</button>
       </div></details>
     </nav>
     <div class="daily-alerts" id="dailyAlerts" aria-live="polite"><strong>Daily priorities</strong><span id="dailyAlertsBody">Loading live counts…</span></div>
@@ -126,7 +126,7 @@
       <div id="commsError" class="notice hidden" role="status"></div>
       <div class="stats"><div class="stat"><span>Weekly updates due</span><strong id="commsDue">—</strong></div><div class="stat"><span>Overdue (7+ days)</span><strong id="commsOverdue">—</strong></div><div class="stat"><span>Failed / uncertain jobs</span><strong id="commsFailed">—</strong></div><div class="stat"><span>Open messaging alerts</span><strong id="commsAlerts">—</strong></div></div>
       <h3>Introduction messages &amp; delivery issues</h3><div id="commsJobs">Loading…</div>
-      <h3>Weekly progress updates</h3><p class="small muted">Members due for a message appear here. Sending or preparing a message does not mark it successful; only recorded send confirmation does.</p><div id="commsWeekly">Loading…</div>
+      <h3>Weekly progress updates</h3><p class="small muted">Members due for a message appear here. Sending or preparing a message does not mark it successful; only recorded send confirmation does.</p><div id="commsWeekly">Loading…</div><div id="commsWeeklyFeedback" class="notice hidden" role="status"></div>
       <div class="actions"><button type="button" class="secondary" id="commsQueueWeekly">Prepare eligible weekly updates</button><button type="button" class="secondary" data-open-panel="operationsPanel">Review 5–9 km opportunities</button></div>
       <h3>Extended-radius requests</h3><div id="commsRadius">Loading…</div>
       <h3>Event invitations</h3><div id="commsEvents">Loading…</div>
@@ -850,7 +850,7 @@
       const count={};for(const i of ev.invitations||[])count[i.status]=(count[i.status]||0)+1;
       const keys=ev.areas.map(x=>x.area_key);const selected=nbffAreas.filter(a=>keys.includes(a.key));
       const sum=selected.reduce((n,a)=>n+a.paid,0);
-      return `<div class="event-card"><h3>${safe(ev.title)}</h3><p class="small muted">${safe(new Date(ev.starts_at).toLocaleString('en-KE',{dateStyle:'full',timeStyle:'short',timeZone:'Africa/Nairobi'}))} · ${safe(ev.venue_name||'Venue not set')}</p><p>${ev.areas.map(x=>safe(x.area_label)).join(' · ')}</p><details><summary>Area statistics · ${sum} paid members</summary>${selected.map(a=>`<p class="small">${safe(a.label)}: ${safe(areaSummary(a))}</p>`).join('')}</details><p class="small">Invitations: ${ev.invitations.length} queued/processed · ${count.sent||0} accepted by WhatsApp · ${count.delivered||0} delivered · ${count.failed||0} failed · ${count.queued||0} awaiting send · ${count.sending||0} processing · ${count.skipped||0} skipped</p><div class="actions"><button class="secondary" data-event-action="preview" data-id="${safe(ev.id)}">Preview recipients</button><button data-event-action="queue" data-id="${safe(ev.id)}">Queue invitations</button><button data-event-action="send" data-id="${safe(ev.id)}">Send next 15 via WhatsApp</button></div></div>`;
+      return `<div class="event-card"><h3>${safe(ev.title)}</h3><p class="small muted">${safe(new Date(ev.starts_at).toLocaleString('en-KE',{dateStyle:'full',timeStyle:'short',timeZone:'Africa/Nairobi'}))} · ${safe(ev.venue_name||'Venue not set')}</p><p>${ev.areas.map(x=>safe(x.area_label)).join(' · ')}</p><details><summary>Area statistics · ${sum} paid members</summary>${selected.map(a=>`<p class="small">${safe(a.label)}: ${safe(areaSummary(a))}</p>`).join('')}</details><p class="small">Invitations: ${ev.invitations.length} queued/processed · ${count.sent||0} accepted by WhatsApp · ${count.delivered||0} delivered · ${count.failed||0} failed · ${count.queued||0} awaiting send · ${count.sending||0} processing · ${count.skipped||0} skipped</p><div id="recipient-preview-${safe(ev.id)}" class="small" aria-live="polite"></div><div class="actions"><button class="secondary" data-event-action="preview" data-id="${safe(ev.id)}">View recipient details</button><button data-event-action="queue" data-id="${safe(ev.id)}">Queue invitations (do not send)</button><button data-event-action="send" data-id="${safe(ev.id)}">Send queued invitations (up to 15)</button></div></div>`;
     }).join('')||'<p class="muted">No cluster events yet.</p>';
   }
   $('eventForm').addEventListener('submit',async e=>{
@@ -865,14 +865,21 @@
     const b=e.target.closest('button[data-event-action]');if(!b)return;b.disabled=true;
     try{
       const id=b.dataset.id,op=b.dataset.eventAction;
-      if(op==='preview'){const x=await api('POST',{action:'event_recipients',event_id:id});alert(`${x.event.title}\nEligible WhatsApp recipients: ${x.total_eligible}\nAlready queued: ${x.already_queued}\nNew to queue: ${x.new_recipients}\n\n${x.by_area.map(a=>a.area+': '+a.count).join('\n')}`);}
+      if(op==='preview'){
+        const x=await api('POST',{action:'event_recipients',event_id:id});
+        const target=document.getElementById('recipient-preview-'+id);
+        if(target){
+          const rows=(x.recipients||[]).map(m=>`<tr><td>${safe(m.name||'Unnamed')}</td><td>${safe(m.area||'')}</td><td>${safe(m.phone||'')}</td><td>${m.already_queued?'Already queued':'Not queued'}</td></tr>`).join('');
+          target.innerHTML=`<details open><summary><strong>${x.total_eligible} eligible recipients · ${x.new_recipients} not yet queued</strong></summary><div style="overflow-x:auto"><table><thead><tr><th>Name</th><th>Neighbourhood</th><th>Phone</th><th>Invitation</th></tr></thead><tbody>${rows||'<tr><td colspan="4">No eligible recipients</td></tr>'}</tbody></table></div></details>`;
+        }
+      }
       if(op==='queue'){
         const x=await api('POST',{action:'event_recipients',event_id:id});
         if(!confirm(`Queue ${x.new_recipients} new opted-in paid members for this event? This does not send WhatsApp messages.`))return;
         const r=await api('POST',{action:'queue_event_invitations',event_id:id,confirmed:true});showMessage($('eventsMessage'),`${r.queued} invitations queued. Not yet sent.`,true);
       }
       if(op==='send'){
-        if(!confirm('Send up to 15 QUEUED invitations via WhatsApp now? Only proceed if your neighbourhood_event_invitation template is APPROVED and has 4 body variables: first name, event title, date/time, venue. This action contacts real members.'))return;
+        if(!confirm('This attempts to send up to 15 already QUEUED invitations. WHATSAPP_SEND_MODE must be live and the template approved. Continue? \n\nSend up to 15 QUEUED invitations via WhatsApp now? Only proceed if your neighbourhood_event_invitation template is APPROVED and has 4 body variables: first name, event title, date/time, venue. This action contacts real members.'))return;
         const r=await api('POST',{action:'send_event_invitations',event_id:id,confirmed:true});showMessage($('eventsMessage'),`WhatsApp: ${r.sent} accepted, ${r.failed} failed, ${r.skipped} skipped. ${r.has_more?'More may remain queued: click Send next 15 again.':''}`,true);
       }
       await loadWorkspace();
@@ -1012,7 +1019,7 @@
     $('dailyAlertsBody').innerHTML=items.map(i=>`<button type="button" class="${i.severity}" data-daily-panel="${i.panel}">${safe(i.label)}</button>`).join('');
     $('commsDue').textContent=due.length;$('commsOverdue').textContent=overdue.length;
     $('commsFailed').textContent=problemJobs.length;$('commsAlerts').textContent=alerts.length;
-    $('commsWeekly').innerHTML=due.length?`<div class="table-wrap"><table class="comms-table"><thead><tr><th>Member</th><th>Status</th><th>Next action</th></tr></thead><tbody>${due.slice(0,100).map(m=>`<tr><td>${safe(m.first_name||'Member')} · ${safe(m.neighbourhood||m.area||'')}</td><td>${overdueWeekly(m)?'<strong>Overdue</strong>':'Due'}</td><td>Review and queue update</td></tr>`).join('')}</tbody></table></div>${due.length>100?`<p>${due.length-100} more due; see Matching opportunities.</p>`:''}`:'<p class="muted">No member updates due based on the latest loaded records.</p>';
+    $('commsWeekly').innerHTML=due.length?`<div class="table-wrap"><table class="comms-table"><thead><tr><th>Member</th><th>Status</th><th>Next action</th></tr></thead><tbody>${due.slice(0,100).map(m=>`<tr><td>${safe(m.first_name||'Member')} · ${safe(m.neighbourhood||m.area||'')}</td><td>${overdueWeekly(m)?'<strong>Overdue</strong>':'Due'}</td><td><button type="button" class="secondary" data-comms-queue-member="${safe(m.id)}">Review &amp; queue</button></td></tr>`).join('')}</tbody></table></div>${due.length>100?`<p>${due.length-100} more due; see Matching opportunities.</p>`:''}`:'<p class="muted">No member updates due based on the latest loaded records.</p>';
     $('commsJobs').innerHTML=alerts.length||problemJobs.length?`<div class="comms-note"><strong>${alerts.length} open alert(s), ${problemJobs.length} recent problem job(s)</strong><p>Review each message in the messaging status section before retrying. Unknown sends must not be retried automatically.</p><button type="button" class="secondary" data-comms-target="individualPanel">Open messaging status</button></div>`:'<p class="muted">No failed or uncertain jobs in the latest messaging response.</p>';
     const radius=operationMembers.filter(m=>(m.almost_nearby_pairs||[]).length+(m.almost_nearby_groups||[]).length>0);
     $('commsRadius').innerHTML=`<p>${radius.length} member(s) have potential 5–9 km options requiring consent.</p>`;
@@ -1022,7 +1029,22 @@
     $('commsEvents').innerHTML=`<p>${pendingInvites.length} pending, queued or failed event invitation record(s). Verify their status before sending.</p>`+(ev.length?ev.map(x=>`<div class="comms-note"><strong>${safe(x.name)} · Day ${x.days} ${x.level==='overdue'?'— overdue':'— planning due'}</strong><p>${x.future?'An event is scheduled; verify it takes place within the 30-day cycle.':'No future event found in this neighbourhood.'}</p></div>`).join(''):'<p class="muted">No neighbourhoods have reached the day-21 planning reminder based on recorded events and member dates.</p>');
   }
   $('dailyAlerts').addEventListener('click',e=>{const b=e.target.closest('[data-daily-panel]');if(b)showDashboardTab(b.dataset.dailyPanel);});
-  $('communicationsPanel').addEventListener('click',e=>{const b=e.target.closest('[data-comms-target]');if(b)showDashboardTab(b.dataset.commsTarget);});
+  $('communicationsPanel').addEventListener('click',async e=>{
+    const nav=e.target.closest('[data-comms-target]');if(nav){showDashboardTab(nav.dataset.commsTarget);return;}
+    const btn=e.target.closest('[data-comms-queue-member]');if(!btn)return;
+    const m=operationMembers.find(x=>String(x.id)===btn.dataset.commsQueueMember);
+    if(!m){showMessage($('commsWeeklyFeedback'),'Member not found. Refresh communications.');return;}
+    if(!eligibleWeekly(m)){showMessage($('commsWeeklyFeedback'),'This member is no longer due. Refresh communications.');return;}
+    if(!confirm(`Prepare a weekly update for ${m.first_name||'this member'}? This creates a pending job only; it does not send a WhatsApp message.`))return;
+    btn.disabled=true;btn.textContent='Preparing…';
+    try{
+      const result=await api('POST',{action:'queue_weekly_waiting_updates',member_id:m.id});
+      if(result.queued===1)showMessage($('commsWeeklyFeedback'),`One pending update prepared for ${m.first_name||'member'}. No WhatsApp message sent.`,true);
+      else showMessage($('commsWeeklyFeedback'),`No update queued for ${m.first_name||'member'}. They may be ineligible, on cooldown, or already have an update queued.`,true);
+      await loadMessagingStatus();
+    }catch(err){showMessage($('commsWeeklyFeedback'),err.message||'Could not queue update');}
+    finally{btn.disabled=false;btn.textContent='Review & queue';}
+  });
   $('refreshCommsButton').addEventListener('click',async()=>{const b=$('refreshCommsButton');b.disabled=true;b.textContent='Refreshing…';try{await Promise.all([loadOperations(),loadMessagingStatus(),loadWorkspace()]);updateDailyStatus();showMessage($('commsError'),'Updated at '+new Date().toLocaleTimeString('en-KE'),true);}catch(e){showMessage($('commsError'),e.message||'Refresh failed');}finally{b.disabled=false;b.textContent='Refresh communications';}});
   $('commsQueueWeekly').addEventListener('click',()=> $('queueWaitingUpdates').click());
   document.querySelector('.admin-nav').addEventListener('click',e=>{const b=e.target.closest('[data-tab]');if(b?.dataset.tab==='communicationsPanel')updateDailyStatus();});
