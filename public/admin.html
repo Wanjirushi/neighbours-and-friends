@@ -36,6 +36,47 @@
 </style>
 <style>
 .nbff-growth{margin:18px 0 26px}.growth-bars{display:grid;gap:9px;max-height:440px;overflow:auto}.growth-bar-line{display:grid;grid-template-columns:minmax(100px,180px) 1fr 45px;gap:12px;align-items:center;font-size:13px}.growth-bar-track{background:#e7ebe4;border-radius:20px;overflow:hidden;height:13px}.growth-bar-fill{background:linear-gradient(90deg,#315b48,#83a58a);height:100%;border-radius:20px}.growth-map{min-height:290px;border-radius:16px;background:radial-gradient(ellipse at 60% 40%,#dce8d9,#edf2e9 70%);border:1px solid #d3ddce;overflow:hidden}.growth-map svg{width:100%;height:auto;display:block}.growth-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:14px 0}.growth-card{background:#f5f8f1;border:1px solid #d9e2d3;border-radius:13px;padding:16px}.growth-card strong{color:#294d39}.growth-dots{display:flex;gap:6px;margin-top:12px}.growth-dot{height:12px;flex:1;background:#d9e2d3;border-radius:20px}.growth-dot.on{background:#397957}
+</style><style id="nbff-scan-ui">
+/* Scan-first operational dashboard */
+:root{--blue:#245c88;--amber:#ad661a;--red:#a33b37}
+.admin-nav{background:#fffdf8;border:1px solid #e2ded4;border-radius:16px;padding:16px;box-shadow:0 6px 20px #1b30220e}
+.admin-nav .nav-buttons{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px}
+.admin-nav button[data-tab]{border:2px solid transparent;border-radius:12px;padding:15px 10px;text-align:left;min-height:58px;font-size:14px;box-shadow:0 2px 4px #00000008}
+.admin-nav button[data-tab][aria-selected="true"]{background:#254b38!important;color:#fff!important;border-color:#173728;box-shadow:0 5px 15px #1c46352b}
+.admin-nav button[data-tab][aria-selected="true"] .nav-count{color:#254b38}
+.admin-nav button[data-tab="membersPanel"]{background:#e4f2e9!important;color:#24503a!important}
+.admin-nav button[data-tab="individualPanel"]{background:#e9e9fb!important;color:#393c80!important}
+.admin-nav button[data-tab="communicationsPanel"]{background:#e1f0ff!important;color:#235981!important}
+.admin-nav button[data-tab="eventsPanel"]{background:#f6e8f4!important;color:#793b72!important}
+.admin-nav button[data-tab="tasksPanel"]{background:#fff0dc!important;color:#88551d!important}
+.admin-nav button[data-tab="overviewPanel"]{background:#e9e9e6!important;color:#434a43!important}
+.admin-more{background:#f3efe7;padding:12px 14px;border-radius:12px;margin-top:12px}
+.admin-more summary{font-size:15px;font-weight:700;color:#2d4436;padding:4px}
+.admin-more .nav-buttons{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:9px}
+.admin-more button[data-tab]{background:white!important;color:#354f40!important;border:1px solid #dedbd0;min-height:52px}
+.daily-alerts{border-left:7px solid #b87528;align-items:flex-start}
+.daily-alerts strong{font-size:18px;min-width:130px}.daily-alerts #dailyAlertsBody{display:flex;flex-wrap:wrap;gap:8px}
+#communicationsPanel{border-top:7px solid #2874ad}
+#communicationsPanel .stats{grid-template-columns:repeat(auto-fit,minmax(160px,1fr))}
+#communicationsPanel .stat{background:#edf5fc;border:1px solid #d1e4f4;border-radius:12px;padding:18px}
+#communicationsPanel .stat:first-child{background:#fff2d9;border-color:#f0d9a9}
+#communicationsPanel .stat:nth-child(4),#communicationsPanel .stat:nth-child(5){background:#fff0ef;border-color:#f1d4d0}
+#communicationsPanel .stat strong{font-size:32px}
+#communicationsPanel .comms-section{border:2px solid #d9e4ee;border-radius:15px;padding:20px;margin:22px 0;background:#f8fbff}
+#communicationsPanel .comms-section.queue{border-color:#edcf9b;background:#fff9ee}
+#communicationsPanel .comms-section.due{border-color:#c3d9ec;background:#f4f9ff}
+#communicationsPanel .comms-section.issue{border-color:#eed2cc;background:#fff8f6}
+#communicationsPanel .comms-section h3{font:700 23px Georgia,serif;margin:0 0 5px;color:#254d6a}
+#communicationsPanel .comms-section.queue h3{color:#925c1e}
+#communicationsPanel .comms-section.issue h3{color:#923d37}
+#communicationsPanel .comms-section .table-wrap{background:white;border-radius:9px}
+#communicationsPanel #commsWeeklyFeedback{position:sticky;top:96px;z-index:25;border-left-width:7px;font-weight:bold;box-shadow:0 6px 18px #00000020}
+#communicationsPanel tr[data-result="error"]{background:#fff0ec}
+#communicationsPanel tr[data-result="ok"]{background:#e9f5e8}
+#communicationsPanel .comms-inline-result{display:block;margin-top:8px;padding:9px 12px;border-radius:8px;background:#fff1e5;color:#7e3e22;font-weight:700}
+#communicationsPanel .comms-inline-result.ok{background:#e3f1e6;color:#225638}
+#communicationsPanel .comms-inline-result.error{background:#ffebe7;color:#8c2824}
+@media(max-width:640px){.admin-nav .nav-buttons{grid-template-columns:repeat(2,minmax(0,1fr))}#communicationsPanel .comms-section{padding:12px}}
 </style></head>
 <body>
 <main>
@@ -135,11 +176,11 @@
       <div class="topline"><div><h2>3 · Communications</h2><p class="muted">One place for introduction messages, weekly updates, expanded-radius requests and event invitations. A queued message is not a sent message.</p></div><button type="button" class="secondary" id="refreshCommsButton">Refresh communications</button></div>
       <div id="commsError" class="notice hidden" role="status"></div>
       <div class="stats"><div class="stat"><span>Queued messages (not sent)</span><strong id="commsQueued">—</strong></div><div class="stat"><span>Updates shown due*</span><strong id="commsDue">—</strong></div><div class="stat"><span>Overdue (7+ days)</span><strong id="commsOverdue">—</strong></div><div class="stat"><span>Failed / uncertain jobs</span><strong id="commsFailed">—</strong></div><div class="stat"><span>Open messaging alerts</span><strong id="commsAlerts">—</strong></div></div>
-      <h3>Ready to send · WhatsApp queue</h3><p class="small muted">Prepared messages are listed here. Processing is a separate action. A submitted message is not necessarily delivered. Never retry an uncertain send until checked.</p><div id="commsJobs">Loading…</div>
-      <h3>Members needing contact</h3><p class="small muted">Every active member should hear from us at least every seven days. A completed introduction counts as their weekly contact. Once five introductions are completed, updates stop unless matching is reopened on request. Preparing a message does not send it.</p><label for="commsWeeklySearch">Filter weekly updates by neighbourhood or member</label><input id="commsWeeklySearch" type="search" placeholder="Search neighbourhood or member" style="max-width:430px;margin:8px 0 14px"><div id="commsWeekly">Loading…</div><div id="commsWeeklyFeedback" class="notice hidden" role="status"></div>
+      <section class="comms-section queue"><h3>📤 READY TO SEND · WhatsApp queue</h3><p class="small muted">Prepared messages are listed here. Processing is a separate action. A submitted message is not necessarily delivered. Never retry an uncertain send until checked.</p><div id="commsJobs">Loading…</div></section>
+      <section class="comms-section due"><h3>📅 MEMBERS NEEDING CONTACT</h3><p class="small muted">Every active member should hear from us at least every seven days. A completed introduction counts as their weekly contact. Once five introductions are completed, updates stop unless matching is reopened on request. Preparing a message does not send it.</p><label for="commsWeeklySearch">Filter weekly updates by neighbourhood or member</label><input id="commsWeeklySearch" type="search" placeholder="Search neighbourhood or member" style="max-width:430px;margin:8px 0 14px"><div id="commsWeekly">Loading…</div><div id="commsWeeklyFeedback" class="notice hidden" role="status"></div></section>
       <div class="actions"><button type="button" class="secondary" id="commsQueueWeekly">Prepare eligible weekly updates</button><button type="button" class="secondary" data-open-panel="operationsPanel">Review 5–9 km opportunities</button></div>
-      <p class="small muted">*Due indicators are advisory; the server checks completed introductions and message history before creating a job.</p><h3>Extended-radius requests</h3><div id="commsRadius">Loading…</div>
-      <h3>Event invitations</h3><div id="commsEvents">Loading…</div>
+      <p class="small muted">*Due indicators are advisory; the server checks completed introductions and message history before creating a job.</p><section class="comms-section issue"><h3>📍 Extended-radius requests</h3><div id="commsRadius">Loading…</div></section>
+      <section class="comms-section issue"><h3>✉️ Event invitations</h3><div id="commsEvents">Loading…</div></section>
       <p class="small muted">Automated scheduling and live delivery remain disabled until messaging templates and safeguards are verified. No messages are sent by viewing this screen.</p>
     </div>
     <div class="panel dashboard-tab-panel hidden" id="individualPanel" role="tabpanel" aria-labelledby="tab-individual">
@@ -1183,11 +1224,14 @@
     btn.disabled=true;btn.textContent='Preparing…';
     try{
       const result=await api('POST',{action:'queue_weekly_waiting_updates',member_id:m.id});
-      if(result.queued===1)showMessage($('commsWeeklyFeedback'),`One pending update prepared for ${m.first_name||'member'}. No WhatsApp message sent.`,true);
-      else showMessage($('commsWeeklyFeedback'),`No update queued for ${m.first_name||'member'}. Reason: ${result.reason||'Not eligible under current matching rules'}. No WhatsApp message sent.`);
+      const success=result.queued===1;
+      const explanation=success?`Prepared for ${m.first_name||'member'}. This message is pending, NOT sent.`:`NOT PREPARED for ${m.first_name||'member'}: ${result.reason||'No reason returned by server'}.`;
+      const tr=btn.closest('tr');
+      if(tr){tr.dataset.result=success?'ok':'error';let note=tr.querySelector('.comms-inline-result');if(!note){note=document.createElement('span');note.className='comms-inline-result';btn.parentElement.appendChild(note);}note.className='comms-inline-result '+(success?'ok':'error');note.textContent=explanation;}
+      showMessage($('commsWeeklyFeedback'),explanation,success);
       await loadMessagingStatus();
       updateDailyStatus();
-    }catch(err){showMessage($('commsWeeklyFeedback'),err.message||'Could not queue update');}
+    }catch(err){const msg='NOT PREPARED: '+(err.message||'Could not queue update');showMessage($('commsWeeklyFeedback'),msg);const tr=btn.closest('tr');if(tr){tr.dataset.result='error';const note=document.createElement('span');note.className='comms-inline-result error';note.textContent=msg;btn.parentElement.appendChild(note);}}
     finally{btn.disabled=false;btn.textContent='Prepare update';}
   });
   $('refreshCommsButton').addEventListener('click',async()=>{const b=$('refreshCommsButton');b.disabled=true;b.textContent='Refreshing…';try{await Promise.all([loadOperations(),loadMessagingStatus(),loadWorkspace()]);updateDailyStatus();showMessage($('commsError'),'Updated at '+new Date().toLocaleTimeString('en-KE'),true);}catch(e){showMessage($('commsError'),e.message||'Refresh failed');}finally{b.disabled=false;b.textContent='Refresh communications';}});
