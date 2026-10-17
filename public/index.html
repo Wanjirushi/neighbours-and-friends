@@ -717,8 +717,7 @@ form.addEventListener('focusin',event=>{
     note.textContent=message;
   }
   prevField.scrollIntoView({behavior:'smooth',block:'center'});
-  if(previous==='friendPriorities')showTwoChoicesDialog();
-  else window.alert(message);
+  showNbffChoiceDialog(message);
   setTimeout(()=>{nbffTransitionWarning=false;},0);
 },true);
 form.addEventListener('change',event=>{
@@ -726,16 +725,22 @@ form.addEventListener('change',event=>{
   if(!nbffChoiceRules[name])return;
   const rule=nbffChoiceRules[name];
   const selected=[...form.querySelectorAll('input[name="'+name+'"]:checked')];
-  if(selected.length>=rule.min && selected.length<=rule.max){
+  if(selected.length>=rule.min && selected.length<=rule.max && !(name==='coreValues' && selected.some(x=>x.value==='None of these') && selected.length!==1)){
     const group=event.target.closest('.choices');
     group?.classList.remove('needs-attention');
     if(group?.nextElementSibling?.classList.contains('field-validation-error'))group.nextElementSibling.remove();
   }
 });
-function showTwoChoicesDialog(){
+function showNbffChoiceDialog(message){
   const dialog=document.getElementById('nbffTwoChoicesDialog');
-  if(dialog && typeof dialog.showModal==='function') {dialog.showModal();}
-  else alert('Please select exactly TWO qualities you look for in a friend. You currently have only one selected.');
+  if(!dialog){window.alert(message);return;}
+  dialog.querySelector('#nbffTwoChoicesTitle').textContent=message;
+  dialog.querySelector('#nbffChoiceDetail').textContent='';
+  if(!dialog.open && typeof dialog.showModal==='function')dialog.showModal();
+}
+function showTwoChoicesDialog(){
+  const count=form.querySelectorAll('input[name="friendPriorities"]:checked').length;
+  showNbffChoiceDialog(count<2?'Please choose 2 options.':'Please choose exactly 2 options.');
 }
 function flagField(field,message){
   window.nbffClarityMilestone?.('nbff_form_validation_error');
@@ -912,8 +917,42 @@ form.addEventListener('submit', async (event) => {
 </script>
 <dialog id="nbffTwoChoicesDialog" aria-labelledby="nbffTwoChoicesTitle" style="border:2px solid #bb7055;border-radius:14px;padding:26px;max-width:min(92vw,440px);box-shadow:0 20px 70px #0005;background:#fffdf8;color:#2e332d">
   <h2 id="nbffTwoChoicesTitle" style="font-size:25px;margin:0 0 12px">Please choose 2 options.</h2>
-  <p>Select one more answer to continue.</p>
+  <p id="nbffChoiceDetail"></p>
   <form method="dialog" style="text-align:right"><button class="button" type="submit">OK</button></form>
 </dialog>
+<dialog id="nbffExitDialog" aria-labelledby="nbffExitTitle" style="border:2px solid #bb7055;border-radius:14px;padding:26px;max-width:min(92vw,440px);box-shadow:0 20px 70px #0005;background:#fffdf8;color:#2e332d">
+ <h2 id="nbffExitTitle" style="font-size:24px;margin:0 0 12px">Leave without finishing?</h2>
+ <p style="line-height:1.5">Your answers haven't been submitted yet.</p>
+ <div style="display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;margin-top:18px">
+ <button type="button" class="button secondary" id="nbffLeaveAnyway">Leave</button>
+ <button type="button" class="button" id="nbffStayHere">Keep filling</button>
+ </div>
+</dialog>
+<script id="nbff-exit-protection">
+(function(){
+ const form=document.getElementById('joinForm');
+ const dialog=document.getElementById('nbffExitDialog');
+ if(!form||!dialog)return;
+ let started=false, completed=false, leaving=false, destination=null;
+ form.addEventListener('input',e=>{if(e.target.matches('input,select,textarea'))started=true;});
+ form.addEventListener('change',e=>{if(e.target.matches('input,select,textarea'))started=true;});
+ window.nbffMarkFormComplete=(function(original){return function(){completed=true;if(typeof original==='function')original();};})(window.nbffMarkFormComplete);
+ function warn(){return started&&!completed&&!leaving;}
+ // Browsers control the wording for tab close, refresh and external navigation.
+ window.addEventListener('beforeunload',function(e){if(!warn())return;e.preventDefault();e.returnValue='';});
+ document.addEventListener('click',function(e){
+   const link=e.target.closest('a[href]');
+   if(!link||!warn()||e.defaultPrevented||e.button!==0||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey||link.target==='_blank'||link.hasAttribute('download'))return;
+   const url=new URL(link.href,location.href);
+   if(url.origin===location.origin&&url.pathname===location.pathname&&url.search===location.search)return;
+   e.preventDefault();destination=url.href;
+   window.nbffTrackIssue?.('nbff_issue_exit_prompt_shown');
+   if(!dialog.open)dialog.showModal();
+ },true);
+ document.getElementById('nbffStayHere').addEventListener('click',()=>{destination=null;dialog.close();window.nbffTrackIssue?.('nbff_issue_exit_stayed');});
+ document.getElementById('nbffLeaveAnyway').addEventListener('click',()=>{leaving=true;dialog.close();window.nbffTrackIssue?.('nbff_issue_exit_confirmed');if(destination)location.assign(destination);});
+ dialog.addEventListener('close',()=>{if(!leaving)destination=null;});
+})();
+</script>
 </body>
 </html>
