@@ -732,15 +732,11 @@ form.addEventListener('change',event=>{
   }
 });
 function showNbffChoiceDialog(message){
-  const toast=document.getElementById('nbffQuestionToast');
-  if(!toast)return;
-  const text=toast.querySelector('.nbff-toast-message');
-  text.textContent=message;
-  toast.classList.remove('nbff-toast-visible');
-  void toast.offsetWidth;
-  toast.classList.add('nbff-toast-visible');
-  clearTimeout(window.nbffToastTimer);
-  window.nbffToastTimer=setTimeout(()=>toast.classList.remove('nbff-toast-visible'),3200);
+  const dialog=document.getElementById('nbffTwoChoicesDialog');
+  if(!dialog){window.alert(message);return;}
+  dialog.querySelector('#nbffTwoChoicesTitle').textContent=message;
+  dialog.querySelector('#nbffChoiceDetail').textContent='';
+  if(!dialog.open && typeof dialog.showModal==='function')dialog.showModal();
 }
 function showTwoChoicesDialog(){
   const count=form.querySelectorAll('input[name="friendPriorities"]:checked').length;
@@ -919,15 +915,11 @@ form.addEventListener('submit', async (event) => {
  document.getElementById('joinForm')?.addEventListener('submit',e=>{validate();if(!county.checkValidity()||!dial.checkValidity()||!num.checkValidity()){e.preventDefault();[county,dial,num].find(x=>!x.checkValidity())?.reportValidity();}},true);
 })();
 </script>
-<style>
-#nbffQuestionToast{position:fixed;z-index:99999;top:calc(16px + env(safe-area-inset-top, 0px));left:50%;transform:translate(-50%,-12px);width:max-content;max-width:min(350px,calc(100vw - 28px));box-sizing:border-box;display:flex;align-items:center;gap:10px;padding:12px 15px;background:#fffdf8;color:#283d32;border:1px solid #d9e4da;border-radius:14px;box-shadow:0 8px 28px rgba(30,55,40,.14);font:500 14px/1.45 inherit;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .18s ease,transform .18s ease,visibility .18s ease}
-#nbffQuestionToast.nbff-toast-visible{opacity:1;visibility:visible;transform:translate(-50%,0)}
-#nbffQuestionToast .nbff-toast-icon{display:grid;place-items:center;flex:0 0 23px;height:23px;border-radius:50%;background:#e6efe8;color:#315e45;font:700 14px/1 sans-serif}
-#nbffQuestionToast .nbff-toast-message{font-family:inherit}
-@media(max-width:480px){#nbffQuestionToast{top:calc(10px + env(safe-area-inset-top, 0px));font-size:13px;padding:10px 12px}}
-@media(prefers-reduced-motion:reduce){#nbffQuestionToast{transition:none}}
-</style>
-<div id="nbffQuestionToast" role="status" aria-live="polite" aria-atomic="true"><span class="nbff-toast-icon" aria-hidden="true">!</span><span class="nbff-toast-message">Please answer this question first.</span></div>
+<dialog id="nbffTwoChoicesDialog" aria-labelledby="nbffTwoChoicesTitle" style="border:2px solid #bb7055;border-radius:14px;padding:26px;max-width:min(92vw,440px);box-shadow:0 20px 70px #0005;background:#fffdf8;color:#2e332d">
+  <h2 id="nbffTwoChoicesTitle" style="font-size:25px;margin:0 0 12px">Please choose 2 options.</h2>
+  <p id="nbffChoiceDetail"></p>
+  <form method="dialog" style="text-align:right"><button class="button" type="submit">OK</button></form>
+</dialog>
 <dialog id="nbffExitDialog" aria-labelledby="nbffExitTitle" style="border:2px solid #bb7055;border-radius:14px;padding:26px;max-width:min(92vw,440px);box-shadow:0 20px 70px #0005;background:#fffdf8;color:#2e332d">
  <h2 id="nbffExitTitle" style="font-size:24px;margin:0 0 12px">Leave without finishing?</h2>
  <p style="line-height:1.5">Your answers haven't been submitted yet.</p>
@@ -1020,52 +1012,5 @@ body.nbff-progress-visible{padding-bottom:95px}
  update();
 })();
 </script>
-<script id="nbff-strict-question-order">
-(function(){
- const form=document.getElementById('joinForm');if(!form)return;
- const fields=[...form.querySelectorAll('input,select,textarea')].filter(e=>e.name&&e.type!=='hidden'&&!['submit','button'].includes(e.type));
- const optional=new Set(['email']);
- const groups=[],seen=new Set();
- fields.forEach(el=>{if(optional.has(el.name)||seen.has(el.name))return;seen.add(el.name);groups.push({name:el.name,el});});
- function incomplete(g){
-  const name=g.name,el=g.el,all=fields.filter(f=>f.name===name),checked=all.filter(f=>f.checked);
-  if(name==='friendPriorities')return checked.length!==2?'Please choose 2 options.':null;
-  if(name==='friendshipGoals')return checked.length<1||checked.length>2?'Please choose 1 or 2 options.':null;
-  if(name==='coreValues')return checked.length<1||checked.length>3||(checked.length>1&&checked.some(f=>f.value==='None of these'))?'Please choose up to 3 options. Select “None of these” on its own.':null;
-  if(['availability','lifeStage'].includes(name))return checked.length===0?'Please choose an answer.':null;
-  if(name==='childrenAges')return null;
-  if(el.type==='radio'||el.type==='checkbox')return checked.length===0?'Please choose an answer.':null;
-  if(!String(el.value||'').trim())return 'Please answer this question first.';
-  if(el.validity&&!el.validity.valid)return 'Please check this answer.';
-  return null;
- }
- let blocking=false,lastTime=0;
- function blockLater(target,event){
-  if(blocking||!target||!form.contains(target))return;
-  const control=target.closest('input,select,textarea,button,label,.choice');if(!control)return;
-  const el=control.matches('input,select,textarea')?control:control.querySelector('input,select,textarea');
-  if(!el||!el.name)return;
-  const index=groups.findIndex(g=>g.name===el.name);if(index<0)return;
-  for(let i=0;i<index;i++){
-   const msg=incomplete(groups[i]);if(!msg)continue;
-   event.preventDefault();event.stopImmediatePropagation();
-   const previous=groups[i].el;blocking=true;
-   previous.closest('.choices')?.classList.add('needs-attention');
-   previous.scrollIntoView({behavior:'smooth',block:'center'});
-   try{window.nbffTrackIssue?.('nbff_issue_skipped_required_field');}catch(e){}
-   const now=Date.now();if(now-lastTime>700){lastTime=now;
-     if(typeof showNbffChoiceDialog==='function')showNbffChoiceDialog(msg);else alert(msg);
-   }
-   setTimeout(()=>{blocking=false;try{previous.focus({preventScroll:true});}catch(e){}},250);
-   return;
-  }
- }
- // Check intentional selection/clicks only. Focus and keystroke interception can trap
- // users after browser autofill or when a numeric field is being edited.
- form.addEventListener('pointerdown',e=>blockLater(e.target,e),true);
- form.addEventListener('click',e=>blockLater(e.target,e),true);
-})();
-</script>
-
 </body>
 </html>
