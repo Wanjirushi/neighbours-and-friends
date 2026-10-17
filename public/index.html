@@ -1012,5 +1012,52 @@ body.nbff-progress-visible{padding-bottom:95px}
  update();
 })();
 </script>
+<script id="nbff-strict-question-order">
+(function(){
+ const form=document.getElementById('joinForm');if(!form)return;
+ const fields=[...form.querySelectorAll('input,select,textarea')].filter(e=>e.name&&!['hidden','submit','button'].includes(e.type));
+ const optional=new Set(['email']);
+ const groups=[];const seen=new Set();
+ fields.forEach(el=>{if(optional.has(el.name)||seen.has(el.name))return;seen.add(el.name);groups.push({name:el.name,el});});
+ function incomplete(g){
+  const name=g.name,el=g.el,all=fields.filter(f=>f.name===name),checked=all.filter(f=>f.checked);
+  if(name==='friendPriorities')return checked.length!==2?'Please choose 2 options.':null;
+  if(name==='friendshipGoals')return checked.length<1||checked.length>2?'Please choose 1 or 2 options.':null;
+  if(name==='coreValues')return checked.length<1||checked.length>3||(checked.length>1&&checked.some(f=>f.value==='None of these'))?'Please choose up to 3 options. Select “None of these” on its own.':null;
+  if(['availability','lifeStage'].includes(name))return checked.length===0?'Please choose an answer.':null;
+  if(name==='childrenAges')return null; // Not applicable to visitors without children.
+  if(el.type==='radio'||el.type==='checkbox')return checked.length===0?'Please choose an answer.':null;
+  if(!String(el.value||'').trim())return 'Please answer this question first.';
+  if(el.validity&&!el.validity.valid)return 'Please check this answer.';
+  return null;
+ }
+ let blocking=false,lastTime=0;
+ function blockLater(target,event){
+  if(blocking||!target||!form.contains(target))return;
+  const control=target.closest('input,select,textarea,button,label,.choice');if(!control)return;
+  const el=control.matches('input,select,textarea')?control:control.querySelector('input,select,textarea');
+  if(!el||!el.name)return;
+  const index=groups.findIndex(g=>g.name===el.name);if(index<0)return;
+  for(let i=0;i<index;i++){
+   const msg=incomplete(groups[i]);if(!msg)continue;
+   event.preventDefault();event.stopImmediatePropagation();
+   const previous=groups[i].el;blocking=true;
+   previous.closest('.choices')?.classList.add('needs-attention');
+   previous.scrollIntoView({behavior:'smooth',block:'center'});
+   try{window.nbffTrackIssue?.('nbff_issue_skipped_required_field');}catch(e){}
+   const now=Date.now();if(now-lastTime>700){lastTime=now;
+     if(typeof showNbffChoiceDialog==='function')showNbffChoiceDialog(msg);else alert(msg);
+   }
+   setTimeout(()=>{blocking=false;try{previous.focus({preventScroll:true});}catch(e){}},200);
+   return;
+  }
+ }
+ form.addEventListener('pointerdown',e=>blockLater(e.target,e),true);
+ form.addEventListener('click',e=>blockLater(e.target,e),true);
+ form.addEventListener('focusin',e=>blockLater(e.target,e),true);
+ form.addEventListener('keydown',e=>{if(e.key==='Tab')return;blockLater(e.target,e);},true);
+})();
+</script>
+
 </body>
 </html>
