@@ -145,6 +145,20 @@
       <div class="stat"><strong style="font-size:16px">2 · Pricing reactions</strong><span class="small">Check where visitors stop or click around the price.</span></div>
       <div class="stat"><strong style="font-size:16px">3 · Form friction</strong><span class="small">Watch pauses, repeated clicks and exits during registration.</span></div>
     </div>
+    <div style="margin:18px 0 4px;padding:17px;background:#fff;border:1px solid #c9e4e8;border-radius:12px">
+      <h3 style="font-size:20px;margin:0 0 8px">🩺 Registration Form Health</h3>
+      <p class="small muted">The homepage now emits anonymous Clarity events when a visitor encounters a form issue. Open Clarity, filter recordings by these custom event names, and inspect the affected sessions. These are <strong>event categories, not live counts</strong>.</p>
+      <div class="table-wrap"><table style="min-width:570px"><thead><tr><th>Issue to investigate</th><th>Clarity event</th></tr></thead><tbody>
+        <tr><td>Selected fewer or more than two friend qualities</td><td><code>nbff_issue_two_friend_qualities</code></td></tr>
+        <tr><td>Location not confirmed</td><td><code>nbff_issue_location_not_confirmed</code></td></tr>
+        <tr><td>Other missing or invalid required answers</td><td><code>nbff_issue_other_required_field</code></td></tr>
+        <tr><td>Registration failed to save</td><td><code>nbff_error_registration_request</code></td></tr>
+        <tr><td>Form started but page was left before saving</td><td><code>nbff_issue_form_left_unfinished</code></td></tr>
+        <tr><td>Successful registration</td><td><code>nbff_registration_saved</code></td></tr>
+      </tbody></table></div>
+      <p class="small muted">Abandonment events are best-effort and may not fire if the browser closes abruptly. Clarity custom-event reports may take time to populate. No personal answers are sent in event names.</p>
+      <a href="https://clarity.microsoft.com/projects/view/yz2uzn8tmg/" target="_blank" rel="noopener noreferrer" style="display:inline-block;padding:10px 15px;background:#354f40;color:white;border-radius:7px;text-decoration:none;font-weight:bold">Review form issues in Clarity ↗</a>
+    </div>
     <p class="small muted" style="margin:14px 0 0">Clarity recordings are viewed in Microsoft Clarity, not embedded here. The figures above in Website analytics come from NBFF's own tracking and payment data; Clarity session metrics are not yet imported. Sensitive form fields should remain masked.</p>
   </section>
 
