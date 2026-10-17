@@ -1005,6 +1005,7 @@ body.nbff-progress-visible{padding-bottom:95px}
  function issue(item){
   const {key,el,els}=item,chosen=els.filter(e=>e.checked),n=chosen.length;
   if(key==='__confirmedLocation')return document.getElementById('locationLatitude')?.value&&document.getElementById('locationLongitude')?.value?'':'Please confirm your location first.';
+  if(key==='mpesaCode')return String(el.value||'').trim()?'':'Please answer this question first.';
   if(key==='friendPriorities')return n===2?'':'Please select 2 options.';
   if(key==='friendshipGoals')return n>=1&&n<=2?'':'Please answer this question first.';
   if(key==='coreValues')return n>=1&&n<=3&&!(n>1&&chosen.some(e=>e.value==='None of these'))?'':'Please answer this question first.';
