@@ -963,9 +963,11 @@ body.nbff-progress-visible{padding-bottom:95px}
  // Additional multi-select groups are required even though HTML checkboxes aren't individually required.
  const controls=[...form.querySelectorAll('input,select,textarea')].filter(el=>!el.disabled&&el.type!=='hidden'&&el.type!=='submit'&&el.type!=='button');
  const groups=new Map();
- controls.forEach(el=>{if(!el.required)return;const key=el.name||el.id;if(!key)return;if(!groups.has(key))groups.set(key,[]);groups.get(key).push(el);});
- ['friendPriorities','friendshipGoals','coreValues'].forEach(name=>{const els=[...form.querySelectorAll('input[name="'+name+'"]')];if(els.length)groups.set(name,els);});
+ controls.forEach(el=>{if(!el.required||el.id==='countryCallingCode')return;const key=el.name||el.id;if(!key)return;if(!groups.has(key))groups.set(key,[]);groups.get(key).push(el);});
+ ['friendPriorities','friendshipGoals','coreValues','availability','lifeStage'].forEach(name=>{const els=[...form.querySelectorAll('input[name="'+name+'"]')];if(els.length)groups.set(name,els);});
+ groups.set('__confirmedLocation',[]);
  function answered(name,els){
+  if(name==='__confirmedLocation')return !!(document.getElementById('locationLatitude')?.value&&document.getElementById('locationLongitude')?.value);
   if(name==='friendPriorities')return els.filter(el=>el.checked).length===2;
   if(name==='friendshipGoals')return els.filter(el=>el.checked).length>=1&&els.filter(el=>el.checked).length<=2;
   if(name==='coreValues'){const selected=els.filter(el=>el.checked);return selected.length>=1&&selected.length<=3&&!(selected.length>1&&selected.some(el=>el.value==='None of these'));}
@@ -982,72 +984,68 @@ body.nbff-progress-visible{padding-bottom:95px}
  }
  const observer=new IntersectionObserver(entries=>{const visible=entries.some(e=>e.isIntersecting);bar.style.display=visible?'block':'none';document.body.classList.toggle('nbff-progress-visible',visible);if(visible)update();},{threshold:0});
  observer.observe(form);
- form.addEventListener('input',update);form.addEventListener('change',update);
+ form.addEventListener('input',update);form.addEventListener('change',update);document.getElementById('confirmMapLocation')?.addEventListener('click',()=>setTimeout(update,100));
  update();
 })();
 </script>
 <script id="nbff-strict-question-order">
 (function(){
- const form=document.getElementById('joinForm'); if(!form)return;
+ const form=document.getElementById('joinForm');if(!form)return;
  const special=new Set(['availability','lifeStage','childrenAges','friendshipGoals','friendPriorities','coreValues']);
  const fields=[...form.querySelectorAll('input,select,textarea')].filter(e=>!e.disabled&&!['hidden','submit','button','reset'].includes(e.type));
  const items=[],seen=new Set();
  for(const el of fields){
-   const key=el.name||el.id;
-   if(!key||seen.has(key))continue;
-   seen.add(key);
-   if(!el.required&&!special.has(key))continue;
-   items.push({key,el,els:fields.filter(e=>(e.name||e.id)===key),order:el.compareDocumentPosition(form)?0:0});
+   const key=el.name||el.id;if(!key||seen.has(key)||key==='countryCallingCode')continue;
+   seen.add(key);if(!el.required&&!special.has(key))continue;
+   items.push({key,el,els:fields.filter(e=>(e.name||e.id)===key)});
  }
- // Location confirmation is a real required step, even though its coordinates are hidden inputs.
  const mapButton=document.getElementById('useCurrentLocation');
  if(mapButton)items.push({key:'__confirmedLocation',el:mapButton,els:[mapButton]});
  items.sort((a,b)=>a.el===b.el?0:(a.el.compareDocumentPosition(b.el)&Node.DOCUMENT_POSITION_FOLLOWING)?-1:1);
  function issue(item){
-  const {key,el,els}=item, chosen=els.filter(e=>e.checked),n=chosen.length;
+  const {key,el,els}=item,chosen=els.filter(e=>e.checked),n=chosen.length;
   if(key==='__confirmedLocation')return document.getElementById('locationLatitude')?.value&&document.getElementById('locationLongitude')?.value?'':'Please confirm your location first.';
   if(key==='friendPriorities')return n===2?'':'Please select 2 options.';
   if(key==='friendshipGoals')return n>=1&&n<=2?'':'Please answer this question first.';
   if(key==='coreValues')return n>=1&&n<=3&&!(n>1&&chosen.some(e=>e.value==='None of these'))?'':'Please answer this question first.';
   if(el.type==='checkbox'||el.type==='radio')return n?'':'Please answer this question first.';
-  if(!String(el.value||'').trim()||!el.checkValidity())return 'Please answer this question first.';
-  return '';
+  return String(el.value||'').trim()&&el.checkValidity()?'':'Please answer this question first.';
  }
  let active=null;
  function clear(){form.querySelectorAll('[data-nbff-order-hint]').forEach(e=>e.remove());form.querySelectorAll('.nbff-order-highlight').forEach(e=>e.classList.remove('nbff-order-highlight'));active=null;}
  function anchor(item){return item.key==='__confirmedLocation'?document.querySelector('.location-methods'):(['checkbox','radio'].includes(item.el.type)?item.el.closest('.choices')||item.el:item.el);}
- function warn(item,message){
+ function warn(item,msg){
   clear();const el=anchor(item);if(!el)return;
-  el.classList.add('nbff-order-highlight');
-  const note=document.createElement('div');note.dataset.nbffOrderHint='';note.className='nbff-order-hint';note.setAttribute('role','status');note.textContent=message;
+  el.classList.add('nbff-order-highlight');const note=document.createElement('div');note.dataset.nbffOrderHint='';note.className='nbff-order-hint';note.setAttribute('role','status');note.textContent=msg;
   el.insertAdjacentElement('afterend',note);active=item.key;
   el.scrollIntoView({behavior:'smooth',block:'center'});
   try{window.nbffTrackIssue?.(item.key==='__confirmedLocation'?'nbff_issue_location_not_confirmed':'nbff_issue_skipped_required_field');}catch(e){}
  }
- function targetItemIndex(target){
-  if(target.closest('#useCurrentLocation,#chooseMapLocation,#confirmMapLocation,#locationMap,#locationMapWrap,.location-methods'))return items.findIndex(g=>g.key==='__confirmedLocation');
+ function indexFor(target){
+  // County picker, county menu and its options belong to COUNTY, not AREA.
+  if(target.closest('#showCountyOptions,#countyMenu,.county-select-wrap'))return items.findIndex(x=>x.key==='county');
+  // Map buttons, map and confirmation belong to the location confirmation question.
+  if(target.closest('#useCurrentLocation,#chooseMapLocation,#confirmMapLocation,#locationMap,#locationMapWrap,.location-methods'))return items.findIndex(x=>x.key==='__confirmedLocation');
   const field=target.closest('input,select,textarea');
-  if(field){const key=field.name||field.id;const i=items.findIndex(g=>g.key===key);if(i>=0)return i;}
-  const label=target.closest('label');if(label){const control=label.control||label.querySelector('input,select,textarea');if(control){const i=items.findIndex(g=>g.key===(control.name||control.id));if(i>=0)return i;}}
-  // For controls that aren't themselves required (e.g. buttons), locate them in document order.
-  const candidate=field||target.closest('button,.choice,label')||target;
-  return items.findIndex(item=>item.el===candidate||(candidate.compareDocumentPosition(item.el)&Node.DOCUMENT_POSITION_FOLLOWING));
+  if(field){const i=items.findIndex(x=>x.key===(field.name||field.id));if(i>=0)return i;}
+  const label=target.closest('label');
+  if(label){const control=label.control||label.querySelector('input,select,textarea');if(control){const i=items.findIndex(x=>x.key===(control.name||control.id));if(i>=0)return i;}}
+  // Buttons outside question groups (e.g. submit) come after their preceding questions.
+  if(target.closest('button'))return items.filter(x=>!!(x.el.compareDocumentPosition(target)&Node.DOCUMENT_POSITION_FOLLOWING)).length;
+  return -1;
  }
- function guard(event){
-  const target=event.target;if(!(target instanceof Element)||!form.contains(target))return;
-  if(target.closest('a'))return;
-  const i=targetItemIndex(target);if(i<0)return;
+ function guard(e){
+  const target=e.target;if(!(target instanceof Element)||!form.contains(target)||target.closest('a,[data-nbff-order-hint]'))return;
+  const i=indexFor(target);if(i<0)return;
   for(let j=0;j<i;j++){
    const msg=issue(items[j]);if(!msg)continue;
-   event.preventDefault();event.stopImmediatePropagation();warn(items[j],msg);return;
+   e.preventDefault();e.stopImmediatePropagation();warn(items[j],msg);return;
   }
  }
- // Capture interactions BEFORE checkbox/radio state changes and before typing into later fields.
- form.addEventListener('pointerdown',e=>{if(e.target.closest('input,select,textarea,button,label,.choice'))guard(e);},true);
- form.addEventListener('click',guard,true);
- form.addEventListener('keydown',e=>{if(e.key==='Tab')return;guard(e);},true);
- form.addEventListener('beforeinput',guard,true);
- function refresh(){if(!active)return;const g=items.find(x=>x.key===active);if(g&&!issue(g))clear();}
+ // Only check genuine attempts to interact, never keystrokes/focus on the question being fixed.
+ form.addEventListener('pointerdown',e=>{if(e.target.closest('input,select,textarea,button,label,.choice,#countyMenu'))guard(e);},true);
+ form.addEventListener('click',e=>{if(e.detail===0)guard(e);},true);
+ function refresh(){if(!active)return;const item=items.find(x=>x.key===active);if(item&&!issue(item))clear();}
  form.addEventListener('input',refresh);form.addEventListener('change',refresh);
  document.getElementById('confirmMapLocation')?.addEventListener('click',()=>setTimeout(refresh,0));
 })();
