@@ -133,33 +133,18 @@
  <div id="analyticsError" class="notice hidden" role="status"></div>
  <div class="analytics-cards" style="margin:20px 0"><div class="analytics-card"><span>👥 Unique visitors</span><strong id="anaVisitors">—</strong></div><div class="analytics-card"><span>📝 Registrations</span><strong id="anaRegistrations">—</strong></div><div class="analytics-card"><span>💰 Verified payments</span><strong id="anaPaid">—</strong></div><div class="analytics-card"><span>📈 Visitor → paid</span><strong id="anaConversion">—</strong></div><div class="analytics-card"><span>💵 Verified revenue</span><strong id="anaRevenue">—</strong></div></div>
  <h3>Registration funnel</h3><div id="analyticsFunnel" class="analytics-footnote">Loading tracking data…</div>
-  <section class="clarity-panel" aria-labelledby="clarityHeading" style="margin:24px 0;padding:20px;border:2px solid #c9e4e8;border-radius:14px;background:#f1f9fa">
-    <h3 id="clarityHeading" style="margin:0 0 7px">👀 Visitor behaviour · Microsoft Clarity</h3>
-    <p class="muted" style="margin:0 0 15px">Watch real visitor sessions and explore click and scroll heatmaps. These open your existing NBFF Clarity project in a new tab.</p>
-    <div class="actions" style="margin-bottom:14px">
-      <a href="https://clarity.microsoft.com/projects/view/yz2uzn8tmg/" target="_blank" rel="noopener noreferrer" style="display:inline-block;padding:11px 15px;background:#354f40;color:white;border-radius:8px;text-decoration:none;font-weight:bold">▶ View recordings &amp; heatmaps ↗</a>
-      <a href="https://clarity.microsoft.com/projects/view/yz2uzn8tmg/settings#masking" target="_blank" rel="noopener noreferrer" style="display:inline-block;padding:11px 15px;border:1px solid #354f40;color:#354f40;border-radius:8px;text-decoration:none;font-weight:bold">Privacy settings ↗</a>
+  <section class="clarity-panel" style="margin:24px 0;padding:20px;border:1px solid #c9e4e8;border-radius:14px;background:#f8fbfa">
+    <h3 style="margin:0 0 8px">🩺 Registration Form Health</h3>
+    <p class="muted small">Actual anonymous website events for the selected analytics period. No Clarity login needed.</p>
+    <div class="stats" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin:15px 0">
+      <div class="stat"><strong id="fhStarts">—</strong><span>Form starts</span></div>
+      <div class="stat"><strong id="fhSaved">—</strong><span>Registrations saved</span></div>
+      <div class="stat"><strong id="fhIncomplete">—</strong><span>Started, not saved yet</span></div>
+      <div class="stat"><strong id="fhIssues">—</strong><span>Sessions with issues</span></div>
     </div>
-    <div class="stats" style="grid-template-columns:repeat(auto-fit,minmax(180px,1fr))">
-      <div class="stat"><strong style="font-size:16px">1 · Homepage exits</strong><span class="small">Look for visitors leaving before scrolling.</span></div>
-      <div class="stat"><strong style="font-size:16px">2 · Pricing reactions</strong><span class="small">Check where visitors stop or click around the price.</span></div>
-      <div class="stat"><strong style="font-size:16px">3 · Form friction</strong><span class="small">Watch pauses, repeated clicks and exits during registration.</span></div>
-    </div>
-    <div style="margin:18px 0 4px;padding:17px;background:#fff;border:1px solid #c9e4e8;border-radius:12px">
-      <h3 style="font-size:20px;margin:0 0 8px">🩺 Registration Form Health</h3>
-      <p class="small muted">The homepage now emits anonymous Clarity events when a visitor encounters a form issue. Open Clarity, filter recordings by these custom event names, and inspect the affected sessions. These are <strong>event categories, not live counts</strong>.</p>
-      <div class="table-wrap"><table style="min-width:570px"><thead><tr><th>Issue to investigate</th><th>Clarity event</th></tr></thead><tbody>
-        <tr><td>Selected fewer or more than two friend qualities</td><td><code>nbff_issue_two_friend_qualities</code></td></tr>
-        <tr><td>Location not confirmed</td><td><code>nbff_issue_location_not_confirmed</code></td></tr>
-        <tr><td>Other missing or invalid required answers</td><td><code>nbff_issue_other_required_field</code></td></tr>
-        <tr><td>Registration failed to save</td><td><code>nbff_error_registration_request</code></td></tr>
-        <tr><td>Form started but page was left before saving</td><td><code>nbff_issue_form_left_unfinished</code></td></tr>
-        <tr><td>Successful registration</td><td><code>nbff_registration_saved</code></td></tr>
-      </tbody></table></div>
-      <p class="small muted">Abandonment events are best-effort and may not fire if the browser closes abruptly. Clarity custom-event reports may take time to populate. No personal answers are sent in event names.</p>
-      <a href="https://clarity.microsoft.com/projects/view/yz2uzn8tmg/" target="_blank" rel="noopener noreferrer" style="display:inline-block;padding:10px 15px;background:#354f40;color:white;border-radius:7px;text-decoration:none;font-weight:bold">Review form issues in Clarity ↗</a>
-    </div>
-    <p class="small muted" style="margin:14px 0 0">Clarity recordings are viewed in Microsoft Clarity, not embedded here. The figures above in Website analytics come from NBFF's own tracking and payment data; Clarity session metrics are not yet imported. Sensitive form fields should remain masked.</p>
+    <h4 style="margin:18px 0 8px">Most frequent difficulties</h4>
+    <div id="fhIssueRows" class="growth-bars">Loading form events…</div>
+    <p id="fhNotice" class="muted small">Counts begin after deployment of the new event collector; earlier Clarity events cannot be recovered here. Unfinished does not necessarily mean abandoned.</p>
   </section>
 
  <h3>Visitors by day</h3><div id="analyticsDays" class="growth-bars">Loading…</div>
@@ -699,6 +684,19 @@
     const b=$('analyticsRefresh');if(b)b.disabled=true;
     try{
       const data=await api('POST',{action:'analytics_overview',days:$('analyticsPeriod').value});
+      try {
+        const fh=await api('POST',{action:'form_health_overview',days:$('analyticsPeriod').value});
+        const out=id=>document.getElementById(id);
+        if(!fh.tracking_ready){['fhStarts','fhSaved','fhIncomplete','fhIssues'].forEach(id=>out(id).textContent='—');out('fhIssueRows').textContent='Tracking not connected yet.';out('fhNotice').textContent=fh.error||'Deploy the event collector and SQL first.';}
+        else{
+          out('fhStarts').textContent=Number(fh.starts||0).toLocaleString();out('fhSaved').textContent=Number(fh.saved||0).toLocaleString();
+          out('fhIncomplete').textContent=Number(fh.not_saved_yet||0).toLocaleString();out('fhIssues').textContent=Number(fh.issue_sessions||0).toLocaleString();
+          const labels={nbff_issue_two_friend_qualities:'Friendship qualities',nbff_issue_location_not_confirmed:'Map location not confirmed',nbff_issue_skipped_required_field:'Skipped required question',nbff_issue_friendship_goals:'Friendship goals',nbff_issue_core_values:'Core values',nbff_issue_payment_reference:'M-PESA code',nbff_issue_county:'County',nbff_issue_area:'Area',nbff_issue_neighbourhood:'Neighbourhood',nbff_issue_form_left_unfinished:'Left page before saving (best effort)',nbff_error_registration_request:'Registration request failed',nbff_registration_error:'Registration error',nbff_form_validation_error:'Submission validation error'};
+          const issues=(fh.issues||[]).filter(x=>x.count>0);const max=Math.max(1,...issues.map(x=>x.count));
+          out('fhIssueRows').innerHTML=issues.length?issues.map(x=>'<div class="growth-bar-line"><span>'+safe(labels[x.name]||x.name.replace(/^nbff_(issue|error)_/,'').replaceAll('_',' '))+'</span><div class="growth-bar-track"><div class="growth-bar-fill" style="width:'+Math.round(100*x.count/max)+'%"></div></div><strong>'+Number(x.count).toLocaleString()+'</strong></div>').join(''):'<p>No issues recorded in this period.</p>';
+          out('fhNotice').textContent=(fh.truncated?'Reporting limit reached; counts may be incomplete. ':'')+'Counts reflect unique browser sessions, not individual people. Started but not saved does not prove abandonment. Tracking begins after deployment.';
+        }
+      }catch(e){document.getElementById('fhIssueRows').textContent='Form health could not load: '+(e.message||'unknown error');}
       const fmt=n=>Number(n||0).toLocaleString('en-KE');
       $('anaVisitors').textContent=data.tracking_ready?fmt(data.unique_visitors):'Not connected';
       $('anaRegistrations').textContent=fmt(data.registrations);
