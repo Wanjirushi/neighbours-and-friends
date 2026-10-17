@@ -245,6 +245,17 @@ fbq('track', 'PageView');
     recorded[name] = true;
     if (typeof window.clarity === 'function') window.clarity('event', name);
   }
+  window.nbffTrackIssue = function (name) {
+    if (!/^nbff_(issue|error)_[a-z0-9_]+$/.test(name)) return;
+    if (typeof window.clarity === 'function') window.clarity('event', name);
+  };
+  var formCompleted = false;
+  window.nbffMarkFormComplete = function(){ formCompleted = true; };
+  window.addEventListener('pagehide', function(){
+    if (recorded.nbff_form_started && !formCompleted) {
+      window.nbffTrackIssue('nbff_issue_form_left_unfinished');
+    }
+  });
   function ready() {
     var form = document.getElementById('joinForm');
     if (!form) return;
@@ -638,8 +649,16 @@ function validationLabel(field){
   if(field.labels?.length)return field.labels[0].textContent.trim();
   return field.getAttribute('aria-label')||group?.querySelector('h3')?.textContent.trim()||field.name||'this question';
 }
+function showTwoChoicesDialog(){
+  const dialog=document.getElementById('nbffTwoChoicesDialog');
+  if(dialog && typeof dialog.showModal==='function') {dialog.showModal();}
+  else alert('Please select exactly TWO qualities you look for in a friend. You currently have only one selected.');
+}
 function flagField(field,message){
   window.nbffClarityMilestone?.('nbff_form_validation_error');
+  const issueNames = {friendPriorities:'two_friend_qualities', friendshipGoals:'friendship_goals',coreValues:'core_values',county:'county',area:'area',neighbourhood:'neighbourhood',phone:'phone',mpesaCode:'payment_reference',paymentDate:'payment_date',paymentHour:'payment_time',paymentMinute:'payment_time',paymentPeriod:'payment_time',whatsappOptIn:'consent'};
+  const issueKey = issueNames[field.name] || issueNames[field.id] || 'other_required_field';
+  window.nbffTrackIssue?.('nbff_issue_' + issueKey);
   clearFormValidation();
   const label=validationLabel(field);
   const target=(field.type==='radio'||field.type==='checkbox')?(field.closest('.choices')||field.closest('label')||field):field;
@@ -651,6 +670,7 @@ function flagField(field,message){
   summary.textContent='Please complete: '+label+'. Your answers have been saved on this page.';
   const actions=form.querySelector('.form-actions');actions.parentNode.insertBefore(summary,actions);
   formMessage.textContent='Please complete: '+label+'.';formMessage.classList.add('is-error');
+  if (field.name === 'friendPriorities') showTwoChoicesDialog();
   target.scrollIntoView({behavior:'smooth',block:'center'});
   try{field.focus({preventScroll:true});}catch(e){}
 }
@@ -677,10 +697,11 @@ form.addEventListener('submit', async (event) => {
   const selectedGoals = form.querySelectorAll('input[name="friendshipGoals"]:checked');
   if (selectedGoals.length < 1 || selectedGoals.length > 2) { flagField(form.querySelector('input[name="friendshipGoals"]'),"Please choose one or two friendship goals."); return; }
   const selectedPriorities = form.querySelectorAll('input[name="friendPriorities"]:checked');
-  if (selectedPriorities.length !== 2) { flagField(form.querySelector('input[name="friendPriorities"]'),"Please choose exactly two friendship priorities."); return; }
+  if (selectedPriorities.length !== 2) { flagField(form.querySelector('input[name="friendPriorities"]'),"Please select exactly TWO qualities you look for in a friend. You have to choose two answers to continue."); return; }
   const selectedValues = [...form.querySelectorAll('input[name="coreValues"]:checked')];
   if (selectedValues.length < 1 || selectedValues.length > 3 || (selectedValues.some(x => x.value === 'None of these') && selectedValues.length !== 1)) { flagField(form.querySelector('input[name="coreValues"]'),"Please choose up to three life priorities, or None of these on its own."); return; }
   if (!latitudeInput.value || !longitudeInput.value) {
+    window.nbffTrackIssue?.('nbff_issue_location_not_confirmed');
     showLocationMessage('Please use your current location or choose and confirm a point on the map.','error');
     document.getElementById('useCurrentLocation').focus();
     return;
@@ -753,6 +774,7 @@ form.addEventListener('submit', async (event) => {
     }
 
     window.nbffClarityMilestone?.('nbff_registration_saved');
+    window.nbffMarkFormComplete?.();
     // Track registration only after Supabase confirms the record was saved.
     if (typeof window.fbq === 'function') {
       window.fbq('track', 'CompleteRegistration', { content_name: 'Neighbour Friend Finder Membership', status: 'pending_payment' });
@@ -762,6 +784,7 @@ form.addEventListener('submit', async (event) => {
     window.location.assign('/thank-you.html');
   } catch (error) {
     window.nbffClarityMilestone?.('nbff_registration_error');
+    window.nbffTrackIssue?.('nbff_error_registration_request');
     formMessage.textContent =
       error instanceof Error
         ? error.message
@@ -804,5 +827,11 @@ form.addEventListener('submit', async (event) => {
  document.getElementById('joinForm')?.addEventListener('submit',e=>{validate();if(!county.checkValidity()||!dial.checkValidity()||!num.checkValidity()){e.preventDefault();[county,dial,num].find(x=>!x.checkValidity())?.reportValidity();}},true);
 })();
 </script>
+<dialog id="nbffTwoChoicesDialog" aria-labelledby="nbffTwoChoicesTitle" style="border:2px solid #bb7055;border-radius:14px;padding:26px;max-width:min(92vw,440px);box-shadow:0 20px 70px #0005;background:#fffdf8;color:#2e332d">
+  <h2 id="nbffTwoChoicesTitle" style="font-size:25px;margin:0 0 12px">Please select two qualities</h2>
+  <p>For <strong>“What are the two most important qualities you look for in a friend?”</strong> you must select <strong>exactly 2</strong> answers before joining.</p>
+  <p>Your other answers are still here. We'll take you straight to this question.</p>
+  <form method="dialog" style="text-align:right"><button class="button" type="submit">Choose my second answer</button></form>
+</dialog>
 </body>
 </html>
