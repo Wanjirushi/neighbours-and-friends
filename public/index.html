@@ -649,6 +649,89 @@ function validationLabel(field){
   if(field.labels?.length)return field.labels[0].textContent.trim();
   return field.getAttribute('aria-label')||group?.querySelector('h3')?.textContent.trim()||field.name||'this question';
 }
+// Explain each multi-select rule without changing matching requirements.
+function nbffMultiChoiceGuidance(){
+ const rules=[
+  {name:'availability',text:'Choose all the times that work for you. You can select more than one.'},
+  {name:'lifeStage',text:'Choose every life stage that describes you. More than one is allowed.'},
+  {name:'childrenAges',text:'Choose all applicable age groups, or “I don’t have children”.'},
+  {name:'friendshipGoals',text:'Choose one or two friendship goals.'},
+  {name:'friendPriorities',text:'Choose exactly two friendship qualities.'},
+  {name:'coreValues',text:'Choose one, two or three priorities, or “None of these” alone.'}
+ ];
+ rules.forEach(rule=>{
+  const first=form.querySelector('input[name="'+rule.name+'"]');
+  const choices=first?.closest('.choices');
+  if(!choices || choices.previousElementSibling?.classList?.contains('nbff-multiselect-rule'))return;
+  const tip=document.createElement('p');tip.className='field-hint nbff-multiselect-rule';
+  tip.textContent=rule.text;tip.style.margin='7px 0 9px';
+  choices.parentNode.insertBefore(tip,choices);
+ });
+}
+nbffMultiChoiceGuidance();
+// Check a multi-answer question as the visitor moves into a later question.
+// Do not interrupt someone while they are still choosing within the same group.
+const nbffChoiceRules = {
+  friendPriorities: {min:2,max:2,message:'Please choose 2 options.'},
+  friendshipGoals: {min:1,max:2,message:'Please choose at least 1 option.'},
+  coreValues: {min:1,max:3,message:'Please choose at least 1 option.'}
+};
+let nbffLastQuestion = null;
+let nbffTransitionWarning = false;
+function nbffQuestionFor(el){
+  if(!el || !form.contains(el))return null;
+  const field=el.closest('input,select,textarea');
+  if(!field)return null;
+  if(nbffChoiceRules[field.name])return field.name;
+  return field.name || field.id || null;
+}
+form.addEventListener('focusin',event=>{
+  if(nbffTransitionWarning)return;
+  const current=nbffQuestionFor(event.target);
+  const previous=nbffLastQuestion;
+  if(!current)return;
+  nbffLastQuestion=current;
+  if(!previous || previous===current || !nbffChoiceRules[previous])return;
+  const prevField=form.querySelector('input[name="'+previous+'"]');
+  const nextField=event.target;
+  if(!prevField || !nextField || !prevField.compareDocumentPosition(nextField))return;
+  // Only prompt when proceeding forward, not when revisiting earlier answers.
+  if(!(prevField.compareDocumentPosition(nextField)&Node.DOCUMENT_POSITION_FOLLOWING))return;
+  const rule=nbffChoiceRules[previous];
+  const selected=[...form.querySelectorAll('input[name="'+previous+'"]:checked')];
+  const valid=selected.length>=rule.min && selected.length<=rule.max &&
+    !(previous==='coreValues' && selected.some(x=>x.value==='None of these') && selected.length!==1);
+  if(valid)return;
+  nbffTransitionWarning=true;
+  nbffLastQuestion=previous;
+  window.nbffTrackIssue?.('nbff_issue_'+(previous==='friendPriorities'?'two_friend_qualities':previous==='friendshipGoals'?'friendship_goals':'core_values'));
+  const message=previous==='friendPriorities'?'Please choose 2 options.':
+    (selected.length>rule.max?'Please choose no more than '+rule.max+' options.':rule.message);
+  const group=prevField.closest('.choices');
+  if(group){
+    group.classList.add('needs-attention');
+    let note=group.nextElementSibling;
+    if(!note?.classList.contains('field-validation-error')){
+      note=document.createElement('p');note.className='field-validation-error';group.insertAdjacentElement('afterend',note);
+    }
+    note.textContent=message;
+  }
+  prevField.scrollIntoView({behavior:'smooth',block:'center'});
+  if(previous==='friendPriorities')showTwoChoicesDialog();
+  else window.alert(message);
+  setTimeout(()=>{nbffTransitionWarning=false;},0);
+},true);
+form.addEventListener('change',event=>{
+  const name=event.target?.name;
+  if(!nbffChoiceRules[name])return;
+  const rule=nbffChoiceRules[name];
+  const selected=[...form.querySelectorAll('input[name="'+name+'"]:checked')];
+  if(selected.length>=rule.min && selected.length<=rule.max){
+    const group=event.target.closest('.choices');
+    group?.classList.remove('needs-attention');
+    if(group?.nextElementSibling?.classList.contains('field-validation-error'))group.nextElementSibling.remove();
+  }
+});
 function showTwoChoicesDialog(){
   const dialog=document.getElementById('nbffTwoChoicesDialog');
   if(dialog && typeof dialog.showModal==='function') {dialog.showModal();}
@@ -828,10 +911,9 @@ form.addEventListener('submit', async (event) => {
 })();
 </script>
 <dialog id="nbffTwoChoicesDialog" aria-labelledby="nbffTwoChoicesTitle" style="border:2px solid #bb7055;border-radius:14px;padding:26px;max-width:min(92vw,440px);box-shadow:0 20px 70px #0005;background:#fffdf8;color:#2e332d">
-  <h2 id="nbffTwoChoicesTitle" style="font-size:25px;margin:0 0 12px">Please select two qualities</h2>
-  <p>For <strong>“What are the two most important qualities you look for in a friend?”</strong> you must select <strong>exactly 2</strong> answers before joining.</p>
-  <p>Your other answers are still here. We'll take you straight to this question.</p>
-  <form method="dialog" style="text-align:right"><button class="button" type="submit">Choose my second answer</button></form>
+  <h2 id="nbffTwoChoicesTitle" style="font-size:25px;margin:0 0 12px">Please choose 2 options.</h2>
+  <p>Select one more answer to continue.</p>
+  <form method="dialog" style="text-align:right"><button class="button" type="submit">OK</button></form>
 </dialog>
 </body>
 </html>
