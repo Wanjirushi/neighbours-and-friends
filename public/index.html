@@ -245,9 +245,19 @@ fbq('track', 'PageView');
     recorded[name] = true;
     if (typeof window.clarity === 'function') window.clarity('event', name);
   }
+  var nbffSessionId;
+  try {nbffSessionId=sessionStorage.getItem('nbff_form_session_v1');if(!nbffSessionId||!/^[a-f0-9-]{36}$/.test(nbffSessionId)){nbffSessionId=crypto.randomUUID();sessionStorage.setItem('nbff_form_session_v1',nbffSessionId);}}catch(e){}
+  function recordFormEvent(name){
+    if(!nbffSessionId||!/^nbff_[a-z0-9_]+$/.test(name))return;
+    try{fetch('https://peulzmhgqfdycckzwnnx.supabase.co/functions/v1/form-events',{
+      method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({session_id:nbffSessionId,event:name}),keepalive:true
+    }).catch(function(){});}catch(e){}
+  }
+  window.nbffRecordFormEvent=recordFormEvent;
   window.nbffTrackIssue = function (name) {
     if (!/^nbff_(issue|error)_[a-z0-9_]+$/.test(name)) return;
     if (typeof window.clarity === 'function') window.clarity('event', name);
+    recordFormEvent(name);
   };
   var formCompleted = false;
   window.nbffMarkFormComplete = function(){ formCompleted = true; };
