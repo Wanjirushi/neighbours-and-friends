@@ -133,6 +133,21 @@
  <div id="analyticsError" class="notice hidden" role="status"></div>
  <div class="analytics-cards" style="margin:20px 0"><div class="analytics-card"><span>👥 Unique visitors</span><strong id="anaVisitors">—</strong></div><div class="analytics-card"><span>📝 Registrations</span><strong id="anaRegistrations">—</strong></div><div class="analytics-card"><span>💰 Verified payments</span><strong id="anaPaid">—</strong></div><div class="analytics-card"><span>📈 Visitor → paid</span><strong id="anaConversion">—</strong></div><div class="analytics-card"><span>💵 Verified revenue</span><strong id="anaRevenue">—</strong></div></div>
  <h3>Registration funnel</h3><div id="analyticsFunnel" class="analytics-footnote">Loading tracking data…</div>
+  <section class="clarity-panel" aria-labelledby="clarityHeading" style="margin:24px 0;padding:20px;border:2px solid #c9e4e8;border-radius:14px;background:#f1f9fa">
+    <h3 id="clarityHeading" style="margin:0 0 7px">👀 Visitor behaviour · Microsoft Clarity</h3>
+    <p class="muted" style="margin:0 0 15px">Watch real visitor sessions and explore click and scroll heatmaps. These open your existing NBFF Clarity project in a new tab.</p>
+    <div class="actions" style="margin-bottom:14px">
+      <a href="https://clarity.microsoft.com/projects/view/yz2uzn8tmg/" target="_blank" rel="noopener noreferrer" style="display:inline-block;padding:11px 15px;background:#354f40;color:white;border-radius:8px;text-decoration:none;font-weight:bold">▶ View recordings &amp; heatmaps ↗</a>
+      <a href="https://clarity.microsoft.com/projects/view/yz2uzn8tmg/settings#masking" target="_blank" rel="noopener noreferrer" style="display:inline-block;padding:11px 15px;border:1px solid #354f40;color:#354f40;border-radius:8px;text-decoration:none;font-weight:bold">Privacy settings ↗</a>
+    </div>
+    <div class="stats" style="grid-template-columns:repeat(auto-fit,minmax(180px,1fr))">
+      <div class="stat"><strong style="font-size:16px">1 · Homepage exits</strong><span class="small">Look for visitors leaving before scrolling.</span></div>
+      <div class="stat"><strong style="font-size:16px">2 · Pricing reactions</strong><span class="small">Check where visitors stop or click around the price.</span></div>
+      <div class="stat"><strong style="font-size:16px">3 · Form friction</strong><span class="small">Watch pauses, repeated clicks and exits during registration.</span></div>
+    </div>
+    <p class="small muted" style="margin:14px 0 0">Clarity recordings are viewed in Microsoft Clarity, not embedded here. The figures above in Website analytics come from NBFF's own tracking and payment data; Clarity session metrics are not yet imported. Sensitive form fields should remain masked.</p>
+  </section>
+
  <h3>Visitors by day</h3><div id="analyticsDays" class="growth-bars">Loading…</div>
  <div class="analytics-footnote">Visitor counts are approximate: each browser is counted once per day, with repeat visits deduplicated across the selected period. Browser privacy settings, blockers and cleared storage can affect counts. Registrations and confirmed payments are grouped by their own event dates; this is a period conversion ratio, not a tracked individual customer journey. Historical visits before deployment cannot be recovered.</div>
  </div>
