@@ -954,5 +954,63 @@ form.addEventListener('submit', async (event) => {
  dialog.addEventListener('close',()=>{if(!leaving)destination=null;});
 })();
 </script>
+
+<style id="nbff-floating-progress-style">
+#nbffFloatingProgress{position:fixed;bottom:0;left:0;right:0;z-index:800;background:#fffdf8;box-shadow:0 -5px 24px rgba(32,64,49,.15);border-top:1px solid #e4e5db;padding:11px max(16px,env(safe-area-inset-right)) calc(11px + env(safe-area-inset-bottom));display:none;font-family:inherit;color:#234b3b}
+#nbffFloatingProgress .nbff-progress-inner{max-width:820px;margin:auto}
+#nbffFloatingProgress .nbff-progress-top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:7px;font-size:13px}
+#nbffFloatingProgress .nbff-progress-message{font-weight:700}
+#nbffFloatingProgress .nbff-progress-number{white-space:nowrap;font-weight:750;font-variant-numeric:tabular-nums}
+#nbffFloatingProgress .nbff-progress-track{height:9px;background:#e3e8e0;border-radius:99px;overflow:hidden}
+#nbffFloatingProgress .nbff-progress-fill{height:100%;width:0;background:#39745c;border-radius:99px;transition:width .25s ease}
+body.nbff-progress-visible{padding-bottom:95px}
+@media(max-width:500px){#nbffFloatingProgress .nbff-progress-top{font-size:12px}body.nbff-progress-visible{padding-bottom:105px}}
+</style>
+
+<div id="nbffFloatingProgress" role="status" aria-live="off" aria-label="Questionnaire completion progress">
+ <div class="nbff-progress-inner">
+  <div class="nbff-progress-top"><span id="nbffProgressMessage" class="nbff-progress-message">You're on your way to finding your people!</span><span id="nbffProgressNumber" class="nbff-progress-number">0% complete</span></div>
+  <div class="nbff-progress-track" role="progressbar" aria-label="Questions answered" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="nbffProgressTrack"><div id="nbffProgressFill" class="nbff-progress-fill"></div></div>
+ </div>
+</div>
+<script id="nbff-floating-progress-script">
+(function(){
+ const form=document.getElementById('joinForm');
+ const bar=document.getElementById('nbffFloatingProgress');
+ const number=document.getElementById('nbffProgressNumber');
+ const message=document.getElementById('nbffProgressMessage');
+ const fill=document.getElementById('nbffProgressFill');
+ const track=document.getElementById('nbffProgressTrack');
+ const encouragementMessages=["You're on your way to finding your people!","Every answer helps us find people you'll genuinely click with."];
+ let encouragementIndex=0;
+ if(!form||!bar)return;
+ setInterval(()=>{encouragementIndex=(encouragementIndex+1)%encouragementMessages.length;update();},6500);
+ // Count required question groups, not keystrokes or scroll distance.
+ // Additional multi-select groups are required even though HTML checkboxes aren't individually required.
+ const controls=[...form.querySelectorAll('input,select,textarea')].filter(el=>!el.disabled&&el.type!=='hidden'&&el.type!=='submit'&&el.type!=='button');
+ const groups=new Map();
+ controls.forEach(el=>{if(!el.required)return;const key=el.name||el.id;if(!key)return;if(!groups.has(key))groups.set(key,[]);groups.get(key).push(el);});
+ ['friendPriorities','friendshipGoals','coreValues'].forEach(name=>{const els=[...form.querySelectorAll('input[name="'+name+'"]')];if(els.length)groups.set(name,els);});
+ function answered(name,els){
+  if(name==='friendPriorities')return els.filter(el=>el.checked).length===2;
+  if(name==='friendshipGoals')return els.filter(el=>el.checked).length>=1&&els.filter(el=>el.checked).length<=2;
+  if(name==='coreValues'){const selected=els.filter(el=>el.checked);return selected.length>=1&&selected.length<=3&&!(selected.length>1&&selected.some(el=>el.value==='None of these'));}
+  const el=els[0];
+  if(el.type==='checkbox'||el.type==='radio')return els.some(x=>x.checked);
+  return els.every(x=>String(x.value||'').trim()!==''&&x.validity.valid);
+ }
+ function update(){
+  const total=groups.size;if(!total)return;
+  let done=0;groups.forEach((els,name)=>{if(answered(name,els))done++;});
+  const percent=Math.round(done/total*100);
+  number.textContent=percent+'% complete';fill.style.width=percent+'%';track.setAttribute('aria-valuenow',String(percent));
+  message.textContent=percent===100?'Almost there! Complete the payment step to finish joining.':encouragementMessages[encouragementIndex];
+ }
+ const observer=new IntersectionObserver(entries=>{const visible=entries.some(e=>e.isIntersecting);bar.style.display=visible?'block':'none';document.body.classList.toggle('nbff-progress-visible',visible);if(visible)update();},{threshold:0});
+ observer.observe(form);
+ form.addEventListener('input',update);form.addEventListener('change',update);
+ update();
+})();
+</script>
 </body>
 </html>
