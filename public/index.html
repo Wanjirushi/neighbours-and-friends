@@ -236,6 +236,54 @@ fbq('track', 'PageView');
         y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
     })(window, document, "clarity", "script", "yz2uzn8tmg");
 </script>
+<!-- NBFF anonymous behavioural milestones for Microsoft Clarity. No form answers or personal details are transmitted. -->
+<script id="nbff-clarity-funnel">
+(function () {
+  var recorded = Object.create(null);
+  function milestone(name) {
+    if (recorded[name]) return;
+    recorded[name] = true;
+    if (typeof window.clarity === 'function') window.clarity('event', name);
+  }
+  function ready() {
+    var form = document.getElementById('joinForm');
+    if (!form) return;
+    // Register a start only after the visitor actively engages with the form.
+    form.addEventListener('input', function (e) {
+      if (e.target && e.target.matches('input,select,textarea')) milestone('nbff_form_started');
+    }, {passive:true});
+    form.addEventListener('change', function (e) {
+      if (e.target && e.target.matches('input,select,textarea')) milestone('nbff_form_started');
+    }, {passive:true});
+    form.addEventListener('submit', function () { milestone('nbff_submit_clicked'); });
+    document.querySelectorAll('a[href="#join"]').forEach(function (link) {
+      link.addEventListener('click', function () { milestone('nbff_join_clicked'); });
+    });
+    if ('IntersectionObserver' in window) {
+      var sections = [
+        ['how','nbff_how_it_works_seen'],
+        ['join','nbff_form_seen'],
+        ['faq','nbff_faq_seen']
+      ];
+      var observer = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (!entry.isIntersecting) return;
+          var eventName = entry.target.getAttribute('data-nbff-milestone');
+          if (eventName) milestone(eventName);
+          observer.unobserve(entry.target);
+        });
+      }, {threshold:0.15});
+      sections.forEach(function (pair) {
+        var el = document.getElementById(pair[0]);
+        if (el) {el.setAttribute('data-nbff-milestone',pair[1]);observer.observe(el);}
+      });
+    }
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded',ready,{once:true});
+  else ready();
+  window.nbffClarityMilestone = milestone;
+})();
+</script>
 </head>
 <body>
 <header><div class="brand-lockup"><img alt="" class="brand-logo" src="/community-mark.png"/><div class="brand">Neighbour Friend Finder</div></div><a class="nav-link" href="#how">How it works ↓</a></header>
@@ -591,6 +639,7 @@ function validationLabel(field){
   return field.getAttribute('aria-label')||group?.querySelector('h3')?.textContent.trim()||field.name||'this question';
 }
 function flagField(field,message){
+  window.nbffClarityMilestone?.('nbff_form_validation_error');
   clearFormValidation();
   const label=validationLabel(field);
   const target=(field.type==='radio'||field.type==='checkbox')?(field.closest('.choices')||field.closest('label')||field):field;
@@ -610,6 +659,7 @@ form.addEventListener('change',()=>{form.querySelectorAll('.validation-summary')
 
 form.addEventListener('submit', async (event) => {
   event.preventDefault();
+  window.nbffClarityMilestone?.('nbff_submit_attempt');
 
   formMessage.classList.remove('is-error');
   clearFormValidation();
@@ -702,6 +752,7 @@ form.addEventListener('submit', async (event) => {
       throw new Error(result.error || 'We could not submit your registration. Please check your answers and try again.');
     }
 
+    window.nbffClarityMilestone?.('nbff_registration_saved');
     // Track registration only after Supabase confirms the record was saved.
     if (typeof window.fbq === 'function') {
       window.fbq('track', 'CompleteRegistration', { content_name: 'Neighbour Friend Finder Membership', status: 'pending_payment' });
@@ -710,6 +761,7 @@ form.addEventListener('submit', async (event) => {
     // Registration was saved successfully; show confirmation on its own page.
     window.location.assign('/thank-you.html');
   } catch (error) {
+    window.nbffClarityMilestone?.('nbff_registration_error');
     formMessage.textContent =
       error instanceof Error
         ? error.message
